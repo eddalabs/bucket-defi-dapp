@@ -22,10 +22,6 @@
     "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/managed ./dist/managed && cp ./src/bucket-defi.compact ./dist",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "toolkit-version": "bash src/toolkit/version.sh"  
-
-
-
-    
+    "toolkit-version": "bash src/toolkit/version.sh"      
   }
 }
