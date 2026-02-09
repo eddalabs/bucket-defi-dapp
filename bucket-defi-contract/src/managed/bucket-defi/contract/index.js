@@ -1,5 +1,5 @@
 import * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
-__compactRuntime.checkRuntimeVersion('0.11.0');
+__compactRuntime.checkRuntimeVersion('0.14.0');
 
 export var BucketDEFI_STATUS;
 (function (BucketDEFI_STATUS) {
@@ -230,22 +230,22 @@ const _descriptor_21 = new __compactRuntime.CompactTypeVector(3, _descriptor_0);
 
 const _descriptor_22 = new __compactRuntime.CompactTypeVector(2, _descriptor_19);
 
-const _descriptor_23 = new __compactRuntime.CompactTypeBytes(6);
+const _descriptor_23 = new __compactRuntime.CompactTypeBytes(21);
 
 class _CoinPreimage_0 {
   alignment() {
-    return _descriptor_11.alignment().concat(_descriptor_8.alignment().concat(_descriptor_0.alignment().concat(_descriptor_23.alignment())));
+    return _descriptor_23.alignment().concat(_descriptor_11.alignment().concat(_descriptor_8.alignment().concat(_descriptor_0.alignment())));
   }
   fromValue(value_0) {
     return {
+      domain_sep: _descriptor_23.fromValue(value_0),
       info: _descriptor_11.fromValue(value_0),
       dataType: _descriptor_8.fromValue(value_0),
-      data: _descriptor_0.fromValue(value_0),
-      domain_sep: _descriptor_23.fromValue(value_0)
+      data: _descriptor_0.fromValue(value_0)
     }
   }
   toValue(value_0) {
-    return _descriptor_11.toValue(value_0.info).concat(_descriptor_8.toValue(value_0.dataType).concat(_descriptor_0.toValue(value_0.data).concat(_descriptor_23.toValue(value_0.domain_sep))));
+    return _descriptor_23.toValue(value_0.domain_sep).concat(_descriptor_11.toValue(value_0.info).concat(_descriptor_8.toValue(value_0.dataType).concat(_descriptor_0.toValue(value_0.data))));
   }
 }
 
@@ -2238,7 +2238,7 @@ export class Contract {
     this._initialize_2(context, partialProofData);
     this._initialize_4(context, partialProofData, _name_0, _symbol_0);
     this._initialize_6(context, partialProofData);
-    state_0.data = context.currentQueryContext.state;
+    state_0.data = new __compactRuntime.ChargedState(context.currentQueryContext.state.state);
     return {
       currentContractState: state_0,
       currentPrivateState: context.currentPrivateState,
@@ -2382,7 +2382,7 @@ export class Contract {
                                        { swap: { n: 0 } }]);
     let t_0;
     const change_0 = (t_0 = input_0.value,
-                      (__compactRuntime.assert(!(t_0 < value_0),
+                      (__compactRuntime.assert(t_0 >= value_0,
                                                'result of subtraction would be negative'),
                        t_0 - value_0));
     const output_0 = { nonce:
@@ -2468,21 +2468,21 @@ export class Contract {
     return { nonce: coin_0.nonce, color: coin_0.color, value: coin_0.value };
   }
   _coinCommitment_0(coin_0, recipient_0) {
-    return this._persistentHash_0({ info: coin_0,
+    return this._persistentHash_0({ domain_sep:
+                                      new Uint8Array([109, 105, 100, 110, 105, 103, 104, 116, 58, 122, 115, 119, 97, 112, 45, 99, 99, 91, 118, 49, 93]),
+                                    info: coin_0,
                                     dataType: recipient_0.is_left,
                                     data:
                                       recipient_0.is_left ?
                                       recipient_0.left.bytes :
-                                      recipient_0.right.bytes,
-                                    domain_sep:
-                                      new Uint8Array([109, 100, 110, 58, 99, 99]) });
+                                      recipient_0.right.bytes });
   }
   _coinNullifier_0(coin_0, addr_0) {
-    return this._persistentHash_0({ info: coin_0,
+    return this._persistentHash_0({ domain_sep:
+                                      new Uint8Array([109, 105, 100, 110, 105, 103, 104, 116, 58, 122, 115, 119, 97, 112, 45, 99, 110, 91, 118, 49, 93]),
+                                    info: coin_0,
                                     dataType: false,
-                                    data: addr_0.bytes,
-                                    domain_sep:
-                                      new Uint8Array([109, 100, 110, 58, 99, 110]) });
+                                    data: addr_0.bytes });
   }
   _blockTimeLt_0(context, partialProofData, time_0) {
     return _descriptor_8.fromValue(__compactRuntime.queryLedgerState(context,
@@ -3741,7 +3741,7 @@ export class Contract {
                                                                                                                         alignment: _descriptor_14.alignment() } }] } },
                                                                                              { popeq: { cached: false,
                                                                                                         result: undefined } }]).value),
-                            (__compactRuntime.assert(!(t_0 < 1n),
+                            (__compactRuntime.assert(t_0 >= 1n,
                                                      'result of subtraction would be negative'),
                              t_0 - 1n));
       __compactRuntime.queryLedgerState(context,
@@ -4989,7 +4989,7 @@ export class Contract {
     let t_0, t_1;
     const leftovers_0 = (t_0 = bucketConditions_0.pot,
                          (t_1 = bucketConditions_0.accumulatedPrice,
-                          (__compactRuntime.assert(!(t_0 < t_1),
+                          (__compactRuntime.assert(t_0 >= t_1,
                                                    'result of subtraction would be negative'),
                            t_0 - t_1)));
     const pot_0 = _descriptor_15.fromValue(__compactRuntime.queryLedgerState(context,

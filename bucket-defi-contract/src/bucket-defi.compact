@@ -1,5 +1,5 @@
 // Edda Labs Compact Contracts v0.0.1
-pragma language_version >= 0.19;
+pragma language_version >= 0.20;
 
 /**
 * @description: The main logic is running here. Modules are used to split the logic.
