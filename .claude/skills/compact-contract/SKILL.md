@@ -145,14 +145,26 @@ export circuit myAction(param: Uint<128>): [] {
 
 ### Role Hierarchy Pattern
 
-Roles are `Bytes<32>` values cast from integers. Each operator role has an admin role:
+Roles are `Bytes<32>` values cast from integers. Two proven patterns exist:
 
+**Flat hierarchy (Private Buyer pattern - preferred for simpler contracts):**
 ```
-Master Admin  = 0 (default<Bytes<32>>)
+Admin         = 0 (default<Bytes<32>>)  -- manages all roles directly
+Minter        = 1
+PoolOperator  = 2
+Verifier      = 3
+```
+
+**Two-tier hierarchy (Bucket DEFI pattern - for complex organizational structures):**
+```
+Master Admin  = 0 (default<Bytes<32>>)  -- manages admin roles
 MinterAdmin   = 1    Minter        = 2
-CustomAdmin   = 3    CustomRole    = 4
-VerifierAdmin = 5    Verifier      = 6
+MatcherAdmin  = 3    Matcher       = 4
+SettlerAdmin  = 5    Settler       = 6
+VerifierAdmin = 7    Verifier      = 8
 ```
+
+The flat hierarchy is simpler and cheaper (fewer role management transactions). Use the two-tier hierarchy only when delegation of role management is a requirement.
 
 ### Shielded Coin Patterns
 
@@ -171,6 +183,106 @@ if (send_result.change.value.value != 0) {
   myMap.insertCoin(key, send_result.change.value, right<...>(kernel.self()));
 } else {
   myMap.insert(key, default<QualifiedShieldedCoinInfo>);
+}
+```
+
+### Seller Payment Accumulation Pattern (Private Buyer)
+
+When multiple purchases accumulate balance for a seller:
+
+```compact
+// Two maps: one for coin info, one for numeric amount tracking
+export ledger _sellerBalance: Map<Either<ZswapCoinPublicKey, ContractAddress>, QualifiedShieldedCoinInfo>;
+export ledger _sellerAmount: Map<Either<ZswapCoinPublicKey, ContractAddress>, Uint<128>>;
+
+// On purchase: store/accumulate payment
+_sellerBalance.insertCoin(disclose(seller), disclose(coin), right<...>(kernel.self()));
+if (_sellerAmount.member(disclose(seller))) {
+  const current = _sellerAmount.lookup(disclose(seller));
+  _sellerAmount.insert(disclose(seller), disclose((current + disclose(price)) as Uint<128>));
+} else {
+  _sellerAmount.insert(disclose(seller), disclose(disclose(price) as Uint<128>));
+}
+
+// On withdrawal: send accumulated amount using ownPublicKey() for caller identity
+const caller = left<ZswapCoinPublicKey, ContractAddress>(ownPublicKey());
+const balance = _sellerBalance.lookup(disclose(caller));
+const amount = _sellerAmount.lookup(disclose(caller));
+const send_result = sendShielded(balance, caller, amount);
+_sellerAmount.insert(disclose(caller), 0);
+```
+
+### NFT Pool Pattern (Private Buyer)
+
+Direct purchase pool where NFTs are listed by a PoolOperator and purchased by verified buyers:
+
+```compact
+export ledger _pool: Set<Uint<128>>;                                // Listed tokens
+export ledger _tokenSold: Map<Uint<128>, Boolean>;                  // Sold tracking
+export ledger _nftOwnerCommitment: Map<Uint<128>, Bytes<32>>;       // Buyer commitment per token
+
+// List: PoolOperator adds token to pool
+_pool.insert(disclose(tokenId));
+
+// Purchase: remove from pool, mark sold, store commitment
+_pool.remove(disclose(tokenId));
+_tokenSold.insert(disclose(tokenId), true);
+_nftOwnerCommitment.insert(disclose(tokenId), ownerCommitment);
+```
+
+### Batch Purchase Pattern (Private Buyer)
+
+Multiple NFTs purchased with a single shared commitment. Uses mock tokens (tokenId == 0) for partial batches:
+
+```compact
+// Skip mock tokens at every step
+export circuit _getBatchTokenPrice(tokenId: Uint<128>): Uint<64> {
+  if (disclose(tokenId) != 0) {
+    return NonFungibleToken__tokenToPrice.lookup(disclose(tokenId));
+  }
+  return 0;
+}
+
+// Compute ONE commitment for all tokens in the batch
+const ownerCommitment = NFTPool_computeBatchCommitment();
+
+// Execute purchase per real token (shares same commitment)
+_executeBatchPurchase(tokenId1, ownerCommitment);
+_executeBatchPurchase(tokenId2, ownerCommitment);
+// ... up to batch size
+```
+
+### Burn Guards Pattern (Private Buyer)
+
+Protect burn from destroying active tokens:
+
+```compact
+export circuit burn(tokenId: Uint<128>): [] {
+  assertOnlyRole(1 as Field as Bytes<32>);  // Minter role
+  assert(!NFTPool__pool.member(disclose(tokenId)), "Token must be unlisted before burning");
+  if (NFTPool__tokenSold.member(disclose(tokenId))) {
+    assert(!NFTPool__tokenSold.lookup(disclose(tokenId)), "Sold tokens must be burned by commitment owner");
+  }
+  return NonFungibleToken_burn(tokenId);
+}
+```
+
+### Internal Function Access Pattern
+
+When the top-level contract needs to call a module's internal `_function` (bypassing the module's own access checks because access control is handled at the top level):
+
+```compact
+// Module defines internal function with underscore prefix:
+//   export circuit _setTokenPrice(tokenId, price): [] { ... }
+
+// Top-level import: import "./modules/token-nft/NonFungibleToken" prefix NonFungibleToken_;
+
+// Calling _setTokenPrice becomes NonFungibleToken_ + _setTokenPrice = NonFungibleToken__setTokenPrice
+// (double underscore: import prefix + underscore from function name)
+
+export circuit setTokenPrice(tokenId: Uint<128>, price: Uint<64>): [] {
+  assertOnlyRole(2 as Field as Bytes<32>);  // PoolOperator checks access
+  NonFungibleToken__setTokenPrice(tokenId, price);  // Bypass module's owner check
 }
 ```
 

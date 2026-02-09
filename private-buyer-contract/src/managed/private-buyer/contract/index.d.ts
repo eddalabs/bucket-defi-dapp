@@ -147,6 +147,53 @@ export type ImpureCircuits<PS> = {
                  challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   pauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  _burnPurchasedToken(context: __compactRuntime.CircuitContext<PS>,
+                      tokenId_0: bigint,
+                      ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch5(context: __compactRuntime.CircuitContext<PS>,
+                      ownerCommitment_0: Uint8Array,
+                      tokenId1_0: bigint,
+                      tokenId2_0: bigint,
+                      tokenId3_0: bigint,
+                      tokenId4_0: bigint,
+                      tokenId5_0: bigint,
+                      challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch10(context: __compactRuntime.CircuitContext<PS>,
+                       ownerCommitment_0: Uint8Array,
+                       tokenId1_0: bigint,
+                       tokenId2_0: bigint,
+                       tokenId3_0: bigint,
+                       tokenId4_0: bigint,
+                       tokenId5_0: bigint,
+                       tokenId6_0: bigint,
+                       tokenId7_0: bigint,
+                       tokenId8_0: bigint,
+                       tokenId9_0: bigint,
+                       tokenId10_0: bigint,
+                       challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch20(context: __compactRuntime.CircuitContext<PS>,
+                       ownerCommitment_0: Uint8Array,
+                       tokenId1_0: bigint,
+                       tokenId2_0: bigint,
+                       tokenId3_0: bigint,
+                       tokenId4_0: bigint,
+                       tokenId5_0: bigint,
+                       tokenId6_0: bigint,
+                       tokenId7_0: bigint,
+                       tokenId8_0: bigint,
+                       tokenId9_0: bigint,
+                       tokenId10_0: bigint,
+                       tokenId11_0: bigint,
+                       tokenId12_0: bigint,
+                       tokenId13_0: bigint,
+                       tokenId14_0: bigint,
+                       tokenId15_0: bigint,
+                       tokenId16_0: bigint,
+                       tokenId17_0: bigint,
+                       tokenId18_0: bigint,
+                       tokenId19_0: bigint,
+                       tokenId20_0: bigint,
+                       challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
 }
 
 export type PureCircuits = {
@@ -259,6 +306,53 @@ export type Circuits<PS> = {
                  challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   pauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  _burnPurchasedToken(context: __compactRuntime.CircuitContext<PS>,
+                      tokenId_0: bigint,
+                      ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch5(context: __compactRuntime.CircuitContext<PS>,
+                      ownerCommitment_0: Uint8Array,
+                      tokenId1_0: bigint,
+                      tokenId2_0: bigint,
+                      tokenId3_0: bigint,
+                      tokenId4_0: bigint,
+                      tokenId5_0: bigint,
+                      challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch10(context: __compactRuntime.CircuitContext<PS>,
+                       ownerCommitment_0: Uint8Array,
+                       tokenId1_0: bigint,
+                       tokenId2_0: bigint,
+                       tokenId3_0: bigint,
+                       tokenId4_0: bigint,
+                       tokenId5_0: bigint,
+                       tokenId6_0: bigint,
+                       tokenId7_0: bigint,
+                       tokenId8_0: bigint,
+                       tokenId9_0: bigint,
+                       tokenId10_0: bigint,
+                       challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch20(context: __compactRuntime.CircuitContext<PS>,
+                       ownerCommitment_0: Uint8Array,
+                       tokenId1_0: bigint,
+                       tokenId2_0: bigint,
+                       tokenId3_0: bigint,
+                       tokenId4_0: bigint,
+                       tokenId5_0: bigint,
+                       tokenId6_0: bigint,
+                       tokenId7_0: bigint,
+                       tokenId8_0: bigint,
+                       tokenId9_0: bigint,
+                       tokenId10_0: bigint,
+                       tokenId11_0: bigint,
+                       tokenId12_0: bigint,
+                       tokenId13_0: bigint,
+                       tokenId14_0: bigint,
+                       tokenId15_0: bigint,
+                       tokenId16_0: bigint,
+                       tokenId17_0: bigint,
+                       tokenId18_0: bigint,
+                       tokenId19_0: bigint,
+                       tokenId20_0: bigint,
+                       challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
 }
 
 export type Ledger = {

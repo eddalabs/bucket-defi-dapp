@@ -420,6 +420,29 @@ module NFTPool {
   }
 
   /**
+   * @description: Clean up sold token data when burning a purchased token
+   *
+   * @notice: Called from top-level burn circuits to clear pool state for a purchased token.
+   * Does NOT clean up _commitmentToCounter or _authVerifications (audit trail preserved).
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * - Contract is not paused.
+   * @param {Uint<128>} tokenId - The token ID to clean up
+   * @return {[]} - Empty tuple.
+   */
+  export circuit cleanupSoldToken(tokenId: Uint<128>): [] {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+
+    // Clear sold status
+    _tokenSold.insert(disclose(tokenId), false);
+
+    // Clear commitment mapping
+    _nftOwnerCommitment.insert(disclose(tokenId), default<Bytes<32>>);
+  }
+
+  /**
    * @description: Pause NFTPool calls.
    *
    * Requirements:

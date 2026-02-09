@@ -15,47 +15,35 @@ import { randomBytes } from "./utils/utils";
 import * as utils from "./utils/utils";
 
 // Users private information
-const adminMaster_privateKey = randomBytes(32);
-const minterAdmin_privateKey = randomBytes(32);
+const admin_privateKey = randomBytes(32);
 const minter_privateKey = randomBytes(32);
-const poolAdmin_privateKey = randomBytes(32);
 const poolOperator_privateKey = randomBytes(32);
-const verifierAdmin_privateKey = randomBytes(32);
 const verifier_privateKey = randomBytes(32);
 const buyer1_privateKey = randomBytes(32);
 const buyer2_privateKey = randomBytes(32);
 
 // Callers - use createCaller to ensure they match the accounts created by createEitherTestUser
-export const adminMaster = utils.createCaller("adminMaster");
-export const minterAdmin = utils.createCaller("minterAdmin");
+export const admin = utils.createCaller("admin");
 export const minter = utils.createCaller("minter");
-export const poolAdmin = utils.createCaller("poolAdmin");
 export const poolOperator = utils.createCaller("poolOperator");
-export const verifierAdmin = utils.createCaller("verifierAdmin");
 export const verifier = utils.createCaller("verifier");
 export const buyer1 = utils.createCaller("buyer1");
 export const buyer2 = utils.createCaller("buyer2");
 
 // Encoded PK/Addresses Accounts
-const Account_adminMaster = utils.createEitherTestUser("adminMaster");
-const Account_adminMaster2 = utils.createEitherTestUser("adminMaster2");
-const Account_minterAdmin = utils.createEitherTestUser("minterAdmin");
+const Account_admin = utils.createEitherTestUser("admin");
+const Account_admin2 = utils.createEitherTestUser("admin2");
 const Account_minter = utils.createEitherTestUser("minter");
-const Account_poolAdmin = utils.createEitherTestUser("poolAdmin");
 const Account_poolOperator = utils.createEitherTestUser("poolOperator");
-const Account_verifierAdmin = utils.createEitherTestUser("verifierAdmin");
 const Account_verifier = utils.createEitherTestUser("verifier");
 const Account_buyer1 = utils.createEitherTestUser("buyer1");
 const Account_buyer2 = utils.createEitherTestUser("buyer2");
 
-// Roles (new hierarchy: 0-6)
-const adminMaster_ROLE = utils.zeroUint8Array();
-const minterAdmin_ROLE = convertFieldToBytes(32, 1n, '');
-const minter_ROLE = convertFieldToBytes(32, 2n, '');
-const poolAdmin_ROLE = convertFieldToBytes(32, 3n, '');
-const poolOperator_ROLE = convertFieldToBytes(32, 4n, '');
-const verifierAdmin_ROLE = convertFieldToBytes(32, 5n, '');
-const verifier_ROLE = convertFieldToBytes(32, 6n, '');
+// Roles (flat hierarchy: Admin=0, Minter=1, PoolOperator=2, Verifier=3)
+const admin_ROLE = utils.zeroUint8Array();
+const minter_ROLE = convertFieldToBytes(32, 1n, '');
+const poolOperator_ROLE = convertFieldToBytes(32, 2n, '');
+const verifier_ROLE = convertFieldToBytes(32, 3n, '');
 
 // Token IDs (1-20 for batch testing)
 const TOKENID_1: bigint = 1n;
@@ -131,42 +119,28 @@ const symbol = "SYMBOL";
 
 function createSimulator() {
   const simulator = Simulator.deployContract(
-    adminMaster_privateKey,
+    admin_privateKey,
     name,
     symbol
   );
 
-  simulator.createPrivateState("adminMaster", adminMaster_privateKey);
-  simulator.createPrivateState("minterAdmin", minterAdmin_privateKey);
+  simulator.createPrivateState("admin", admin_privateKey);
   simulator.createPrivateState("minter", minter_privateKey);
-  simulator.createPrivateState("poolAdmin", poolAdmin_privateKey);
   simulator.createPrivateState("poolOperator", poolOperator_privateKey);
-  simulator.createPrivateState("verifierAdmin", verifierAdmin_privateKey);
   simulator.createPrivateState("verifier", verifier_privateKey);
   simulator.createPrivateState("buyer1", buyer1_privateKey);
   simulator.createPrivateState("buyer2", buyer2_privateKey);
 
-  // Grant admin roles
+  // Admin directly grants all roles
   simulator
-    .as("adminMaster")
-    .grantRole(minterAdmin_ROLE, Account_minterAdmin, adminMaster);
+    .as("admin")
+    .grantRole(minter_ROLE, Account_minter, admin);
   simulator
-    .as("adminMaster")
-    .grantRole(poolAdmin_ROLE, Account_poolAdmin, adminMaster);
+    .as("admin")
+    .grantRole(poolOperator_ROLE, Account_poolOperator, admin);
   simulator
-    .as("adminMaster")
-    .grantRole(verifierAdmin_ROLE, Account_verifierAdmin, adminMaster);
-
-  // Grant operator roles
-  simulator
-    .as("minterAdmin")
-    .grantRole(minter_ROLE, Account_minter, minterAdmin);
-  simulator
-    .as("poolAdmin")
-    .grantRole(poolOperator_ROLE, Account_poolOperator, poolAdmin);
-  simulator
-    .as("verifierAdmin")
-    .grantRole(verifier_ROLE, Account_verifier, verifierAdmin);
+    .as("admin")
+    .grantRole(verifier_ROLE, Account_verifier, admin);
 
   return simulator;
 }
@@ -204,109 +178,88 @@ describe("Smart Contract Testing", () => {
 
   describe("Access Control module testing", () => {
     it("properly initializes ledger state and private state", () => {
-      const initialLedgerState = simulator.as("adminMaster").getLedger();
+      const initialLedgerState = simulator.as("admin").getLedger();
       expect(initialLedgerState.NonFungibleToken__name).toEqual("NAME");
       expect(initialLedgerState.NonFungibleToken__symbol).toEqual("SYMBOL");
-      const initialPrivateState = simulator.as("adminMaster").getPrivateState();
+      const initialPrivateState = simulator.as("admin").getPrivateState();
       expect(initialPrivateState).toEqual({
-        secretNonce: adminMaster_privateKey
+        secretNonce: admin_privateKey
       });
     });
 
     it("Confirm the roles using assertOnlyRole", () => {
-      simulator.as("adminMaster").assertOnlyRole(adminMaster_ROLE, adminMaster);
-      simulator.as("minterAdmin").assertOnlyRole(adminMaster_ROLE, adminMaster);
-      simulator.as("minter").assertOnlyRole(adminMaster_ROLE, adminMaster);
-      simulator.as("poolAdmin").assertOnlyRole(adminMaster_ROLE, adminMaster);
-      simulator.as("poolOperator").assertOnlyRole(adminMaster_ROLE, adminMaster);
-      simulator.as("verifierAdmin").assertOnlyRole(adminMaster_ROLE, adminMaster);
-      simulator.as("verifier").assertOnlyRole(adminMaster_ROLE, adminMaster);
+      simulator.as("admin").assertOnlyRole(admin_ROLE, admin);
+      simulator.as("minter").assertOnlyRole(admin_ROLE, admin);
+      simulator.as("poolOperator").assertOnlyRole(admin_ROLE, admin);
+      simulator.as("verifier").assertOnlyRole(admin_ROLE, admin);
     });
 
-    it("Setting Roles Admins should fail if not AdminMaster", () => {
-      expect(() => {
-        simulator
-          .as("minterAdmin")
-          .setRoleAdmin(minter_ROLE, minterAdmin_ROLE, minterAdmin);
-      }).toThrow();
+    it("Setting Roles Admins should fail if not Admin", () => {
       expect(() => {
         simulator
           .as("minter")
-          .setRoleAdmin(minter_ROLE, minterAdmin_ROLE, minter);
-      }).toThrow();
-      expect(() => {
-        simulator
-          .as("poolAdmin")
-          .setRoleAdmin(poolOperator_ROLE, poolAdmin_ROLE, poolAdmin);
+          .setRoleAdmin(minter_ROLE, admin_ROLE, minter);
       }).toThrow();
       expect(() => {
         simulator
           .as("poolOperator")
-          .setRoleAdmin(poolOperator_ROLE, poolAdmin_ROLE, poolOperator);
-      }).toThrow();
-      expect(() => {
-        simulator
-          .as("verifierAdmin")
-          .setRoleAdmin(verifier_ROLE, verifierAdmin_ROLE, verifierAdmin);
+          .setRoleAdmin(poolOperator_ROLE, admin_ROLE, poolOperator);
       }).toThrow();
       expect(() => {
         simulator
           .as("verifier")
-          .setRoleAdmin(verifier_ROLE, verifierAdmin_ROLE, verifier);
+          .setRoleAdmin(verifier_ROLE, admin_ROLE, verifier);
       }).toThrow();
     });
 
-    it("Setting Roles should fail if not correct Admin", () => {
+    it("Setting Roles should fail if not Admin", () => {
       expect(() => {
         simulator
-          .as("minterAdmin")
-          .grantRole(poolOperator_ROLE, Account_poolOperator, minterAdmin);
+          .as("minter")
+          .grantRole(poolOperator_ROLE, Account_poolOperator, minter);
       }).toThrow();
       expect(() => {
         simulator
-          .as("poolAdmin")
-          .grantRole(minter_ROLE, Account_minter, poolAdmin);
+          .as("poolOperator")
+          .grantRole(minter_ROLE, Account_minter, poolOperator);
       }).toThrow();
       expect(() => {
         simulator
-          .as("verifierAdmin")
-          .grantRole(minter_ROLE, Account_minter, verifierAdmin);
+          .as("verifier")
+          .grantRole(minter_ROLE, Account_minter, verifier);
       }).toThrow();
     });
 
-    it("Creating a new Admin Master", () => {
+    it("Creating a new Admin", () => {
       simulator
-        .as("adminMaster")
-        .grantRole(adminMaster_ROLE, Account_adminMaster2, adminMaster);
+        .as("admin")
+        .grantRole(admin_ROLE, Account_admin2, admin);
       expect(() => {
         simulator
-          .as("minterAdmin")
-          .grantRole(adminMaster_ROLE, Account_adminMaster2, minterAdmin);
+          .as("minter")
+          .grantRole(admin_ROLE, Account_admin2, minter);
       }).toThrow();
     });
 
     it("Pause Access Control", () => {
-      simulator.as("adminMaster").pauseAccessControl(adminMaster);
+      simulator.as("admin").pauseAccessControl(admin);
       expect(() => {
         simulator
-          .as("adminMaster")
-          .setRoleAdmin(minter_ROLE, minterAdmin_ROLE, adminMaster);
+          .as("admin")
+          .setRoleAdmin(minter_ROLE, admin_ROLE, admin);
       }).toThrow();
-      simulator.as("adminMaster").unpauseAccessControl(adminMaster);
+      simulator.as("admin").unpauseAccessControl(admin);
       expect(() => {
-        simulator.as("adminMaster").unpauseAccessControl(adminMaster);
+        simulator.as("admin").unpauseAccessControl(admin);
       }).toThrow();
       expect(() => {
-        simulator.as("minterAdmin").pauseAccessControl(minterAdmin);
+        simulator.as("minter").pauseAccessControl(minter);
       }).toThrow();
     });
   });
 
   describe("Identity module testing", () => {
     it("Setting User should fail if not verifier", () => {
-      expect(() => {
-        simulator.as("minterAdmin").setUser(Account_minter.left, minterAdmin);
-      }).toThrow();
       expect(() => {
         simulator.as("minter").setUser(Account_minter.left, minter);
       }).toThrow();
@@ -318,11 +271,6 @@ describe("Smart Contract Testing", () => {
 
     it("Removing User should fail if not verifier", () => {
       expect(() => {
-        simulator
-          .as("minterAdmin")
-          .removeUser(Account_minter.left, minterAdmin);
-      }).toThrow();
-      expect(() => {
         simulator.as("minter").removeUser(Account_minter.left, minter);
       }).toThrow();
       expect(() => {
@@ -332,16 +280,16 @@ describe("Smart Contract Testing", () => {
     });
 
     it("Pause Identity", () => {
-      simulator.as("adminMaster").pauseIdentity(adminMaster);
+      simulator.as("admin").pauseIdentity(admin);
       expect(() => {
-        simulator.as("adminMaster").setUser(Account_minter.left, adminMaster);
+        simulator.as("admin").setUser(Account_minter.left, admin);
       }).toThrow();
-      simulator.as("adminMaster").unpauseIdentity(adminMaster);
+      simulator.as("admin").unpauseIdentity(admin);
       expect(() => {
-        simulator.as("adminMaster").unpauseIdentity(adminMaster);
+        simulator.as("admin").unpauseIdentity(admin);
       }).toThrow();
       expect(() => {
-        simulator.as("minterAdmin").pauseIdentity(minterAdmin);
+        simulator.as("minter").pauseIdentity(minter);
       }).toThrow();
     });
   });
@@ -357,17 +305,6 @@ describe("Smart Contract Testing", () => {
           TOKEN_PRICE,
           minter
         );
-      expect(() => {
-        simulator
-          .as("minterAdmin")
-          .mint(
-            Account_minter,
-            TOKENID_1,
-            createCertificate(1),
-            TOKEN_PRICE,
-            minterAdmin
-          );
-      }).toThrow();
       expect(() => {
         simulator
           .as("verifier")
@@ -400,14 +337,16 @@ describe("Smart Contract Testing", () => {
         createCertificate(1)
       );
 
-      // Set a price
-      simulator.as("minter").setTokenPrice(TOKENID_1, 20n, minter);
+      // Set a price - PoolOperator can set price (role 2)
+      simulator.as("poolOperator").setTokenPrice(TOKENID_1, 20n, poolOperator);
+
+      // Minter cannot set price (no PoolOperator role)
       expect(() => {
-        simulator.as("poolOperator").setTokenPrice(TOKENID_1, 20n, poolOperator);
+        simulator.as("minter").setTokenPrice(TOKENID_1, 20n, minter);
       }).toThrow();
     });
 
-    it("Burning a token (MasterAdmin only)", () => {
+    it("PoolOperator can update price of a listed NFT", () => {
       simulator
         .as("minter")
         .mint(
@@ -417,27 +356,60 @@ describe("Smart Contract Testing", () => {
           TOKEN_PRICE,
           minter
         );
-      // Non-admin roles should fail to burn
-      expect(() => {
-        simulator.as("minter").burn(TOKENID_1, minter);
-      }).toThrow();
+
+      // List the NFT in the pool
+      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
+
+      // PoolOperator can update price even when listed
+      simulator.as("poolOperator").setTokenPrice(TOKENID_1, 50n, poolOperator);
+
+      // Verify price was updated
+      expect(simulator.as("poolOperator").tokenPrice(TOKENID_1)).toBe(50n);
+    });
+
+    it("Burning a token (Minter role)", () => {
+      simulator
+        .as("minter")
+        .mint(
+          Account_minter,
+          TOKENID_1,
+          createCertificate(1),
+          TOKEN_PRICE,
+          minter
+        );
+      // Non-minter roles should fail to burn
       expect(() => {
         simulator.as("poolOperator").burn(TOKENID_1, poolOperator);
       }).toThrow();
       expect(() => {
         simulator.as("verifier").burn(TOKENID_1, verifier);
       }).toThrow();
-      // Admin master can burn
-      simulator.as("adminMaster").burn(TOKENID_1, adminMaster);
+      // Minter can burn (minter/burner combined role)
+      simulator.as("minter").burn(TOKENID_1, minter);
 
       // Checking status
+      expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+    });
+
+    it("Admin can also burn (has all roles)", () => {
+      simulator
+        .as("minter")
+        .mint(
+          Account_minter,
+          TOKENID_1,
+          createCertificate(1),
+          TOKEN_PRICE,
+          minter
+        );
+      // Admin has minter role, so can burn too
+      simulator.as("admin").burn(TOKENID_1, admin);
       expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
     });
   });
 
   describe("NFT Pool module testing", () => {
     it("properly initializes ledger state", () => {
-      const initialLedgerState = simulator.as("adminMaster").getLedger();
+      const initialLedgerState = simulator.as("admin").getLedger();
       expect(initialLedgerState.NFTPool__purchaseCounter).toEqual(0n);
     });
 
@@ -534,7 +506,7 @@ describe("Smart Contract Testing", () => {
       expect(ownerCommitment).toBeDefined();
       expect(ownerCommitment.length).toBe(32);
 
-      const ledgerState = simulator.as("adminMaster").getLedger();
+      const ledgerState = simulator.as("admin").getLedger();
       expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
     });
 
@@ -629,7 +601,7 @@ describe("Smart Contract Testing", () => {
     });
 
     it("Pause and unpause NFTPool", () => {
-      simulator.as("adminMaster").pauseNFTPool(adminMaster);
+      simulator.as("admin").pauseNFTPool(admin);
 
       simulator
         .as("minter")
@@ -644,7 +616,7 @@ describe("Smart Contract Testing", () => {
         simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
       }).toThrow();
 
-      simulator.as("adminMaster").unpauseNFTPool(adminMaster);
+      simulator.as("admin").unpauseNFTPool(admin);
 
       simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
     });
@@ -663,7 +635,7 @@ describe("Smart Contract Testing", () => {
 
       simulator.as("minter").withdrawSellerFunds(minter);
 
-      const ledgerState = simulator.as("adminMaster").getLedger();
+      const ledgerState = simulator.as("admin").getLedger();
       expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
     });
   });
@@ -687,7 +659,7 @@ describe("Smart Contract Testing", () => {
         expect(ownerCommitment.length).toBe(32);
 
         // Counter incremented by 1 (one commitment for the batch)
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
       });
 
@@ -706,7 +678,7 @@ describe("Smart Contract Testing", () => {
         expect(ownerCommitment).toBeDefined();
         expect(ownerCommitment.length).toBe(32);
 
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
       });
 
@@ -724,7 +696,7 @@ describe("Smart Contract Testing", () => {
         expect(ownerCommitment).toBeDefined();
         expect(ownerCommitment.length).toBe(32);
 
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
       });
 
@@ -838,7 +810,7 @@ describe("Smart Contract Testing", () => {
         expect(ownerCommitment).toBeDefined();
         expect(ownerCommitment.length).toBe(32);
 
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
       });
 
@@ -858,7 +830,7 @@ describe("Smart Contract Testing", () => {
         expect(ownerCommitment).toBeDefined();
         expect(ownerCommitment.length).toBe(32);
 
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
       });
 
@@ -929,7 +901,7 @@ describe("Smart Contract Testing", () => {
         expect(ownerCommitment).toBeDefined();
         expect(ownerCommitment.length).toBe(32);
 
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
       });
 
@@ -951,7 +923,7 @@ describe("Smart Contract Testing", () => {
         expect(ownerCommitment).toBeDefined();
         expect(ownerCommitment.length).toBe(32);
 
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
       });
 
@@ -1051,7 +1023,7 @@ describe("Smart Contract Testing", () => {
         expect(singleCommitment.length).toBe(32);
 
         // Counter should be 2 (1 for batch, 1 for single)
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(2n);
       });
 
@@ -1072,8 +1044,358 @@ describe("Smart Contract Testing", () => {
         // Seller withdraws
         simulator.as("minter").withdrawSellerFunds(minter);
 
-        const ledgerState = simulator.as("adminMaster").getLedger();
+        const ledgerState = simulator.as("admin").getLedger();
         expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+    });
+  });
+
+  describe("Burn lifecycle testing", () => {
+    describe("Burn unsold tokens (Minter role)", () => {
+      it("Minter burns unsold token that is not listed or sold", () => {
+        // Mint a token but don't add to pool
+        simulator
+          .as("minter")
+          .mint(Account_minter, TOKENID_1, createCertificate(1), TOKEN_PRICE, minter);
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(1n);
+
+        // Minter burns unsold token
+        simulator.as("minter").burn(TOKENID_1, minter);
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+      });
+
+      it("Burn fails if token is listed in pool (must unlist first)", () => {
+        mintAndPoolTokens(simulator, 1);
+
+        // Try to burn listed token - should fail
+        expect(() => {
+          simulator.as("minter").burn(TOKENID_1, minter);
+        }).toThrow("Token must be unlisted before burning");
+      });
+
+      it("Unlist then burn succeeds", () => {
+        mintAndPoolTokens(simulator, 1);
+
+        // Remove from pool first
+        simulator.as("poolOperator").removeFromPool(TOKENID_1, poolOperator);
+
+        // Now burn succeeds
+        simulator.as("minter").burn(TOKENID_1, minter);
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+      });
+
+      it("Burn fails for sold token (must be burned by commitment owner)", () => {
+        mintAndPoolTokens(simulator, 1);
+        verifyBuyer(simulator);
+
+        const coin1 = utils.coin(Number(TOKEN_PRICE));
+        simulator.as("buyer1").purchaseNFT(TOKENID_1, coin1, buyer1);
+
+        // Minter tries to burn sold token - should fail
+        expect(() => {
+          simulator.as("minter").burn(TOKENID_1, minter);
+        }).toThrow("Sold tokens must be burned by commitment owner");
+      });
+
+      it("Non-minter roles cannot burn", () => {
+        simulator
+          .as("minter")
+          .mint(Account_minter, TOKENID_1, createCertificate(1), TOKEN_PRICE, minter);
+
+        expect(() => {
+          simulator.as("poolOperator").burn(TOKENID_1, poolOperator);
+        }).toThrow();
+        expect(() => {
+          simulator.as("verifier").burn(TOKENID_1, verifier);
+        }).toThrow();
+      });
+    });
+
+    describe("Burn purchased tokens (commitment owner)", () => {
+      it("burnPurchasedBatch5 - burn all 5 real tokens", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").burnPurchasedBatch5(
+          ownerCommitment,
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          challenge, buyer1
+        );
+
+        // All tokens should be burned (balance 0)
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+      });
+
+      it("burnPurchasedBatch5 - burn partial batch (3 real + 2 mock)", () => {
+        mintAndPoolTokens(simulator, 3);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 3);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").burnPurchasedBatch5(
+          ownerCommitment,
+          TOKENID_1, TOKENID_2, TOKENID_3, MOCK_TOKEN, MOCK_TOKEN,
+          challenge, buyer1
+        );
+
+        // All 3 real tokens should be burned
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+      });
+
+      it("burnPurchasedBatch5 - non-owner cannot burn", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+        simulator.as("verifier").setUser(Account_buyer2.left, verifier);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        expect(() => {
+          simulator.as("buyer2").burnPurchasedBatch5(
+            ownerCommitment,
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            challenge, buyer2
+          );
+        }).toThrow();
+      });
+
+      it("burnPurchasedBatch5 - wrong commitment fails", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Use a fake commitment
+        const fakeCommitment = randomBytes(32);
+        const challenge = randomBytes(32);
+        expect(() => {
+          simulator.as("buyer1").burnPurchasedBatch5(
+            fakeCommitment,
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            challenge, buyer1
+          );
+        }).toThrow();
+      });
+
+      it("burnPurchasedBatch10 - burn all 10 real tokens", () => {
+        mintAndPoolTokens(simulator, 10);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 10);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch10(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").burnPurchasedBatch10(
+          ownerCommitment,
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          challenge, buyer1
+        );
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+      });
+
+      it("burnPurchasedBatch10 - burn partial batch (5 real + 5 mock)", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch10(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").burnPurchasedBatch10(
+          ownerCommitment,
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          challenge, buyer1
+        );
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+      });
+
+      it("burnPurchasedBatch20 - burn all 20 real tokens", () => {
+        mintAndPoolTokens(simulator, 20);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 20);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch20(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          TOKENID_11, TOKENID_12, TOKENID_13, TOKENID_14, TOKENID_15,
+          TOKENID_16, TOKENID_17, TOKENID_18, TOKENID_19, TOKENID_20,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").burnPurchasedBatch20(
+          ownerCommitment,
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          TOKENID_11, TOKENID_12, TOKENID_13, TOKENID_14, TOKENID_15,
+          TOKENID_16, TOKENID_17, TOKENID_18, TOKENID_19, TOKENID_20,
+          challenge, buyer1
+        );
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+      });
+
+      it("burnPurchasedBatch20 - burn partial batch (10 real + 10 mock)", () => {
+        mintAndPoolTokens(simulator, 10);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 10);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch20(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").burnPurchasedBatch20(
+          ownerCommitment,
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          challenge, buyer1
+        );
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+      });
+
+      it("burnPurchasedBatch10 - non-owner cannot burn", () => {
+        mintAndPoolTokens(simulator, 10);
+        verifyBuyer(simulator);
+        simulator.as("verifier").setUser(Account_buyer2.left, verifier);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 10);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch10(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        expect(() => {
+          simulator.as("buyer2").burnPurchasedBatch10(
+            ownerCommitment,
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+            challenge, buyer2
+          );
+        }).toThrow();
+      });
+    });
+
+    describe("End-to-end burn lifecycle", () => {
+      it("Full flow: mint -> pool -> purchase -> prove ownership -> burn -> verify gone", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        // Purchase batch
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Seller withdraws
+        simulator.as("minter").withdrawSellerFunds(minter);
+
+        // Buyer burns purchased tokens (proves ownership + burns atomically)
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").burnPurchasedBatch5(
+          ownerCommitment,
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          challenge, buyer1
+        );
+
+        // Verify all tokens are burned
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+
+        // Verify pool state is cleaned up (tokens are no longer sold)
+        const ledgerState = simulator.as("admin").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+
+      it("Cannot re-mint same token ID after burn (would need fresh mint)", () => {
+        // Mint and pool
+        simulator
+          .as("minter")
+          .mint(Account_minter, TOKENID_1, createCertificate(1), TOKEN_PRICE, minter);
+
+        // Burn (unsold path - minter can burn)
+        simulator.as("minter").burn(TOKENID_1, minter);
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
+
+        // Re-minting the same token ID should work (token was fully destroyed)
+        simulator
+          .as("minter")
+          .mint(Account_minter, TOKENID_1, createCertificate(1), TOKEN_PRICE, minter);
+
+        expect(simulator.as("minter").balanceOf(Account_minter)).toBe(1n);
+      });
+
+      it("Purchased token cannot be burned twice", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        const challenge1 = randomBytes(32);
+        simulator.as("buyer1").burnPurchasedBatch5(
+          ownerCommitment,
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          challenge1, buyer1
+        );
+
+        // Trying to burn again should fail
+        const challenge2 = randomBytes(32);
+        expect(() => {
+          simulator.as("buyer1").burnPurchasedBatch5(
+            ownerCommitment,
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            challenge2, buyer1
+          );
+        }).toThrow();
       });
     });
   });

@@ -197,6 +197,7 @@ module <ModuleName> {
 - **Always** use concurrency-safe ADTs: `Map`, `Set`, `Counter` (never plain variables for mutable shared state)
 - **Always** use `export` on circuits and state that need to be accessed from the main contract
 - **Always** mark pure utility circuits as `export pure circuit`
+- **Always** export internal `_` prefixed circuits that the top-level contract needs to call directly (they become `Prefix__functionName` due to the underscore)
 
 ### DON'T
 
@@ -205,6 +206,8 @@ module <ModuleName> {
 - **Never** use `Uint<256>` - max supported is `Uint<128>` due to midnight circuit backend limits
 - **Never** use `sealed ledger` for mutable state - only for immutable config (name, symbol)
 - **Never** forget the `disclose()` wrapper on values being written to ledger
+- **Never** use time-dependent logic (`blockTimeGte`/`blockTimeLte`) unless absolutely required - prefer atomic operations
+- **Never** leave funds locked in intermediate state without a guaranteed withdrawal path
 
 ### Type Casting Pitfalls
 
@@ -223,6 +226,53 @@ myUint128Map.insert(key, price as Uint<128>);
 const amount = disclose(price) as Uint<128>;
 myUint128Map.insert(disclose(key), disclose(amount));
 ```
+
+## Module Design Patterns (Learned)
+
+### Pool Module (Direct Purchase Pattern - NFTPool)
+
+Use when tokens are listed and purchased directly. Key state:
+
+```compact
+export ledger _pool: Set<Uint<128>>;                                   // Listed tokens
+export ledger _tokenSold: Map<Uint<128>, Boolean>;                     // Sold tracking
+export ledger _nftOwnerCommitment: Map<Uint<128>, Bytes<32>>;          // Buyer commitment
+export ledger _purchaseCounter: Counter;                               // Unique commitment gen
+export ledger _commitmentToCounter: Map<Bytes<32>, Uint<64>>;          // For ownership verification
+export ledger _sellerBalance: Map<Either<...>, QualifiedShieldedCoinInfo>; // Payment accumulation
+export ledger _sellerAmount: Map<Either<...>, Uint<128>>;              // Amount tracking
+```
+
+Key flows: addToPool -> purchaseNFT -> withdrawSellerFunds, and proofOwnership + burnPurchased.
+
+### Bucket Module (Aggregation Pattern - BucketDEFI)
+
+Use when tokens are grouped under shared conditions with time-bounded funding. Key state:
+
+```compact
+export ledger _zkBucketDEFI: Map<Bytes<32>, Set<Uint<128>>>;          // Bucket -> tokens
+export ledger _zkBucketDEFIConditions: Map<Bytes<32>, CONDITIONS>;     // Bucket conditions
+export ledger _zkBucketDEFIPot: Map<Bytes<32>, QualifiedShieldedCoinInfo>; // Bucket funds
+export ledger _certificateLocked: Map<Uint<128>, Boolean>;             // Lock tracking
+export ledger _certificateClaimed: Map<Uint<128>, Boolean>;            // Claim tracking
+```
+
+Key flows: createBucket -> addCertificate -> settleBucket -> claimReward + withdrawLeftover.
+
+### Cleanup Circuit Pattern
+
+When tokens can be burned after purchase, provide a cleanup circuit:
+
+```compact
+export circuit cleanupSoldToken(tokenId: Uint<128>): [] {
+  Initializable_assertInitialized();
+  Pausable_assertNotPaused();
+  _tokenSold.insert(disclose(tokenId), false);
+  _nftOwnerCommitment.insert(disclose(tokenId), default<Bytes<32>>);
+}
+```
+
+Preserve audit trail data (`_commitmentToCounter`, `_authVerifications`) - never clean those up.
 
 ## Integration in Main Contract
 

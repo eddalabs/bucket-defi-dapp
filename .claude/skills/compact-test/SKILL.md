@@ -313,11 +313,47 @@ For every contract, write tests covering these categories:
 
 ### 3. Token/NFT
 - Minting (only Minter role)
-- Burning (check which role is required)
-- `setTokenPrice` (only token owner)
+- Burning (check which role is required and what guards exist)
+  - In Private Buyer: Minter burns unsold tokens (must unlist first, must not be sold)
+  - In Bucket DEFI: Settler burns tokens
+- `setTokenPrice` (check which role - may be owner-based or role-based)
+  - In Private Buyer: PoolOperator role (2) can update prices even when listed
+  - In Bucket DEFI: token owner only
 - Balance and ownership queries
 
 ### 4. Custom Module
+
+#### For NFTPool-type modules (direct purchase):
+- Pool listing: addToPool succeeds with PoolOperator, fails for others
+- Pool listing: addToPool fails for already-listed or sold tokens
+- Pool removal: removeFromPool succeeds with PoolOperator, fails for others
+- Purchase: purchaseNFT succeeds for verified buyer with sufficient payment
+- Purchase: fails for non-verified buyer, insufficient payment, wrong coin color
+- Purchase: returns a valid ownerCommitment
+- Batch purchase: purchaseBatch5/10/20 with all real, partial (with mock tokenId=0), and edge cases
+- Batch: all tokens in batch share ONE commitment
+- Seller payment: withdrawSellerFunds succeeds for seller with balance
+- Seller payment: fails for user with no balance
+- Proof of ownership: succeeds for commitment owner, fails for others
+- Burn purchased: burnPurchasedBatch proves ownership + burns correct tokens
+- Burn purchased: fails for non-owner commitment, wrong tokens
+- Price updates: PoolOperator can update price, Minter cannot (role-based)
+- Price updates: price can be updated while token is listed in pool
+- Burn guards: cannot burn listed tokens, cannot burn sold tokens
+
+#### For BucketDEFI-type modules (aggregation):
+- Bucket creation: succeeds for verified user with valid deposit
+- Certificate matching: addCertificateToBucket validates all conditions (source, price, vintage, impact, location, status, budget, time)
+- Certificate matching: fails if any condition doesn't match
+- Certificate locking: locked certificates cannot be added to another bucket
+- Settlement: succeeds after endDate, fails before
+- Settlement: fails for already-settled buckets
+- Reward claiming: certificate owner receives tokenPrice from pot
+- Reward claiming: fails for non-owner, already-claimed, unsettled bucket
+- Leftover withdrawal: bucket owner receives (pot - accumulatedPrice)
+- Proof of ownership: succeeds for bucket owner, fails for others
+
+#### General module tests:
 - Initialize state (counters at 0, sets empty)
 - Operations succeed with correct role
 - Operations fail with wrong role
@@ -329,6 +365,8 @@ For every contract, write tests covering these categories:
 - Full workflow from setup to completion
 - Multi-user interactions
 - State consistency throughout
+- For Private Buyer: mint -> list in pool -> verify buyer -> purchase -> proof -> withdraw -> burn
+- For Bucket DEFI: mint -> create bucket -> add certificates -> settle -> claim -> withdraw leftover -> burn
 
 ## Running Tests
 
@@ -374,6 +412,82 @@ it("ownership proof works for owner", () => {
   // Non-owner fails
   expect(() => {
     simulator.as("otherUser").proofOwnership(commitment, challenge, otherCaller);
+  }).toThrow();
+});
+```
+
+### Pattern: Test batch purchase with shared commitment
+```typescript
+it("batch purchase shares single commitment", () => {
+  // Mint and list 5 tokens
+  for (const tokenId of [1n, 2n, 3n, 4n, 5n]) {
+    simulator.as("minter").mint(Account_minter, tokenId, cert, PRICE, minter);
+    simulator.as("poolOperator").addToPool(tokenId, poolOperator);
+  }
+  simulator.as("verifier").setUser(Account_buyer.left, verifier);
+
+  const totalCoin = utils.coin(Number(PRICE) * 5);
+  const commitment = simulator.as("buyer").purchaseBatch5(
+    1n, 2n, 3n, 4n, 5n, totalCoin, buyer
+  );
+
+  // Prove ownership of shared commitment
+  simulator.as("buyer").proofOwnership(commitment, randomBytes(32), buyer);
+});
+```
+
+### Pattern: Test batch with mock tokens (partial batch)
+```typescript
+it("batch with mock tokens (tokenId=0 skipped)", () => {
+  // Only 3 real tokens, 2 mock (tokenId=0)
+  simulator.as("buyer").purchaseBatch5(
+    1n, 2n, 3n, 0n, 0n, coin, buyer
+  );
+  // Mock tokens (0) are skipped at every step
+});
+```
+
+### Pattern: Test burn guards
+```typescript
+it("cannot burn listed token", () => {
+  simulator.as("minter").mint(Account_minter, TOKENID, cert, PRICE, minter);
+  simulator.as("poolOperator").addToPool(TOKENID, poolOperator);
+  expect(() => {
+    simulator.as("minter").burn(TOKENID, minter);
+  }).toThrow(); // Must unlist first
+});
+
+it("sold tokens can only be burned by commitment owner", () => {
+  // ... purchase token ...
+  expect(() => {
+    simulator.as("minter").burn(TOKENID, minter);
+  }).toThrow(); // Must use burnPurchasedBatch
+});
+```
+
+### Pattern: Test role-based price updates
+```typescript
+it("PoolOperator can update price, minter cannot", () => {
+  simulator.as("minter").mint(Account_minter, TOKENID, cert, PRICE, minter);
+  // PoolOperator succeeds
+  simulator.as("poolOperator").setTokenPrice(TOKENID, 50n, poolOperator);
+  expect(simulator.as("poolOperator").tokenPrice(TOKENID)).toBe(50n);
+  // Minter fails (no PoolOperator role)
+  expect(() => {
+    simulator.as("minter").setTokenPrice(TOKENID, 20n, minter);
+  }).toThrow();
+});
+```
+
+### Pattern: Test seller withdrawal
+```typescript
+it("seller withdraws after purchase", () => {
+  // ... mint, list, verify buyer, purchase ...
+  // Seller withdraws
+  simulator.as("minter").withdrawSellerFunds(minter);
+  // Second withdrawal fails (zero balance)
+  expect(() => {
+    simulator.as("minter").withdrawSellerFunds(minter);
   }).toThrow();
 });
 ```

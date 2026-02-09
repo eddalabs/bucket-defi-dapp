@@ -29,7 +29,7 @@ import {
 } from "../../witnesses.js";
 import { createLogger } from "../../logger.js";
 import { LogicTestingConfig } from "../../config.js";
-import { adminMaster } from "../private-buyer.test.js";
+import { admin } from "../private-buyer.test.js";
 
 export {
   type NonFungibleToken_Certificate,
@@ -59,7 +59,7 @@ export class Simulator {
     } = this.contract.initialState(
       createConstructorContext(
         { secretNonce: privateState.secretNonce },
-        adminMaster
+        admin
       ),
       name,
       symbol
@@ -73,7 +73,7 @@ export class Simulator {
       ),
       costModel: CostModel.initialCostModel()
     };
-    this.userPrivateStates = { ["adminMaster"]: currentPrivateState };
+    this.userPrivateStates = { ["admin"]: currentPrivateState };
     this.updateUserPrivateState = (newPrivateState: PrivateState) => {};
   }
 
@@ -576,6 +576,130 @@ export class Simulator {
           : this.circuitContext.currentZswapLocalState
       },
       ownerCommitment,
+      challenge
+    );
+    return this.updateStateAndGetLedger(circuitResults);
+  }
+
+  public burnPurchasedBatch5(
+    ownerCommitment: Uint8Array,
+    tokenId1: bigint,
+    tokenId2: bigint,
+    tokenId3: bigint,
+    tokenId4: bigint,
+    tokenId5: bigint,
+    challenge: Uint8Array,
+    caller?: CoinPublicKey
+  ): Ledger {
+    const circuitResults = this.contract.impureCircuits.burnPurchasedBatch5(
+      {
+        ...this.circuitContext,
+        currentZswapLocalState: caller
+          ? emptyZswapLocalState(caller)
+          : this.circuitContext.currentZswapLocalState
+      },
+      ownerCommitment,
+      tokenId1,
+      tokenId2,
+      tokenId3,
+      tokenId4,
+      tokenId5,
+      challenge
+    );
+    return this.updateStateAndGetLedger(circuitResults);
+  }
+
+  public burnPurchasedBatch10(
+    ownerCommitment: Uint8Array,
+    tokenId1: bigint,
+    tokenId2: bigint,
+    tokenId3: bigint,
+    tokenId4: bigint,
+    tokenId5: bigint,
+    tokenId6: bigint,
+    tokenId7: bigint,
+    tokenId8: bigint,
+    tokenId9: bigint,
+    tokenId10: bigint,
+    challenge: Uint8Array,
+    caller?: CoinPublicKey
+  ): Ledger {
+    const circuitResults = this.contract.impureCircuits.burnPurchasedBatch10(
+      {
+        ...this.circuitContext,
+        currentZswapLocalState: caller
+          ? emptyZswapLocalState(caller)
+          : this.circuitContext.currentZswapLocalState
+      },
+      ownerCommitment,
+      tokenId1,
+      tokenId2,
+      tokenId3,
+      tokenId4,
+      tokenId5,
+      tokenId6,
+      tokenId7,
+      tokenId8,
+      tokenId9,
+      tokenId10,
+      challenge
+    );
+    return this.updateStateAndGetLedger(circuitResults);
+  }
+
+  public burnPurchasedBatch20(
+    ownerCommitment: Uint8Array,
+    tokenId1: bigint,
+    tokenId2: bigint,
+    tokenId3: bigint,
+    tokenId4: bigint,
+    tokenId5: bigint,
+    tokenId6: bigint,
+    tokenId7: bigint,
+    tokenId8: bigint,
+    tokenId9: bigint,
+    tokenId10: bigint,
+    tokenId11: bigint,
+    tokenId12: bigint,
+    tokenId13: bigint,
+    tokenId14: bigint,
+    tokenId15: bigint,
+    tokenId16: bigint,
+    tokenId17: bigint,
+    tokenId18: bigint,
+    tokenId19: bigint,
+    tokenId20: bigint,
+    challenge: Uint8Array,
+    caller?: CoinPublicKey
+  ): Ledger {
+    const circuitResults = this.contract.impureCircuits.burnPurchasedBatch20(
+      {
+        ...this.circuitContext,
+        currentZswapLocalState: caller
+          ? emptyZswapLocalState(caller)
+          : this.circuitContext.currentZswapLocalState
+      },
+      ownerCommitment,
+      tokenId1,
+      tokenId2,
+      tokenId3,
+      tokenId4,
+      tokenId5,
+      tokenId6,
+      tokenId7,
+      tokenId8,
+      tokenId9,
+      tokenId10,
+      tokenId11,
+      tokenId12,
+      tokenId13,
+      tokenId14,
+      tokenId15,
+      tokenId16,
+      tokenId17,
+      tokenId18,
+      tokenId19,
+      tokenId20,
       challenge
     );
     return this.updateStateAndGetLedger(circuitResults);

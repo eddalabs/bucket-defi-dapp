@@ -4,7 +4,7 @@ pragma language_version >= 0.20;
 /**
 * @description: Private Buyer contract - eliminates buyer intent exposure by replacing buckets with a direct NFT pool purchase model. Sellers list NFTs in a pool, buyers purchase them directly in a single transaction. NFT ownership post-purchase is stored as a hash commitment (ZK-provable).
 *
-* @notice: Access control module manages roles: MasterAdmin(0), MinterAdmin(1), Minter(2), PoolAdmin(3), PoolOperator(4), VerifierAdmin(5), Verifier(6).
+* @notice: Access control module manages roles: Admin(0), Minter(1), PoolOperator(2), Verifier(3).
 *
 * @notice: Best Practices
 * - Modules are self-contained (logic-module + Initializable-module + Pausable-module).
@@ -218,32 +218,32 @@ export circuit isUserVerified(user: ZswapCoinPublicKey): Boolean {
 /**
 * @description: Includes a user in the verified users set
 *
-* @notice: Only verifier roles can set users (role 6)
+* @notice: Only verifier role can set users (role 3)
 *
 * @requirements:
-* - The caller must have `verifier Role`.
+* - The caller must have `Verifier Role`.
 * - Wrapper call
 * @param {ZswapCoinPublicKey} user - Zswap Coin public key of a new user.
 * @return {[]} - Empty tuple.
 */
 export circuit setUser(user: ZswapCoinPublicKey): [] {
-  assertOnlyRole(6 as Field as Bytes<32>);
+  assertOnlyRole(3 as Field as Bytes<32>);
   Identity_setUser(user);
 }
 
 /**
 * @description: Removes a user from the verified users set
 *
-* @notice: Only verifier roles can remove users (role 6)
+* @notice: Only verifier role can remove users (role 3)
 *
 * @requirements:
-* - The caller must have `verifier Role`.
+* - The caller must have `Verifier Role`.
 * - Wrapper call
 * @param {ZswapCoinPublicKey} user - Zswap Coin public key of a new user.
 * @return {[]} - Empty tuple.
 */
 export circuit removeUser(user: ZswapCoinPublicKey): [] {
-  assertOnlyRole(6 as Field as Bytes<32>);
+  assertOnlyRole(3 as Field as Bytes<32>);
   Identity_removeUser(user);
 }
 
@@ -332,7 +332,7 @@ export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
 /**
 * @description Mints `tokenId` and transfers it to `to`.
 *
-* @notice: Only Minter role (2) can mint.
+* @notice: Only Minter role (1) can mint.
 *
 * @requirements:
 * - The caller must have `Minter role`.
@@ -348,37 +348,52 @@ export circuit mint(to: Either<ZswapCoinPublicKey, ContractAddress>,
                     tokenCertificate: NonFungibleToken_Certificate,
                     price: Uint<64>
                     ): [] {
-  assertOnlyRole(2 as Field as Bytes<32>);
+  assertOnlyRole(1 as Field as Bytes<32>);
   return NonFungibleToken_mint(to, tokenId, tokenCertificate, price);
 }
 
 /**
-* @description Destroys `tokenId`.
+* @description Destroys an unsold `tokenId` (web2 ledger unlock for non-purchased tokens).
 *
-* @notice: Only MasterAdmin role (0) can burn.
+* @notice: Only Minter role (1) can burn unsold tokens (minter/burner combined role).
+* Token must NOT be listed in the pool (unlist first via removeFromPool).
+* Token must NOT be sold (sold tokens must be burned by commitment owner via burnPurchasedBatch).
 *
 * @requirements:
-* - The caller must have `MasterAdmin role`.
-* - Wrapper call
+* - The caller must have `Minter role`.
+* - Token must not be listed in the pool
+* - Token must not be sold
 * @param {Uint<128>} tokenId - The token to burn
 * @return {[]} - Empty tuple.
 */
 export circuit burn(tokenId: Uint<128>): [] {
-  assertOnlyRole(default<Bytes<32>>);
+  assertOnlyRole(1 as Field as Bytes<32>);
+
+  // Token must not be listed in pool (unlist before burning)
+  assert(!NFTPool__pool.member(disclose(tokenId)), "Token must be unlisted before burning");
+
+  // Token must not be sold (sold tokens must be burned by commitment owner)
+  if (NFTPool__tokenSold.member(disclose(tokenId))) {
+    assert(!NFTPool__tokenSold.lookup(disclose(tokenId)), "Sold tokens must be burned by commitment owner");
+  }
+
   return NonFungibleToken_burn(tokenId);
 }
 
 /**
-* @description Sets the price for the given `tokenId`.
+* @description Sets the price for the given `tokenId`. Only PoolOperator role can update prices.
+*
+* @notice PoolOperator can update NFT prices at any time (even when listed in pool).
 *
 * @requirements:
-* - Wrapper call
+* - The caller must have `PoolOperator role` (role 2).
 * @param {Uint<128>} tokenId - The identifier of the token.
 * @param {Uint<64>} price - The price of the token.
 * @return {[]} - Empty tuple.
 */
 export circuit setTokenPrice(tokenId: Uint<128>, price: Uint<64>): [] {
-  NonFungibleToken_setTokenPrice(tokenId, price);
+  assertOnlyRole(2 as Field as Bytes<32>);
+  NonFungibleToken__setTokenPrice(tokenId, price);
 }
 
 /**
@@ -418,7 +433,7 @@ export circuit unpauseToken(): [] {
 /**
 * @description: Add an NFT to the pool for sale
 *
-* @notice: Only PoolOperator role (4) can add to pool.
+* @notice: Only PoolOperator role (2) can add to pool.
 * Cross-checks that the token exists in the NFT module.
 *
 * @requirements:
@@ -429,7 +444,7 @@ export circuit unpauseToken(): [] {
 * @return {[]} - Empty tuple.
 */
 export circuit addToPool(tokenId: Uint<128>): [] {
-  assertOnlyRole(4 as Field as Bytes<32>);
+  assertOnlyRole(2 as Field as Bytes<32>);
 
   // Cross-check: token must exist in NFT module
   assert(NonFungibleToken__tokenToCertificate.member(disclose(tokenId)), "Token not found");
@@ -440,7 +455,7 @@ export circuit addToPool(tokenId: Uint<128>): [] {
 /**
 * @description: Remove an NFT from the pool (delist)
 *
-* @notice: Only PoolOperator role (4) can remove from pool.
+* @notice: Only PoolOperator role (2) can remove from pool.
 *
 * @requirements:
 * - The caller must have `PoolOperator role`.
@@ -449,7 +464,7 @@ export circuit addToPool(tokenId: Uint<128>): [] {
 * @return {[]} - Empty tuple.
 */
 export circuit removeFromPool(tokenId: Uint<128>): [] {
-  assertOnlyRole(4 as Field as Bytes<32>);
+  assertOnlyRole(2 as Field as Bytes<32>);
   NFTPool_removeFromPool(tokenId);
 }
 
@@ -866,4 +881,165 @@ export circuit pauseNFTPool(): [] {
 export circuit unpauseNFTPool(): [] {
   assertOnlyRole(default<Bytes<32>>);
   NFTPool_unpauseNFTPool();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// BURN PURCHASED TOKENS (BUYER-OWNED VIA COMMITMENT)
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+* @description: Burn a single purchased token after verifying it belongs to the commitment.
+*
+* @notice: Used by burnPurchasedBatch circuits. Skips when tokenId == 0 (mock).
+* Verifies the token's stored commitment matches, cleans up pool state, then burns the NFT.
+*
+* @param {Uint<128>} tokenId - The token ID (0 for mock)
+* @param {Bytes<32>} ownerCommitment - The buyer's commitment
+* @return {[]} - Empty tuple.
+*/
+export circuit _burnPurchasedToken(tokenId: Uint<128>, ownerCommitment: Bytes<32>): [] {
+  if (disclose(tokenId) != 0) {
+    // Verify this token was purchased and belongs to this commitment
+    assert(NFTPool__nftOwnerCommitment.member(disclose(tokenId)), "Token not purchased");
+    const storedCommitment = NFTPool__nftOwnerCommitment.lookup(disclose(tokenId));
+    assert(storedCommitment == disclose(ownerCommitment), "Token not owned by this commitment");
+
+    // Clean up pool state (sold status, commitment mapping)
+    NFTPool_cleanupSoldToken(tokenId);
+
+    // Burn the NFT
+    NonFungibleToken_burn(tokenId);
+  }
+}
+
+/**
+* @description: Burn up to 5 purchased tokens owned by the caller via commitment.
+*
+* @notice: The buyer must prove ownership of the commitment atomically within this circuit.
+* The challenge is stored for audit. Mock tokens (tokenId == 0) are skipped.
+* This represents unlocking the digital assets on the web2 ledger.
+*
+* @requirements:
+* - Caller must be the owner of the commitment (ZK proof via witness nonce)
+* - Each real token must belong to this commitment
+* - Challenge is stored for audit trail
+* @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+* @param {Uint<128>} tokenId1-5 - Token IDs (0 for mock/empty slot)
+* @param {Bytes<32>} challenge - The challenge for ZK proof / audit trail
+* @return {[]} - Empty tuple.
+*/
+export circuit burnPurchasedBatch5(
+  ownerCommitment: Bytes<32>,
+  tokenId1: Uint<128>,
+  tokenId2: Uint<128>,
+  tokenId3: Uint<128>,
+  tokenId4: Uint<128>,
+  tokenId5: Uint<128>,
+  challenge: Bytes<32>
+): [] {
+  // Prove ownership of the commitment and store challenge
+  NFTPool_proofOwnership(ownerCommitment, challenge);
+
+  // Burn each real token
+  _burnPurchasedToken(tokenId1, ownerCommitment);
+  _burnPurchasedToken(tokenId2, ownerCommitment);
+  _burnPurchasedToken(tokenId3, ownerCommitment);
+  _burnPurchasedToken(tokenId4, ownerCommitment);
+  _burnPurchasedToken(tokenId5, ownerCommitment);
+}
+
+/**
+* @description: Burn up to 10 purchased tokens owned by the caller via commitment.
+*
+* @notice: Same as burnPurchasedBatch5 but for up to 10 tokens.
+*
+* @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+* @param {Uint<128>} tokenId1-10 - Token IDs (0 for mock/empty slot)
+* @param {Bytes<32>} challenge - The challenge for ZK proof / audit trail
+* @return {[]} - Empty tuple.
+*/
+export circuit burnPurchasedBatch10(
+  ownerCommitment: Bytes<32>,
+  tokenId1: Uint<128>,
+  tokenId2: Uint<128>,
+  tokenId3: Uint<128>,
+  tokenId4: Uint<128>,
+  tokenId5: Uint<128>,
+  tokenId6: Uint<128>,
+  tokenId7: Uint<128>,
+  tokenId8: Uint<128>,
+  tokenId9: Uint<128>,
+  tokenId10: Uint<128>,
+  challenge: Bytes<32>
+): [] {
+  NFTPool_proofOwnership(ownerCommitment, challenge);
+
+  _burnPurchasedToken(tokenId1, ownerCommitment);
+  _burnPurchasedToken(tokenId2, ownerCommitment);
+  _burnPurchasedToken(tokenId3, ownerCommitment);
+  _burnPurchasedToken(tokenId4, ownerCommitment);
+  _burnPurchasedToken(tokenId5, ownerCommitment);
+  _burnPurchasedToken(tokenId6, ownerCommitment);
+  _burnPurchasedToken(tokenId7, ownerCommitment);
+  _burnPurchasedToken(tokenId8, ownerCommitment);
+  _burnPurchasedToken(tokenId9, ownerCommitment);
+  _burnPurchasedToken(tokenId10, ownerCommitment);
+}
+
+/**
+* @description: Burn up to 20 purchased tokens owned by the caller via commitment.
+*
+* @notice: Same as burnPurchasedBatch5 but for up to 20 tokens.
+*
+* @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+* @param {Uint<128>} tokenId1-20 - Token IDs (0 for mock/empty slot)
+* @param {Bytes<32>} challenge - The challenge for ZK proof / audit trail
+* @return {[]} - Empty tuple.
+*/
+export circuit burnPurchasedBatch20(
+  ownerCommitment: Bytes<32>,
+  tokenId1: Uint<128>,
+  tokenId2: Uint<128>,
+  tokenId3: Uint<128>,
+  tokenId4: Uint<128>,
+  tokenId5: Uint<128>,
+  tokenId6: Uint<128>,
+  tokenId7: Uint<128>,
+  tokenId8: Uint<128>,
+  tokenId9: Uint<128>,
+  tokenId10: Uint<128>,
+  tokenId11: Uint<128>,
+  tokenId12: Uint<128>,
+  tokenId13: Uint<128>,
+  tokenId14: Uint<128>,
+  tokenId15: Uint<128>,
+  tokenId16: Uint<128>,
+  tokenId17: Uint<128>,
+  tokenId18: Uint<128>,
+  tokenId19: Uint<128>,
+  tokenId20: Uint<128>,
+  challenge: Bytes<32>
+): [] {
+  NFTPool_proofOwnership(ownerCommitment, challenge);
+
+  _burnPurchasedToken(tokenId1, ownerCommitment);
+  _burnPurchasedToken(tokenId2, ownerCommitment);
+  _burnPurchasedToken(tokenId3, ownerCommitment);
+  _burnPurchasedToken(tokenId4, ownerCommitment);
+  _burnPurchasedToken(tokenId5, ownerCommitment);
+  _burnPurchasedToken(tokenId6, ownerCommitment);
+  _burnPurchasedToken(tokenId7, ownerCommitment);
+  _burnPurchasedToken(tokenId8, ownerCommitment);
+  _burnPurchasedToken(tokenId9, ownerCommitment);
+  _burnPurchasedToken(tokenId10, ownerCommitment);
+  _burnPurchasedToken(tokenId11, ownerCommitment);
+  _burnPurchasedToken(tokenId12, ownerCommitment);
+  _burnPurchasedToken(tokenId13, ownerCommitment);
+  _burnPurchasedToken(tokenId14, ownerCommitment);
+  _burnPurchasedToken(tokenId15, ownerCommitment);
+  _burnPurchasedToken(tokenId16, ownerCommitment);
+  _burnPurchasedToken(tokenId17, ownerCommitment);
+  _burnPurchasedToken(tokenId18, ownerCommitment);
+  _burnPurchasedToken(tokenId19, ownerCommitment);
+  _burnPurchasedToken(tokenId20, ownerCommitment);
 }
