@@ -4,7 +4,7 @@ import {
   encodeContractAddress,
   encodeCoinPublicKey
 } from "@midnight-ntwrk/compact-runtime";
-import * as ledger from '@midnight-ntwrk/ledger-v6';
+import * as ledger from '@midnight-ntwrk/ledger-v7';
 
 const PREFIX_ADDRESS = "0200";
 
