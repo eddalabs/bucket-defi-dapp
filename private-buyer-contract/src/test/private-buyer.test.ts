@@ -57,44 +57,73 @@ const poolOperator_ROLE = convertFieldToBytes(32, 4n, '');
 const verifierAdmin_ROLE = convertFieldToBytes(32, 5n, '');
 const verifier_ROLE = convertFieldToBytes(32, 6n, '');
 
-// Token IDs
-const TOKENID_1: bigint = BigInt(1);
-const TOKENID_2: bigint = BigInt(2);
-const TOKENID_3: bigint = BigInt(3);
+// Token IDs (1-20 for batch testing)
+const TOKENID_1: bigint = 1n;
+const TOKENID_2: bigint = 2n;
+const TOKENID_3: bigint = 3n;
+const TOKENID_4: bigint = 4n;
+const TOKENID_5: bigint = 5n;
+const TOKENID_6: bigint = 6n;
+const TOKENID_7: bigint = 7n;
+const TOKENID_8: bigint = 8n;
+const TOKENID_9: bigint = 9n;
+const TOKENID_10: bigint = 10n;
+const TOKENID_11: bigint = 11n;
+const TOKENID_12: bigint = 12n;
+const TOKENID_13: bigint = 13n;
+const TOKENID_14: bigint = 14n;
+const TOKENID_15: bigint = 15n;
+const TOKENID_16: bigint = 16n;
+const TOKENID_17: bigint = 17n;
+const TOKENID_18: bigint = 18n;
+const TOKENID_19: bigint = 19n;
+const TOKENID_20: bigint = 20n;
 const NON_EXISTENT_TOKEN: bigint = BigInt(0xdead);
+const MOCK_TOKEN: bigint = 0n;
 
-// Certificates
-const Certificate_1: NonFungibleToken_Certificate = {
-  id: "Certificate_1",
-  source: NonFungibleToken_Source.Biomass,
-  generation: 10000000n,
-  vintage: 20n,
-  impact: NonFungibleToken_Impact.High,
-  location: NonFungibleToken_Location.RJ
-};
+// Base price per token
+const TOKEN_PRICE = 100n;
 
-const Certificate_2: NonFungibleToken_Certificate = {
-  id: "Certificate_2",
-  source: NonFungibleToken_Source.Solar,
-  generation: 5000000n,
-  vintage: 15n,
-  impact: NonFungibleToken_Impact.Medium,
-  location: NonFungibleToken_Location.SP
-};
+// Helper to create a certificate for a given index
+function createCertificate(index: number): NonFungibleToken_Certificate {
+  const sources = [
+    NonFungibleToken_Source.Biomass,
+    NonFungibleToken_Source.Solar,
+    NonFungibleToken_Source.Wind,
+    NonFungibleToken_Source.Hydro,
+    NonFungibleToken_Source.Geothermal
+  ];
+  const impacts = [
+    NonFungibleToken_Impact.High,
+    NonFungibleToken_Impact.Medium,
+    NonFungibleToken_Impact.Low,
+    NonFungibleToken_Impact.Minimal,
+    NonFungibleToken_Impact.Extreme
+  ];
+  const locations = [
+    NonFungibleToken_Location.RJ,
+    NonFungibleToken_Location.SP,
+    NonFungibleToken_Location.MG,
+    NonFungibleToken_Location.RS
+  ];
 
-const Certificate_3: NonFungibleToken_Certificate = {
-  id: "Certificate_3",
-  source: NonFungibleToken_Source.Wind,
-  generation: 8000000n,
-  vintage: 25n,
-  impact: NonFungibleToken_Impact.Low,
-  location: NonFungibleToken_Location.MG
-};
+  return {
+    id: `Certificate_${index}`,
+    source: sources[index % sources.length],
+    generation: BigInt(1000000 * index),
+    vintage: BigInt(10 + index),
+    impact: impacts[index % impacts.length],
+    location: locations[index % locations.length]
+  };
+}
 
-// Prices
-const Certificate_1_Price = 100n;
-const Certificate_2_Price = 200n;
-const Certificate_3_Price = 150n;
+// All token IDs in order
+const ALL_TOKEN_IDS = [
+  TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+  TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+  TOKENID_11, TOKENID_12, TOKENID_13, TOKENID_14, TOKENID_15,
+  TOKENID_16, TOKENID_17, TOKENID_18, TOKENID_19, TOKENID_20
+];
 
 // Initialization
 const name = "NAME";
@@ -140,6 +169,30 @@ function createSimulator() {
     .grantRole(verifier_ROLE, Account_verifier, verifierAdmin);
 
   return simulator;
+}
+
+/**
+ * Helper: mint tokens and add them to the pool
+ */
+function mintAndPoolTokens(sim: Simulator, count: number): void {
+  for (let i = 0; i < count; i++) {
+    const tokenId = ALL_TOKEN_IDS[i];
+    sim.as("minter").mint(
+      Account_minter,
+      tokenId,
+      createCertificate(i + 1),
+      TOKEN_PRICE,
+      minter
+    );
+    sim.as("poolOperator").addToPool(tokenId, poolOperator);
+  }
+}
+
+/**
+ * Helper: verify buyer in identity module
+ */
+function verifyBuyer(sim: Simulator): void {
+  sim.as("verifier").setUser(Account_buyer1.left, verifier);
 }
 
 let simulator: Simulator;
@@ -300,8 +353,8 @@ describe("Smart Contract Testing", () => {
         .mint(
           Account_minter,
           TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
+          createCertificate(1),
+          TOKEN_PRICE,
           minter
         );
       expect(() => {
@@ -310,8 +363,8 @@ describe("Smart Contract Testing", () => {
           .mint(
             Account_minter,
             TOKENID_1,
-            Certificate_1,
-            Certificate_1_Price,
+            createCertificate(1),
+            TOKEN_PRICE,
             minterAdmin
           );
       }).toThrow();
@@ -321,8 +374,8 @@ describe("Smart Contract Testing", () => {
           .mint(
             Account_minter,
             TOKENID_1,
-            Certificate_1,
-            Certificate_1_Price,
+            createCertificate(1),
+            TOKEN_PRICE,
             verifier
           );
       }).toThrow();
@@ -332,8 +385,8 @@ describe("Smart Contract Testing", () => {
           .mint(
             Account_minter,
             TOKENID_1,
-            Certificate_1,
-            Certificate_1_Price,
+            createCertificate(1),
+            TOKEN_PRICE,
             poolOperator
           );
       }).toThrow();
@@ -344,7 +397,7 @@ describe("Smart Contract Testing", () => {
         Account_minter
       );
       expect(simulator.as("minter").tokenCertificate(TOKENID_1)).toStrictEqual(
-        Certificate_1
+        createCertificate(1)
       );
 
       // Set a price
@@ -360,8 +413,8 @@ describe("Smart Contract Testing", () => {
         .mint(
           Account_minter,
           TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
+          createCertificate(1),
+          TOKEN_PRICE,
           minter
         );
       // Non-admin roles should fail to burn
@@ -395,8 +448,8 @@ describe("Smart Contract Testing", () => {
         .mint(
           Account_minter,
           TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
+          createCertificate(1),
+          TOKEN_PRICE,
           minter
         );
 
@@ -409,8 +462,8 @@ describe("Smart Contract Testing", () => {
         .mint(
           Account_minter,
           TOKENID_2,
-          Certificate_2,
-          Certificate_2_Price,
+          createCertificate(2),
+          TOKEN_PRICE,
           minter
         );
       expect(() => {
@@ -433,8 +486,8 @@ describe("Smart Contract Testing", () => {
         .mint(
           Account_minter,
           TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
+          createCertificate(1),
+          TOKEN_PRICE,
           minter
         );
       simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
@@ -449,8 +502,8 @@ describe("Smart Contract Testing", () => {
         .mint(
           Account_minter,
           TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
+          createCertificate(1),
+          TOKEN_PRICE,
           minter
         );
       simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
@@ -470,48 +523,25 @@ describe("Smart Contract Testing", () => {
     });
 
     it("Purchase single NFT (verified buyer)", () => {
-      // Setup: mint, add to pool, verify buyer
-      simulator
-        .as("minter")
-        .mint(
-          Account_minter,
-          TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
-          minter
-        );
-      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
-      simulator.as("verifier").setUser(Account_buyer1.left, verifier);
+      mintAndPoolTokens(simulator, 1);
+      verifyBuyer(simulator);
 
-      // Purchase
-      const coin1 = utils.coin(Number(Certificate_1_Price));
+      const coin1 = utils.coin(Number(TOKEN_PRICE));
       const ownerCommitment = simulator
         .as("buyer1")
         .purchaseNFT(TOKENID_1, coin1, buyer1);
 
-      // Verify commitment was returned
       expect(ownerCommitment).toBeDefined();
       expect(ownerCommitment.length).toBe(32);
 
-      // Check purchase counter incremented
       const ledgerState = simulator.as("adminMaster").getLedger();
       expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
     });
 
     it("Purchase fails for non-whitelisted buyer", () => {
-      simulator
-        .as("minter")
-        .mint(
-          Account_minter,
-          TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
-          minter
-        );
-      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
+      mintAndPoolTokens(simulator, 1);
 
-      // buyer1 is NOT verified
-      const coin1 = utils.coin(Number(Certificate_1_Price));
+      const coin1 = utils.coin(Number(TOKEN_PRICE));
       expect(() => {
         simulator.as("buyer1").purchaseNFT(TOKENID_1, coin1, buyer1);
       }).toThrow();
@@ -523,76 +553,47 @@ describe("Smart Contract Testing", () => {
         .mint(
           Account_minter,
           TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
+          createCertificate(1),
+          TOKEN_PRICE,
           minter
         );
-      simulator.as("verifier").setUser(Account_buyer1.left, verifier);
+      verifyBuyer(simulator);
 
       // Token not added to pool
-      const coin1 = utils.coin(Number(Certificate_1_Price));
+      const coin1 = utils.coin(Number(TOKEN_PRICE));
       expect(() => {
         simulator.as("buyer1").purchaseNFT(TOKENID_1, coin1, buyer1);
       }).toThrow();
     });
 
     it("Purchase fails with insufficient payment", () => {
-      simulator
-        .as("minter")
-        .mint(
-          Account_minter,
-          TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
-          minter
-        );
-      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
-      simulator.as("verifier").setUser(Account_buyer1.left, verifier);
+      mintAndPoolTokens(simulator, 1);
+      verifyBuyer(simulator);
 
-      // Coin value less than price
-      const insufficientCoin = utils.coin(Number(Certificate_1_Price) - 1);
+      const insufficientCoin = utils.coin(Number(TOKEN_PRICE) - 1);
       expect(() => {
         simulator.as("buyer1").purchaseNFT(TOKENID_1, insufficientCoin, buyer1);
       }).toThrow();
     });
 
     it("Double-purchase of same token fails", () => {
-      simulator
-        .as("minter")
-        .mint(
-          Account_minter,
-          TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
-          minter
-        );
-      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
-      simulator.as("verifier").setUser(Account_buyer1.left, verifier);
+      mintAndPoolTokens(simulator, 1);
+      verifyBuyer(simulator);
 
-      const coin1 = utils.coin(Number(Certificate_1_Price));
+      const coin1 = utils.coin(Number(TOKEN_PRICE));
       simulator.as("buyer1").purchaseNFT(TOKENID_1, coin1, buyer1);
 
-      // Second purchase should fail (token removed from pool after first purchase)
-      const coin2 = utils.coin(Number(Certificate_1_Price));
+      const coin2 = utils.coin(Number(TOKEN_PRICE));
       expect(() => {
         simulator.as("buyer1").purchaseNFT(TOKENID_1, coin2, buyer1);
       }).toThrow();
     });
 
     it("Proof of ownership (owner succeeds)", () => {
-      simulator
-        .as("minter")
-        .mint(
-          Account_minter,
-          TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
-          minter
-        );
-      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
-      simulator.as("verifier").setUser(Account_buyer1.left, verifier);
+      mintAndPoolTokens(simulator, 1);
+      verifyBuyer(simulator);
 
-      const coin1 = utils.coin(Number(Certificate_1_Price));
+      const coin1 = utils.coin(Number(TOKEN_PRICE));
       const ownerCommitment = simulator
         .as("buyer1")
         .purchaseNFT(TOKENID_1, coin1, buyer1);
@@ -602,25 +603,15 @@ describe("Smart Contract Testing", () => {
     });
 
     it("Proof of ownership (non-owner fails)", () => {
-      simulator
-        .as("minter")
-        .mint(
-          Account_minter,
-          TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
-          minter
-        );
-      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
-      simulator.as("verifier").setUser(Account_buyer1.left, verifier);
+      mintAndPoolTokens(simulator, 1);
+      verifyBuyer(simulator);
       simulator.as("verifier").setUser(Account_buyer2.left, verifier);
 
-      const coin1 = utils.coin(Number(Certificate_1_Price));
+      const coin1 = utils.coin(Number(TOKEN_PRICE));
       const ownerCommitment = simulator
         .as("buyer1")
         .purchaseNFT(TOKENID_1, coin1, buyer1);
 
-      // buyer2 tries to prove ownership of buyer1's purchase
       const challenge = randomBytes(32);
       expect(() => {
         simulator.as("buyer2").proofOwnership(ownerCommitment, challenge, buyer2);
@@ -628,83 +619,462 @@ describe("Smart Contract Testing", () => {
     });
 
     it("Seller withdraws accumulated funds", () => {
-      simulator
-        .as("minter")
-        .mint(
-          Account_minter,
-          TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
-          minter
-        );
-      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
-      simulator.as("verifier").setUser(Account_buyer1.left, verifier);
+      mintAndPoolTokens(simulator, 1);
+      verifyBuyer(simulator);
 
-      const coin1 = utils.coin(Number(Certificate_1_Price));
+      const coin1 = utils.coin(Number(TOKEN_PRICE));
       simulator.as("buyer1").purchaseNFT(TOKENID_1, coin1, buyer1);
 
-      // Seller (minter who owns the NFT) withdraws
       simulator.as("minter").withdrawSellerFunds(minter);
     });
 
     it("Pause and unpause NFTPool", () => {
       simulator.as("adminMaster").pauseNFTPool(adminMaster);
 
-      // Operations should fail when paused
       simulator
         .as("minter")
         .mint(
           Account_minter,
           TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
+          createCertificate(1),
+          TOKEN_PRICE,
           minter
         );
       expect(() => {
         simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
       }).toThrow();
 
-      // Unpause
       simulator.as("adminMaster").unpauseNFTPool(adminMaster);
 
-      // Operations should work again
       simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
     });
 
     it("Full end-to-end flow: mint -> pool -> verify buyer -> purchase -> proof -> seller withdraw", () => {
-      // Mint tokens
-      simulator
-        .as("minter")
-        .mint(
-          Account_minter,
-          TOKENID_1,
-          Certificate_1,
-          Certificate_1_Price,
-          minter
-        );
+      mintAndPoolTokens(simulator, 1);
+      verifyBuyer(simulator);
 
-      // Add to pool
-      simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
-
-      // Verify buyer
-      simulator.as("verifier").setUser(Account_buyer1.left, verifier);
-
-      // Purchase
-      const coin1 = utils.coin(Number(Certificate_1_Price));
+      const coin1 = utils.coin(Number(TOKEN_PRICE));
       const ownerCommitment = simulator
         .as("buyer1")
         .purchaseNFT(TOKENID_1, coin1, buyer1);
 
-      // Proof of ownership
       const challenge = randomBytes(32);
       simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
 
-      // Seller withdraws
       simulator.as("minter").withdrawSellerFunds(minter);
 
-      // Verify final state
       const ledgerState = simulator.as("adminMaster").getLedger();
       expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+    });
+  });
+
+  describe("Batch purchase testing", () => {
+    describe("purchaseBatch5", () => {
+      it("Batch5 with all 5 real tokens - single shared commitment", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const totalPrice = Number(TOKEN_PRICE) * 5;
+        const batchCoin = utils.coin(totalPrice);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Single commitment returned
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+
+        // Counter incremented by 1 (one commitment for the batch)
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+
+      it("Batch5 with 3 real + 2 mock tokens", () => {
+        mintAndPoolTokens(simulator, 3);
+        verifyBuyer(simulator);
+
+        const totalPrice = Number(TOKEN_PRICE) * 3;
+        const batchCoin = utils.coin(totalPrice);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+
+      it("Batch5 with 1 real + 4 mock tokens", () => {
+        mintAndPoolTokens(simulator, 1);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE));
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+
+      it("Batch5 fails with insufficient payment", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const insufficientCoin = utils.coin(Number(TOKEN_PRICE) * 5 - 1);
+
+        expect(() => {
+          simulator.as("buyer1").purchaseBatch5(
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            insufficientCoin, buyer1
+          );
+        }).toThrow();
+      });
+
+      it("Batch5 fails for non-whitelisted buyer", () => {
+        mintAndPoolTokens(simulator, 5);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+
+        expect(() => {
+          simulator.as("buyer1").purchaseBatch5(
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            batchCoin, buyer1
+          );
+        }).toThrow();
+      });
+
+      it("Batch5 proof of ownership works with shared commitment", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Proof of ownership with the shared commitment
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+      });
+
+      it("Batch5 proof of ownership fails for non-owner", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+        simulator.as("verifier").setUser(Account_buyer2.left, verifier);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        expect(() => {
+          simulator.as("buyer2").proofOwnership(ownerCommitment, challenge, buyer2);
+        }).toThrow();
+      });
+
+      it("Batch5 purchased tokens cannot be re-purchased", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Try to purchase an already-sold token
+        const singleCoin = utils.coin(Number(TOKEN_PRICE));
+        expect(() => {
+          simulator.as("buyer1").purchaseNFT(TOKENID_1, singleCoin, buyer1);
+        }).toThrow();
+      });
+
+      it("Batch5 seller can withdraw accumulated funds", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Seller (minter) withdraws accumulated funds from all 5 sales
+        simulator.as("minter").withdrawSellerFunds(minter);
+      });
+    });
+
+    describe("purchaseBatch10", () => {
+      it("Batch10 with all 10 real tokens", () => {
+        mintAndPoolTokens(simulator, 10);
+        verifyBuyer(simulator);
+
+        const totalPrice = Number(TOKEN_PRICE) * 10;
+        const batchCoin = utils.coin(totalPrice);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch10(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          batchCoin, buyer1
+        );
+
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+
+      it("Batch10 with 5 real + 5 mock tokens", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const totalPrice = Number(TOKEN_PRICE) * 5;
+        const batchCoin = utils.coin(totalPrice);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch10(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+
+      it("Batch10 with 1 real + 9 mock tokens", () => {
+        mintAndPoolTokens(simulator, 1);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE));
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch10(
+          TOKENID_1, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+      });
+
+      it("Batch10 fails with insufficient payment", () => {
+        mintAndPoolTokens(simulator, 10);
+        verifyBuyer(simulator);
+
+        const insufficientCoin = utils.coin(Number(TOKEN_PRICE) * 10 - 1);
+
+        expect(() => {
+          simulator.as("buyer1").purchaseBatch10(
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+            insufficientCoin, buyer1
+          );
+        }).toThrow();
+      });
+
+      it("Batch10 proof of ownership works with shared commitment", () => {
+        mintAndPoolTokens(simulator, 10);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 10);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch10(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+      });
+    });
+
+    describe("purchaseBatch20", () => {
+      it("Batch20 with all 20 real tokens", () => {
+        mintAndPoolTokens(simulator, 20);
+        verifyBuyer(simulator);
+
+        const totalPrice = Number(TOKEN_PRICE) * 20;
+        const batchCoin = utils.coin(totalPrice);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch20(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          TOKENID_11, TOKENID_12, TOKENID_13, TOKENID_14, TOKENID_15,
+          TOKENID_16, TOKENID_17, TOKENID_18, TOKENID_19, TOKENID_20,
+          batchCoin, buyer1
+        );
+
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+
+      it("Batch20 with 5 real + 15 mock tokens", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const totalPrice = Number(TOKEN_PRICE) * 5;
+        const batchCoin = utils.coin(totalPrice);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch20(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
+
+      it("Batch20 with 10 real + 10 mock tokens", () => {
+        mintAndPoolTokens(simulator, 10);
+        verifyBuyer(simulator);
+
+        const totalPrice = Number(TOKEN_PRICE) * 10;
+        const batchCoin = utils.coin(totalPrice);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch20(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
+          batchCoin, buyer1
+        );
+
+        expect(ownerCommitment).toBeDefined();
+        expect(ownerCommitment.length).toBe(32);
+      });
+
+      it("Batch20 fails with insufficient payment", () => {
+        mintAndPoolTokens(simulator, 20);
+        verifyBuyer(simulator);
+
+        const insufficientCoin = utils.coin(Number(TOKEN_PRICE) * 20 - 1);
+
+        expect(() => {
+          simulator.as("buyer1").purchaseBatch20(
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+            TOKENID_11, TOKENID_12, TOKENID_13, TOKENID_14, TOKENID_15,
+            TOKENID_16, TOKENID_17, TOKENID_18, TOKENID_19, TOKENID_20,
+            insufficientCoin, buyer1
+          );
+        }).toThrow();
+      });
+
+      it("Batch20 proof of ownership works with shared commitment", () => {
+        mintAndPoolTokens(simulator, 20);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 20);
+
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch20(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          TOKENID_11, TOKENID_12, TOKENID_13, TOKENID_14, TOKENID_15,
+          TOKENID_16, TOKENID_17, TOKENID_18, TOKENID_19, TOKENID_20,
+          batchCoin, buyer1
+        );
+
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+      });
+
+      it("Batch20 seller can withdraw accumulated funds", () => {
+        mintAndPoolTokens(simulator, 20);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 20);
+        simulator.as("buyer1").purchaseBatch20(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
+          TOKENID_11, TOKENID_12, TOKENID_13, TOKENID_14, TOKENID_15,
+          TOKENID_16, TOKENID_17, TOKENID_18, TOKENID_19, TOKENID_20,
+          batchCoin, buyer1
+        );
+
+        simulator.as("minter").withdrawSellerFunds(minter);
+      });
+    });
+
+    describe("Batch + single purchase interaction", () => {
+      it("Single purchase after batch purchase works", () => {
+        mintAndPoolTokens(simulator, 6);
+        verifyBuyer(simulator);
+
+        // Batch5 first
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        const batchCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Then single purchase of token 6
+        const singleCoin = utils.coin(Number(TOKEN_PRICE));
+        const singleCommitment = simulator.as("buyer1").purchaseNFT(
+          TOKENID_6, singleCoin, buyer1
+        );
+
+        // Both commitments exist but are different
+        expect(batchCommitment).toBeDefined();
+        expect(singleCommitment).toBeDefined();
+        expect(batchCommitment.length).toBe(32);
+        expect(singleCommitment.length).toBe(32);
+
+        // Counter should be 2 (1 for batch, 1 for single)
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(2n);
+      });
+
+      it("Full end-to-end batch flow: mint -> pool -> verify -> batch purchase -> proof -> withdraw", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Proof of ownership with shared commitment
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        // Seller withdraws
+        simulator.as("minter").withdrawSellerFunds(minter);
+
+        const ledgerState = simulator.as("adminMaster").getLedger();
+        expect(ledgerState.NFTPool__purchaseCounter).toEqual(1n);
+      });
     });
   });
 });

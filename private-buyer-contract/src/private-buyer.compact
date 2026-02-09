@@ -496,111 +496,318 @@ export circuit purchaseNFT(tokenId: Uint<128>, coin: ShieldedCoinInfo): Bytes<32
   return NFTPool_purchaseNFT(tokenId);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// BATCH HELPERS
+///////////////////////////////////////////////////////////////////////////////
+
 /**
-* @description: Batch purchase of 2 NFTs
+* @description: Get token price or 0 for mock tokens (tokenId == 0)
 *
-* @notice: Compact doesn't support variable-length loops, so fixed-arity batch purchases.
-* Total payment must cover sum of both token prices. Payment is split to respective sellers.
+* @notice: Used by batch purchase circuits to handle partial batches.
+* Mock tokens (tokenId == 0) return price 0.
 *
-* @requirements:
-* - The caller must be identity-verified
-* - Both tokens must be listed
-* - Payment >= sum of prices
-* - Receive single coin, store payments per seller
-* @param {Uint<128>} tokenId1 - First token ID
-* @param {Uint<128>} tokenId2 - Second token ID
-* @param {ShieldedCoinInfo} coin - The payment coin (covers total)
-* @return {[Bytes<32>, Bytes<32>]} - Ownership commitments for both NFTs
+* @param {Uint<128>} tokenId - The token ID (0 for mock)
+* @return {Uint<64>} price - The token price or 0
 */
-export circuit purchaseBatch2(
-  tokenId1: Uint<128>,
-  tokenId2: Uint<128>,
-  coin: ShieldedCoinInfo
-): Vector<2, Bytes<32>> {
-  // Verify buyer identity
-  assertOwnVerification();
-
-  // Get prices
-  assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId1)), "Token 1 price not set");
-  assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId2)), "Token 2 price not set");
-  const price1 = NonFungibleToken__tokenToPrice.lookup(disclose(tokenId1));
-  const price2 = NonFungibleToken__tokenToPrice.lookup(disclose(tokenId2));
-  const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>);
-
-  // Validate payment
-  assert(coin.value >= totalPrice, "Insufficient payment for batch");
-  assert(coin.color == nativeToken(), "Invalid coin provided");
-
-  // Receive the payment
-  receiveShielded(disclose(coin));
-
-  // Get sellers and store payments
-  const seller1 = NonFungibleToken__owners.lookup(disclose(tokenId1));
-  const seller2 = NonFungibleToken__owners.lookup(disclose(tokenId2));
-  NFTPool_storeSellerPayment(seller1, coin, price1);
-  NFTPool_storeSellerPayment(seller2, coin, price2);
-
-  // Execute pool purchases
-  const commitment1 = NFTPool_purchaseNFT(tokenId1);
-  const commitment2 = NFTPool_purchaseNFT(tokenId2);
-
-  return [commitment1, commitment2];
+export circuit _getBatchTokenPrice(tokenId: Uint<128>): Uint<64> {
+  if (disclose(tokenId) != 0) {
+    assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId)), "Token price not set");
+    return NonFungibleToken__tokenToPrice.lookup(disclose(tokenId));
+  }
+  return 0;
 }
 
 /**
-* @description: Batch purchase of 3 NFTs
+* @description: Store seller payment for a real token (skips mock tokens)
 *
-* @notice: Compact doesn't support variable-length loops, so fixed-arity batch purchases.
+* @notice: Used by batch purchase circuits. Skips when tokenId == 0.
+*
+* @param {Uint<128>} tokenId - The token ID (0 for mock)
+* @param {ShieldedCoinInfo} coin - The payment coin
+* @param {Uint<64>} price - The token price
+* @return {[]} - Empty tuple.
+*/
+export circuit _storeBatchSellerPayment(tokenId: Uint<128>, coin: ShieldedCoinInfo, price: Uint<64>): [] {
+  if (disclose(tokenId) != 0) {
+    const seller = NonFungibleToken__owners.lookup(disclose(tokenId));
+    NFTPool_storeSellerPayment(seller, coin, price);
+  }
+}
+
+/**
+* @description: Execute batch purchase for a real token (skips mock tokens)
+*
+* @notice: Used by batch purchase circuits. Skips when tokenId == 0.
+*
+* @param {Uint<128>} tokenId - The token ID (0 for mock)
+* @param {Bytes<32>} ownerCommitment - The shared batch commitment
+* @return {[]} - Empty tuple.
+*/
+export circuit _executeBatchPurchase(tokenId: Uint<128>, ownerCommitment: Bytes<32>): [] {
+  if (disclose(tokenId) != 0) {
+    NFTPool_purchaseNFTBatch(tokenId, ownerCommitment);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// BATCH PURCHASE CIRCUITS
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+* @description: Batch purchase of up to 5 NFTs with a single shared commitment
+*
+* @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
+* are skipped. At least one real token must be included.
 *
 * @requirements:
 * - The caller must be identity-verified
-* - All tokens must be listed
-* - Payment >= sum of prices
-* @param {Uint<128>} tokenId1 - First token ID
-* @param {Uint<128>} tokenId2 - Second token ID
-* @param {Uint<128>} tokenId3 - Third token ID
+* - All real tokens must be listed in the pool
+* - Payment >= sum of real token prices
+* - Payment coin color must be native token
+* @param {Uint<128>} tokenId1-5 - Token IDs (0 for mock/empty slot)
 * @param {ShieldedCoinInfo} coin - The payment coin (covers total)
-* @return {Vector<3, Bytes<32>>} - Ownership commitments for all 3 NFTs
+* @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
 */
-export circuit purchaseBatch3(
+export circuit purchaseBatch5(
   tokenId1: Uint<128>,
   tokenId2: Uint<128>,
   tokenId3: Uint<128>,
+  tokenId4: Uint<128>,
+  tokenId5: Uint<128>,
   coin: ShieldedCoinInfo
-): Vector<3, Bytes<32>> {
-  // Verify buyer identity
+): Bytes<32> {
   assertOwnVerification();
 
-  // Get prices
-  assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId1)), "Token 1 price not set");
-  assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId2)), "Token 2 price not set");
-  assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId3)), "Token 3 price not set");
-  const price1 = NonFungibleToken__tokenToPrice.lookup(disclose(tokenId1));
-  const price2 = NonFungibleToken__tokenToPrice.lookup(disclose(tokenId2));
-  const price3 = NonFungibleToken__tokenToPrice.lookup(disclose(tokenId3));
-  const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>);
+  // Get prices (0 for mock tokens)
+  const price1 = _getBatchTokenPrice(tokenId1);
+  const price2 = _getBatchTokenPrice(tokenId2);
+  const price3 = _getBatchTokenPrice(tokenId3);
+  const price4 = _getBatchTokenPrice(tokenId4);
+  const price5 = _getBatchTokenPrice(tokenId5);
 
-  // Validate payment
+  const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
+                   + (price4 as Uint<128>) + (price5 as Uint<128>);
+
   assert(coin.value >= totalPrice, "Insufficient payment for batch");
   assert(coin.color == nativeToken(), "Invalid coin provided");
 
-  // Receive the payment
   receiveShielded(disclose(coin));
 
-  // Get sellers and store payments
-  const seller1 = NonFungibleToken__owners.lookup(disclose(tokenId1));
-  const seller2 = NonFungibleToken__owners.lookup(disclose(tokenId2));
-  const seller3 = NonFungibleToken__owners.lookup(disclose(tokenId3));
-  NFTPool_storeSellerPayment(seller1, coin, price1);
-  NFTPool_storeSellerPayment(seller2, coin, price2);
-  NFTPool_storeSellerPayment(seller3, coin, price3);
+  // Store seller payments for real tokens
+  _storeBatchSellerPayment(tokenId1, coin, price1);
+  _storeBatchSellerPayment(tokenId2, coin, price2);
+  _storeBatchSellerPayment(tokenId3, coin, price3);
+  _storeBatchSellerPayment(tokenId4, coin, price4);
+  _storeBatchSellerPayment(tokenId5, coin, price5);
 
-  // Execute pool purchases
-  const commitment1 = NFTPool_purchaseNFT(tokenId1);
-  const commitment2 = NFTPool_purchaseNFT(tokenId2);
-  const commitment3 = NFTPool_purchaseNFT(tokenId3);
+  // Compute ONE commitment for all tokens in the batch
+  const ownerCommitment = NFTPool_computeBatchCommitment();
 
-  return [commitment1, commitment2, commitment3];
+  // Execute purchases for real tokens
+  _executeBatchPurchase(tokenId1, ownerCommitment);
+  _executeBatchPurchase(tokenId2, ownerCommitment);
+  _executeBatchPurchase(tokenId3, ownerCommitment);
+  _executeBatchPurchase(tokenId4, ownerCommitment);
+  _executeBatchPurchase(tokenId5, ownerCommitment);
+
+  return ownerCommitment;
+}
+
+/**
+* @description: Batch purchase of up to 10 NFTs with a single shared commitment
+*
+* @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
+* are skipped. At least one real token must be included.
+*
+* @requirements:
+* - The caller must be identity-verified
+* - All real tokens must be listed in the pool
+* - Payment >= sum of real token prices
+* @param {Uint<128>} tokenId1-10 - Token IDs (0 for mock/empty slot)
+* @param {ShieldedCoinInfo} coin - The payment coin (covers total)
+* @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
+*/
+export circuit purchaseBatch10(
+  tokenId1: Uint<128>,
+  tokenId2: Uint<128>,
+  tokenId3: Uint<128>,
+  tokenId4: Uint<128>,
+  tokenId5: Uint<128>,
+  tokenId6: Uint<128>,
+  tokenId7: Uint<128>,
+  tokenId8: Uint<128>,
+  tokenId9: Uint<128>,
+  tokenId10: Uint<128>,
+  coin: ShieldedCoinInfo
+): Bytes<32> {
+  assertOwnVerification();
+
+  const price1 = _getBatchTokenPrice(tokenId1);
+  const price2 = _getBatchTokenPrice(tokenId2);
+  const price3 = _getBatchTokenPrice(tokenId3);
+  const price4 = _getBatchTokenPrice(tokenId4);
+  const price5 = _getBatchTokenPrice(tokenId5);
+  const price6 = _getBatchTokenPrice(tokenId6);
+  const price7 = _getBatchTokenPrice(tokenId7);
+  const price8 = _getBatchTokenPrice(tokenId8);
+  const price9 = _getBatchTokenPrice(tokenId9);
+  const price10 = _getBatchTokenPrice(tokenId10);
+
+  const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
+                   + (price4 as Uint<128>) + (price5 as Uint<128>) + (price6 as Uint<128>)
+                   + (price7 as Uint<128>) + (price8 as Uint<128>) + (price9 as Uint<128>)
+                   + (price10 as Uint<128>);
+
+  assert(coin.value >= totalPrice, "Insufficient payment for batch");
+  assert(coin.color == nativeToken(), "Invalid coin provided");
+
+  receiveShielded(disclose(coin));
+
+  _storeBatchSellerPayment(tokenId1, coin, price1);
+  _storeBatchSellerPayment(tokenId2, coin, price2);
+  _storeBatchSellerPayment(tokenId3, coin, price3);
+  _storeBatchSellerPayment(tokenId4, coin, price4);
+  _storeBatchSellerPayment(tokenId5, coin, price5);
+  _storeBatchSellerPayment(tokenId6, coin, price6);
+  _storeBatchSellerPayment(tokenId7, coin, price7);
+  _storeBatchSellerPayment(tokenId8, coin, price8);
+  _storeBatchSellerPayment(tokenId9, coin, price9);
+  _storeBatchSellerPayment(tokenId10, coin, price10);
+
+  const ownerCommitment = NFTPool_computeBatchCommitment();
+
+  _executeBatchPurchase(tokenId1, ownerCommitment);
+  _executeBatchPurchase(tokenId2, ownerCommitment);
+  _executeBatchPurchase(tokenId3, ownerCommitment);
+  _executeBatchPurchase(tokenId4, ownerCommitment);
+  _executeBatchPurchase(tokenId5, ownerCommitment);
+  _executeBatchPurchase(tokenId6, ownerCommitment);
+  _executeBatchPurchase(tokenId7, ownerCommitment);
+  _executeBatchPurchase(tokenId8, ownerCommitment);
+  _executeBatchPurchase(tokenId9, ownerCommitment);
+  _executeBatchPurchase(tokenId10, ownerCommitment);
+
+  return ownerCommitment;
+}
+
+/**
+* @description: Batch purchase of up to 20 NFTs with a single shared commitment
+*
+* @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
+* are skipped. At least one real token must be included.
+*
+* @requirements:
+* - The caller must be identity-verified
+* - All real tokens must be listed in the pool
+* - Payment >= sum of real token prices
+* @param {Uint<128>} tokenId1-20 - Token IDs (0 for mock/empty slot)
+* @param {ShieldedCoinInfo} coin - The payment coin (covers total)
+* @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
+*/
+export circuit purchaseBatch20(
+  tokenId1: Uint<128>,
+  tokenId2: Uint<128>,
+  tokenId3: Uint<128>,
+  tokenId4: Uint<128>,
+  tokenId5: Uint<128>,
+  tokenId6: Uint<128>,
+  tokenId7: Uint<128>,
+  tokenId8: Uint<128>,
+  tokenId9: Uint<128>,
+  tokenId10: Uint<128>,
+  tokenId11: Uint<128>,
+  tokenId12: Uint<128>,
+  tokenId13: Uint<128>,
+  tokenId14: Uint<128>,
+  tokenId15: Uint<128>,
+  tokenId16: Uint<128>,
+  tokenId17: Uint<128>,
+  tokenId18: Uint<128>,
+  tokenId19: Uint<128>,
+  tokenId20: Uint<128>,
+  coin: ShieldedCoinInfo
+): Bytes<32> {
+  assertOwnVerification();
+
+  const price1 = _getBatchTokenPrice(tokenId1);
+  const price2 = _getBatchTokenPrice(tokenId2);
+  const price3 = _getBatchTokenPrice(tokenId3);
+  const price4 = _getBatchTokenPrice(tokenId4);
+  const price5 = _getBatchTokenPrice(tokenId5);
+  const price6 = _getBatchTokenPrice(tokenId6);
+  const price7 = _getBatchTokenPrice(tokenId7);
+  const price8 = _getBatchTokenPrice(tokenId8);
+  const price9 = _getBatchTokenPrice(tokenId9);
+  const price10 = _getBatchTokenPrice(tokenId10);
+  const price11 = _getBatchTokenPrice(tokenId11);
+  const price12 = _getBatchTokenPrice(tokenId12);
+  const price13 = _getBatchTokenPrice(tokenId13);
+  const price14 = _getBatchTokenPrice(tokenId14);
+  const price15 = _getBatchTokenPrice(tokenId15);
+  const price16 = _getBatchTokenPrice(tokenId16);
+  const price17 = _getBatchTokenPrice(tokenId17);
+  const price18 = _getBatchTokenPrice(tokenId18);
+  const price19 = _getBatchTokenPrice(tokenId19);
+  const price20 = _getBatchTokenPrice(tokenId20);
+
+  const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
+                   + (price4 as Uint<128>) + (price5 as Uint<128>) + (price6 as Uint<128>)
+                   + (price7 as Uint<128>) + (price8 as Uint<128>) + (price9 as Uint<128>)
+                   + (price10 as Uint<128>) + (price11 as Uint<128>) + (price12 as Uint<128>)
+                   + (price13 as Uint<128>) + (price14 as Uint<128>) + (price15 as Uint<128>)
+                   + (price16 as Uint<128>) + (price17 as Uint<128>) + (price18 as Uint<128>)
+                   + (price19 as Uint<128>) + (price20 as Uint<128>);
+
+  assert(coin.value >= totalPrice, "Insufficient payment for batch");
+  assert(coin.color == nativeToken(), "Invalid coin provided");
+
+  receiveShielded(disclose(coin));
+
+  _storeBatchSellerPayment(tokenId1, coin, price1);
+  _storeBatchSellerPayment(tokenId2, coin, price2);
+  _storeBatchSellerPayment(tokenId3, coin, price3);
+  _storeBatchSellerPayment(tokenId4, coin, price4);
+  _storeBatchSellerPayment(tokenId5, coin, price5);
+  _storeBatchSellerPayment(tokenId6, coin, price6);
+  _storeBatchSellerPayment(tokenId7, coin, price7);
+  _storeBatchSellerPayment(tokenId8, coin, price8);
+  _storeBatchSellerPayment(tokenId9, coin, price9);
+  _storeBatchSellerPayment(tokenId10, coin, price10);
+  _storeBatchSellerPayment(tokenId11, coin, price11);
+  _storeBatchSellerPayment(tokenId12, coin, price12);
+  _storeBatchSellerPayment(tokenId13, coin, price13);
+  _storeBatchSellerPayment(tokenId14, coin, price14);
+  _storeBatchSellerPayment(tokenId15, coin, price15);
+  _storeBatchSellerPayment(tokenId16, coin, price16);
+  _storeBatchSellerPayment(tokenId17, coin, price17);
+  _storeBatchSellerPayment(tokenId18, coin, price18);
+  _storeBatchSellerPayment(tokenId19, coin, price19);
+  _storeBatchSellerPayment(tokenId20, coin, price20);
+
+  const ownerCommitment = NFTPool_computeBatchCommitment();
+
+  _executeBatchPurchase(tokenId1, ownerCommitment);
+  _executeBatchPurchase(tokenId2, ownerCommitment);
+  _executeBatchPurchase(tokenId3, ownerCommitment);
+  _executeBatchPurchase(tokenId4, ownerCommitment);
+  _executeBatchPurchase(tokenId5, ownerCommitment);
+  _executeBatchPurchase(tokenId6, ownerCommitment);
+  _executeBatchPurchase(tokenId7, ownerCommitment);
+  _executeBatchPurchase(tokenId8, ownerCommitment);
+  _executeBatchPurchase(tokenId9, ownerCommitment);
+  _executeBatchPurchase(tokenId10, ownerCommitment);
+  _executeBatchPurchase(tokenId11, ownerCommitment);
+  _executeBatchPurchase(tokenId12, ownerCommitment);
+  _executeBatchPurchase(tokenId13, ownerCommitment);
+  _executeBatchPurchase(tokenId14, ownerCommitment);
+  _executeBatchPurchase(tokenId15, ownerCommitment);
+  _executeBatchPurchase(tokenId16, ownerCommitment);
+  _executeBatchPurchase(tokenId17, ownerCommitment);
+  _executeBatchPurchase(tokenId18, ownerCommitment);
+  _executeBatchPurchase(tokenId19, ownerCommitment);
+  _executeBatchPurchase(tokenId20, ownerCommitment);
+
+  return ownerCommitment;
 }
 
 /**

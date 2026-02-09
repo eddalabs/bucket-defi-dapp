@@ -353,6 +353,73 @@ module NFTPool {
   }
 
   /**
+   * @description: Compute a single ownership commitment for a batch purchase
+   *
+   * @notice: Called once per batch. Returns a commitment shared by all NFTs in the batch.
+   * Uses the same commitment computation as single purchases.
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * - Contract is not paused.
+   * @return {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+   */
+  export circuit computeBatchCommitment(): Bytes<32> {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+
+    const nonce = wit_secretNonce();
+    const callerAsEither =
+                  Either<ZswapCoinPublicKey, ContractAddress> { is_left: true,
+                                                                left: ownPublicKey(),
+                                                                right: ContractAddress { bytes: pad(32, "") } };
+    const id = _computeOwnerId(callerAsEither, disclose(nonce));
+    const ownerCommitment = _computeOwnerCommitment(id, _purchaseCounter);
+
+    // Store commitment with counter
+    _commitmentToCounter.insert(ownerCommitment, _purchaseCounter);
+
+    // Increment counter
+    _purchaseCounter += 1;
+
+    return ownerCommitment;
+  }
+
+  /**
+   * @description: Purchase an NFT with a pre-computed commitment (for batch purchases)
+   *
+   * @notice: Used by batch purchase circuits. The commitment is computed once
+   * and shared across all NFTs in the batch.
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * - Contract is not paused.
+   * - Token is listed in the pool
+   * - Token is not already sold
+   * @param {Uint<128>} tokenId - The token ID to purchase
+   * @param {Bytes<32>} ownerCommitment - The pre-computed ownership commitment
+   * @return {[]} - Empty tuple.
+   */
+  export circuit purchaseNFTBatch(tokenId: Uint<128>, ownerCommitment: Bytes<32>): [] {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+
+    // Check token is listed
+    assert(_pool.member(disclose(tokenId)), "NFTPool: Token not listed");
+
+    // Check token is not sold
+    assert(!_isTokenSold(tokenId), "NFTPool: Token already sold");
+
+    // Mark token as sold
+    _tokenSold.insert(disclose(tokenId), true);
+
+    // Store owner commitment for this token
+    _nftOwnerCommitment.insert(disclose(tokenId), disclose(ownerCommitment));
+
+    // Remove from active pool
+    _pool.remove(disclose(tokenId));
+  }
+
+  /**
    * @description: Pause NFTPool calls.
    *
    * Requirements:

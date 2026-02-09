@@ -856,18 +856,28 @@
       }
     },
     {
-      "name": "purchaseBatch2",
+      "name": "_getBatchTokenPrice",
       "pure": false,
       "arguments": [
         {
-          "name": "tokenId1",
+          "name": "tokenId",
           "type": {
             "type-name": "Uint",
             "maxval": 340282366920938463463374607431768211455
           }
-        },
+        }
+      ],
+      "result-type": {
+        "type-name": "Uint",
+        "maxval": 18446744073709551615
+      }
+    },
+    {
+      "name": "_storeBatchSellerPayment",
+      "pure": false,
+      "arguments": [
         {
-          "name": "tokenId2",
+          "name": "tokenId",
           "type": {
             "type-name": "Uint",
             "maxval": 340282366920938463463374607431768211455
@@ -902,19 +912,48 @@
               }
             ]
           }
+        },
+        {
+          "name": "price",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
         }
       ],
       "result-type": {
-        "type-name": "Vector",
-        "length": 2,
-        "type": {
-          "type-name": "Bytes",
-          "length": 32
-        }
+        "type-name": "Tuple",
+        "types": [
+        ]
       }
     },
     {
-      "name": "purchaseBatch3",
+      "name": "_executeBatchPurchase",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "ownerCommitment",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "purchaseBatch5",
       "pure": false,
       "arguments": [
         {
@@ -939,6 +978,20 @@
           }
         },
         {
+          "name": "tokenId4",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId5",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
           "name": "coin",
           "type": {
             "type-name": "Struct",
@@ -970,12 +1023,298 @@
         }
       ],
       "result-type": {
-        "type-name": "Vector",
-        "length": 3,
-        "type": {
-          "type-name": "Bytes",
-          "length": 32
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "purchaseBatch10",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "tokenId1",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId2",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId3",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId4",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId5",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId6",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId7",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId8",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId9",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId10",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "coin",
+          "type": {
+            "type-name": "Struct",
+            "name": "ShieldedCoinInfo",
+            "elements": [
+              {
+                "name": "nonce",
+                "type": {
+                  "type-name": "Bytes",
+                  "length": 32
+                }
+              },
+              {
+                "name": "color",
+                "type": {
+                  "type-name": "Bytes",
+                  "length": 32
+                }
+              },
+              {
+                "name": "value",
+                "type": {
+                  "type-name": "Uint",
+                  "maxval": 340282366920938463463374607431768211455
+                }
+              }
+            ]
+          }
         }
+      ],
+      "result-type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "purchaseBatch20",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "tokenId1",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId2",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId3",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId4",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId5",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId6",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId7",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId8",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId9",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId10",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId11",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId12",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId13",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId14",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId15",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId16",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId17",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId18",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId19",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenId20",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "coin",
+          "type": {
+            "type-name": "Struct",
+            "name": "ShieldedCoinInfo",
+            "elements": [
+              {
+                "name": "nonce",
+                "type": {
+                  "type-name": "Bytes",
+                  "length": 32
+                }
+              },
+              {
+                "name": "color",
+                "type": {
+                  "type-name": "Bytes",
+                  "length": 32
+                }
+              },
+              {
+                "name": "value",
+                "type": {
+                  "type-name": "Uint",
+                  "maxval": 340282366920938463463374607431768211455
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Bytes",
+        "length": 32
       }
     },
     {

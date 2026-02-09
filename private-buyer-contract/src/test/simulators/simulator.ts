@@ -432,35 +432,16 @@ export class Simulator {
     return circuitResults.result;
   }
 
-  public purchaseBatch2(
-    tokenId1: bigint,
-    tokenId2: bigint,
-    coin: ShieldedCoinInfo,
-    caller?: CoinPublicKey
-  ): Uint8Array[] {
-    const circuitResults = this.contract.impureCircuits.purchaseBatch2(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      tokenId1,
-      tokenId2,
-      coin
-    );
-    this.updateStateAndGetLedger(circuitResults);
-    return circuitResults.result;
-  }
-
-  public purchaseBatch3(
+  public purchaseBatch5(
     tokenId1: bigint,
     tokenId2: bigint,
     tokenId3: bigint,
+    tokenId4: bigint,
+    tokenId5: bigint,
     coin: ShieldedCoinInfo,
     caller?: CoinPublicKey
-  ): Uint8Array[] {
-    const circuitResults = this.contract.impureCircuits.purchaseBatch3(
+  ): Uint8Array {
+    const circuitResults = this.contract.impureCircuits.purchaseBatch5(
       {
         ...this.circuitContext,
         currentZswapLocalState: caller
@@ -470,6 +451,102 @@ export class Simulator {
       tokenId1,
       tokenId2,
       tokenId3,
+      tokenId4,
+      tokenId5,
+      coin
+    );
+    this.updateStateAndGetLedger(circuitResults);
+    return circuitResults.result;
+  }
+
+  public purchaseBatch10(
+    tokenId1: bigint,
+    tokenId2: bigint,
+    tokenId3: bigint,
+    tokenId4: bigint,
+    tokenId5: bigint,
+    tokenId6: bigint,
+    tokenId7: bigint,
+    tokenId8: bigint,
+    tokenId9: bigint,
+    tokenId10: bigint,
+    coin: ShieldedCoinInfo,
+    caller?: CoinPublicKey
+  ): Uint8Array {
+    const circuitResults = this.contract.impureCircuits.purchaseBatch10(
+      {
+        ...this.circuitContext,
+        currentZswapLocalState: caller
+          ? emptyZswapLocalState(caller)
+          : this.circuitContext.currentZswapLocalState
+      },
+      tokenId1,
+      tokenId2,
+      tokenId3,
+      tokenId4,
+      tokenId5,
+      tokenId6,
+      tokenId7,
+      tokenId8,
+      tokenId9,
+      tokenId10,
+      coin
+    );
+    this.updateStateAndGetLedger(circuitResults);
+    return circuitResults.result;
+  }
+
+  public purchaseBatch20(
+    tokenId1: bigint,
+    tokenId2: bigint,
+    tokenId3: bigint,
+    tokenId4: bigint,
+    tokenId5: bigint,
+    tokenId6: bigint,
+    tokenId7: bigint,
+    tokenId8: bigint,
+    tokenId9: bigint,
+    tokenId10: bigint,
+    tokenId11: bigint,
+    tokenId12: bigint,
+    tokenId13: bigint,
+    tokenId14: bigint,
+    tokenId15: bigint,
+    tokenId16: bigint,
+    tokenId17: bigint,
+    tokenId18: bigint,
+    tokenId19: bigint,
+    tokenId20: bigint,
+    coin: ShieldedCoinInfo,
+    caller?: CoinPublicKey
+  ): Uint8Array {
+    const circuitResults = this.contract.impureCircuits.purchaseBatch20(
+      {
+        ...this.circuitContext,
+        currentZswapLocalState: caller
+          ? emptyZswapLocalState(caller)
+          : this.circuitContext.currentZswapLocalState
+      },
+      tokenId1,
+      tokenId2,
+      tokenId3,
+      tokenId4,
+      tokenId5,
+      tokenId6,
+      tokenId7,
+      tokenId8,
+      tokenId9,
+      tokenId10,
+      tokenId11,
+      tokenId12,
+      tokenId13,
+      tokenId14,
+      tokenId15,
+      tokenId16,
+      tokenId17,
+      tokenId18,
+      tokenId19,
+      tokenId20,
       coin
     );
     this.updateStateAndGetLedger(circuitResults);
