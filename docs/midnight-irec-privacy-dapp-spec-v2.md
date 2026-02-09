@@ -237,119 +237,60 @@ These proofs can be generated and shared with auditors, regulators, or reporting
 
 ## 5. Technical Components
 
-### 5.1 NFT Token Design (I-REC Certificate Token)
+### 5.1 Operational Roles
 
-Each tokenized I-REC is an NFT on Midnight. The token structure:
+The smart contract enforces a flat, four-role access model. The Admin directly manages all other roles — there is no intermediate admin delegation or role-admin hierarchy.
 
-```
-IRecNFT {
-  // === PUBLIC FIELDS (on-chain, visible to all) ===
-  token_id: UniqueID                    // Midnight-native unique token identifier
-  
-  // Certificate Identity
-  irec_serial_start: String             // First serial number in the certificate batch
-  irec_serial_end: String               // Last serial number (same as start if single cert)
-  certificate_count: u64                // Number of I-RECs in this NFT (1 NFT can represent a batch)
-  totum_custody_ref: String             // Reference in Totum's broker system for this certificate batch
-  
-  // Production Device (Plant)
-  device_name: String                   // Name of the power plant
-  device_id: String                     // Unique device ID from registry
-  technology: Enum {Wind, Solar, Hydro, Biomass, Geothermal, Other}
-  country: String                       // "BR" for Brazil
-  state_region: String                  // e.g., "Bahia", "Rio Grande do Norte"
-  capacity_mw: f64                      // Installed capacity in MW
-  commissioning_date: Date              // When the plant was commissioned
-  
-  // Generation
-  generation_period_start: Date         // Start of generation period
-  generation_period_end: Date           // End of generation period
-  energy_mwh: u64                       // Total MWh represented (= certificate_count)
-  
-  // Marketplace
-  seller_address: PublicKey             // Seller's public Midnight address
-  listing_price_per_mwh: u64           // Price per MWh in smallest denomination
-  listing_currency: String              // e.g., "tDUST", "USDC-bridged"
-  status: Enum {Listed, Sold, Retired, Cancelled}
-  
-  // Quality / Compliance Seals
-  rec_brazil_seal: bool                 // Whether it has the REC Brazil sustainability seal
-  ccee_origem_seal: bool                // Whether it has the CCEE Origem seal
-  
-  // === SHIELDED FIELDS (private, ZK-provable) ===
-  owner: ShieldedAddress                // Current owner (buyer after purchase)
-  purchase_tx_hash: ShieldedHash        // Transaction hash of the purchase
-  purchase_timestamp: ShieldedTimestamp  // When the purchase occurred
-}
-```
+| Role | Responsibility | Who holds it |
+|------|---------------|-------------|
+| **Admin** | Assigns and revokes all other roles. Pauses/unpauses any module in an emergency. | dApp deployer / organization owner |
+| **Minter** | Mints I-REC NFTs (from Totum-confirmed data) with certificate metadata and initial price. Burns unsold tokens (unlisting from the web2 ledger). | dApp operator (backend service or authorized personnel) |
+| **PoolOperator** | Lists and unlists NFTs in the purchase pool. Updates NFT prices to reflect market conditions. | dApp operator or designated market manager |
+| **Verifier** | Verifies and removes buyer identities (KYC/AML whitelist). | Compliance team or KYC service integration |
 
-### 5.2 Smart Contract Functions
+**Key design decisions:**
+- A single Admin controls all role assignments. This keeps governance simple and auditable.
+- Roles are non-hierarchical — no role can grant or revoke another role except Admin.
+- The same entity may hold multiple roles (e.g., the dApp operator may be both Minter and PoolOperator).
+- Each module (Access Control, Identity, Token, Pool) can be independently paused by Admin for emergency response without affecting the others.
 
-#### 5.2.1 Seller / Operator Operations (Public)
+### 5.2 NFT Token Design (I-REC Certificate Token)
 
-```
-fn mint_irec_nft(
-  certificate_metadata: IRecMetadata,   // All public fields
-  listing_price: u64,
-  totum_custody_ref: String             // Reference from Totum's broker service
-) -> TokenID
-// Mints a new I-REC NFT on Midnight with all public metadata
-// Can only be called by the dApp operator (who has confirmed with Totum)
-// Sets status to Listed
+Each tokenized I-REC is represented as an NFT on Midnight. The token carries two categories of data:
 
-fn cancel_listing(token_id: TokenID) -> Result
-// Seller requests delisting; operator cancels NFT
-// Triggers return of certificates from Totum custody to seller's Evident account
-// Sets status to Cancelled
+**Public Data (visible to all market participants):**
 
-fn update_price(token_id: TokenID, new_price: u64) -> Result
-// Seller can update the listing price before sale
-```
+- **Certificate identity**: Serial number or range, number of I-RECs represented, and the Totum custody reference linking the NFT to the underlying certificates held by Instituto Totum.
+- **Production device (plant)**: Name, registry ID, technology type (wind, solar, hydro, biomass, etc.), country, state/region, installed capacity, and commissioning date.
+- **Generation details**: The period during which the energy was generated and the total MWh represented.
+- **Marketplace information**: Seller identity, listing price per MWh, payment currency, and current status (listed, sold, retired, or cancelled).
+- **Quality and compliance seals**: Whether the certificate carries the REC Brazil sustainability seal or the CCEE Origem seal.
 
-#### 5.2.2 Buyer Operations (Shielded)
+**Shielded Data (private, provable via zero-knowledge proofs):**
 
-```
-fn purchase_irec(
-  token_id: TokenID,                   // Which NFT to buy (public reference)
-  shielded_payment: ShieldedValue,     // Encrypted payment amount
-  buyer_commitment: ZKCommitment       // Buyer's ownership commitment
-) -> ShieldedReceipt
-// Atomic operation:
-//   1. Verifies shielded_payment >= listing_price (ZK range proof)
-//   2. Transfers payment to seller (seller sees amount, not buyer identity)
-//   3. Transfers NFT ownership to buyer's shielded address
-//   4. Sets status to Sold
-//   5. Returns encrypted receipt to buyer
-// Each purchase generates a unique, unlinkable transaction hash
+- **Buyer identity**: The current owner after purchase — hidden from all observers.
+- **Transaction details**: Purchase hash and timestamp — each purchase generates a unique, unlinkable record.
 
-fn prove_ownership(
-  token_id: TokenID,
-  zk_proof: OwnershipProof
-) -> bool
-// Buyer generates a ZK proof that they own a specific NFT
-// Can be shared with auditors/regulators without revealing wallet
+This separation ensures that certificate quality and provenance remain fully transparent for market discovery, while buyer identity and purchasing patterns remain private.
 
-fn prove_portfolio_aggregate(
-  claim: AggregateClaimType,           // e.g., "I own >= 1000 MWh of wind from Brazil"
-  zk_proof: AggregateProof
-) -> bool
-// Buyer proves aggregate portfolio claims without revealing specifics
+### 5.3 Marketplace Capabilities
 
-fn initiate_retirement(
-  token_id: TokenID,
-  beneficiary_name: String,            // Required by I-REC standard for retirement
-  reporting_period: String,
-  zk_proof: OwnershipProof
-) -> RetirementRequest
-// Triggers the retirement process:
-//   1. Verifies buyer ownership via ZK proof
-//   2. Sets NFT status to Retired on Midnight
-//   3. Emits event for dApp operator to request Totum to execute
-//      retirement in Evident with the specified beneficiary
-// NOTE: Retirement makes the beneficiary name public (I-REC standard requirement)
-```
+#### 5.3.1 Seller / Operator Capabilities
 
-### 5.3 Bridge Design: Totum Broker Integration
+- **Mint I-REC NFTs**: The dApp operator creates NFTs from Totum-confirmed certificate data, including all public metadata and the initial listing price. Only authorized operators (Minter role) can mint.
+- **Cancel listings**: When a seller requests delisting, the operator removes the NFT from the marketplace. This triggers the return of certificates from Totum's custodial account back to the seller's Evident Trade Account.
+- **Update pricing**: The pool operator can adjust NFT prices to reflect market conditions at any time while the NFT is listed.
+
+#### 5.3.2 Buyer Capabilities
+
+- **Purchase NFTs privately**: A buyer selects an NFT and completes the purchase in a single atomic transaction. The contract verifies the payment meets the listing price, transfers the NFT to the buyer's shielded identity, and releases payment to the seller — all without revealing who the buyer is. Each purchase generates a unique, unlinkable transaction record.
+- **Batch purchases**: Buyers can acquire multiple NFTs (5, 10, or 20) in a single transaction, reducing costs and simplifying portfolio building. Partial batches are supported.
+- **Prove ownership**: Buyers can generate a zero-knowledge proof that they own a specific certificate, shareable with auditors or regulators without revealing their wallet identity.
+- **Prove portfolio aggregates**: Buyers can make aggregate claims (e.g., "I own at least 1,000 MWh of wind energy from Brazil") without revealing which specific certificates they hold.
+- **Initiate retirement**: The buyer provides the beneficiary company name (required by I-REC standards) and triggers the retirement process. The dApp operator coordinates with Totum to execute the retirement in the Evident registry. Note: retirement makes the beneficiary name public — this is by design and required for compliance reporting.
+- **Burn purchased tokens**: Buyers can burn their own purchased NFTs to finalize the lifecycle on-chain and unlock the corresponding entry in the web2 digital asset ledger.
+
+### 5.4 Bridge Design: Totum Broker Integration
 
 The bridge between the off-chain I-REC world and Midnight is mediated entirely by **Instituto Totum's broker service**. The dApp does NOT interact with Evident directly.
 
@@ -394,7 +335,7 @@ The bridge between the off-chain I-REC world and Midnight is mediated entirely b
 - Double-tokenization is prevented because Totum controls which certificates are available to which marketplace
 - Sellers trust Totum (accredited issuer), not the dApp
 
-### 5.4 Transaction Privacy Model
+### 5.5 Transaction Privacy Model
 
 #### How a Purchase Works (Step by Step)
 
@@ -842,13 +783,9 @@ Brazil has **no mandatory** renewable energy certificate system — the I-REC ma
 
 ## 10. Implementation Considerations
 
-### 10.1 Midnight-Specific Architecture Notes
+### 10.1 Why Midnight
 
-- **Compact language**: Midnight uses Compact (TypeScript-based DSL) for smart contracts. The contract logic must be implemented in Compact.
-- **Dual-state model**: Midnight natively supports public state (visible on ledger) and private state (ZK-provable). This maps directly to the NFT public metadata + shielded buyer data.
-- **tDUST**: Midnight's native testnet token. Payment token for the MVP.
-- **Zero-knowledge proofs**: Midnight uses ZK-SNARKs natively. Buyer proofs are generated client-side and verified on-chain.
-- **DApp connector**: Midnight provides a wallet/DApp connector for browser-based interaction.
+Midnight was selected as the blockchain platform because it natively supports the dual-state model the dApp requires: public state for certificate metadata and marketplace transparency, and private (shielded) state for buyer identity and transaction details. Zero-knowledge proofs are a built-in feature of the platform, meaning buyer privacy and selective disclosure are handled at the protocol level rather than requiring custom cryptographic infrastructure. Midnight also provides a wallet and dApp connector for browser-based user interaction.
 
 ### 10.2 MVP Scope (Recommended)
 

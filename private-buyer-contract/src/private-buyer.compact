@@ -38,7 +38,7 @@ import "./modules/nft-pool/NFTPool" prefix NFTPool_;
 // PUBLIC STATE FROM MODULES
 ///////////////////////////////////////////////////////////////////////////////
 
-export { AccessControl__operatorRoles, AccessControl_adminRoles, AccessControl__ADMIN_MASTER };
+export { AccessControl__operatorRoles, AccessControl__ADMIN_MASTER };
 
 export { Identity__verifiedUsersforBuckets };
 
@@ -125,30 +125,6 @@ export circuit revokeRole(roleId: Bytes<32>, account: Either<ZswapCoinPublicKey,
 */
 export circuit renounceRole(roleId: Bytes<32>,): [] {
   AccessControl_renounceRole(roleId);
-}
-
-/**
-* @description: Sets `adminRole` as `roleId`'s admin role.
-*
-* @requirements:
-* - Wrapper call
-* @param {Bytes<32>} roleId - The role identifier.
-* @param {Bytes<32>} adminRole - The admin role identifier.
-*/
-export circuit setRoleAdmin(roleId: Bytes<32>, adminRole: Bytes<32>): [] {
-  AccessControl_setRoleAdmin(roleId, adminRole);
-}
-
-/**
-* @description: Removes `adminRole` as `roleId`'s admin role.
-*
-* @requirements:
-* - Wrapper call
-* @param {Bytes<32>} roleId - The role identifier.
-* @param {Bytes<32>} adminRole - The admin role identifier.
-*/
-export circuit removeRoleAdmin(roleId: Bytes<32>, adminRole: Bytes<32>): [] {
-  AccessControl_removeRoleAdmin(roleId, adminRole);
 }
 
 /**

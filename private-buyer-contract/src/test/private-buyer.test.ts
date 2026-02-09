@@ -194,24 +194,6 @@ describe("Smart Contract Testing", () => {
       simulator.as("verifier").assertOnlyRole(admin_ROLE, admin);
     });
 
-    it("Setting Roles Admins should fail if not Admin", () => {
-      expect(() => {
-        simulator
-          .as("minter")
-          .setRoleAdmin(minter_ROLE, admin_ROLE, minter);
-      }).toThrow();
-      expect(() => {
-        simulator
-          .as("poolOperator")
-          .setRoleAdmin(poolOperator_ROLE, admin_ROLE, poolOperator);
-      }).toThrow();
-      expect(() => {
-        simulator
-          .as("verifier")
-          .setRoleAdmin(verifier_ROLE, admin_ROLE, verifier);
-      }).toThrow();
-    });
-
     it("Setting Roles should fail if not Admin", () => {
       expect(() => {
         simulator
@@ -246,7 +228,7 @@ describe("Smart Contract Testing", () => {
       expect(() => {
         simulator
           .as("admin")
-          .setRoleAdmin(minter_ROLE, admin_ROLE, admin);
+          .grantRole(minter_ROLE, Account_admin2, admin);
       }).toThrow();
       simulator.as("admin").unpauseAccessControl(admin);
       expect(() => {

@@ -40,14 +40,14 @@ Admin(0) -> MinterAdmin(1) -> Minter(2)
           -> VerifierAdmin(7) -> Verifier(8)
 ```
 
-**Private Buyer (4 roles):**
+**Private Buyer (4 roles, flat hierarchy):**
 ```
 Admin(0) -> Minter(1)
           -> PoolOperator(2)
           -> Verifier(3)
 ```
 
-**Improvement:** The two-tier admin hierarchy (admin + operational per role) was eliminated. All roles are managed directly by the Admin. The Matcher and Settler roles were removed entirely since the bucket matching/settling flow no longer exists. A new PoolOperator role replaces them for managing the NFT listing pool.
+**Improvement:** The two-tier admin hierarchy (admin + operational per role) was eliminated. The `adminRoles` mapping, `setRoleAdmin`, and `removeRoleAdmin` circuits were all removed — Admin (role 0) directly manages all roles via `grantRole` and `revokeRole` with no intermediate admin-role delegation layer. The Matcher and Settler roles were removed entirely since the bucket matching/settling flow no longer exists. A new PoolOperator role replaces them for managing the NFT listing pool.
 
 ### 1.3 Single-Transaction Purchase
 
@@ -129,8 +129,8 @@ This enables the buyer to unlock the web2 digital asset ledger without depending
 
 ## 3. Shared Foundations (Unchanged)
 
-Both contracts share these identical modules:
-- **AccessControl** - Role-based access control (adapted role hierarchy per contract)
+Both contracts share these foundational modules (with adaptations):
+- **AccessControl** - Role-based access control. Private Buyer uses a simplified version: flat hierarchy (Admin manages all roles directly), no `adminRoles` map or admin-delegation circuits.
 - **Identity** - KYC/whitelist verification
 - **NonFungibleToken** - NFT management with Certificate metadata (Source, Impact, Location)
 - **Initializable** - One-time initialization pattern

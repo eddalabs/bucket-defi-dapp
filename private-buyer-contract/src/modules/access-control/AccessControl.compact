@@ -6,7 +6,7 @@ pragma language_version >= 0.20.0;
 *
 * @description: An unshielded AccessControl library. This module provides a role-based access control mechanism, where roles can be used to represent a set of permissions.
 *
-* @notice: Roles are referred to by their `Bytes<32>` identifier. Admin Master is the only role that can grant and revoke adminroles {_adminRoles}. The Admin master is the default role. Each role has an associated admin role, and only accounts that have a role's admin role can update {_operatorRoles}.
+* @notice: Roles are referred to by their `Bytes<32>` identifier. Admin Master (role 0) is the only role that can grant and revoke all roles via {_operatorRoles}. The role hierarchy is flat: Admin directly manages all roles.
 *
 * @notice: Admin master role is initialized to the contract owner during initialization. One way to achieve/guarantee this is by using `export sealed ledger`
 *
@@ -50,17 +50,6 @@ module AccessControl {
   */
   export ledger _operatorRoles: Map<Bytes<32>,
                                     Map<Either<ZswapCoinPublicKey, ContractAddress>, Boolean>>;
-
-  /**
-  * @description: Mapping from a role identifier to an admin role identifier.
-  *
-  * @notice: none
-  *
-  * @type {Bytes<32>} roleId - A hash representing a role identifier.
-  * @type {Bytes<32>} adminId - A hash representing an admin identifier.
-  * @type {Map<roleId, adminId>}
-  */
-  export ledger adminRoles: Map<Bytes<32>, Bytes<32>>;
 
   /**
   * @description: Master Admin role identifier. It has control over the other admin IDs.
@@ -121,7 +110,7 @@ module AccessControl {
   export circuit grantRole(roleId: Bytes<32>, account: Either<ZswapCoinPublicKey, ContractAddress>): [] {
     Initializable_assertInitialized();
     Pausable_assertNotPaused();
-    _assertOnlyRole(_getRoleAdmin(roleId));
+    _assertOnlyRole(default<Bytes<32>>);
     _grantRole(roleId, account);
   }
 
@@ -144,7 +133,7 @@ module AccessControl {
   export circuit revokeRole(roleId: Bytes<32>, account: Either<ZswapCoinPublicKey, ContractAddress>): [] {
     Initializable_assertInitialized();
     Pausable_assertNotPaused();
-    _assertOnlyRole(_getRoleAdmin(roleId));
+    _assertOnlyRole(default<Bytes<32>>);
     _revokeRole(roleId, account);
   }
 
@@ -167,46 +156,6 @@ module AccessControl {
     Pausable_assertNotPaused();
     const ownKey = left<ZswapCoinPublicKey, ContractAddress>(ownPublicKey());
     _revokeRole(roleId, ownKey);
-  }
-
-  /**
-    * @description: Sets `adminRole` as `roleId`'s admin role.
-    *
-    * Requirements:
-    * - Check if initialized
-    * - Check if not paused
-    * - Check if transaction is created from an existing admin master account
-    * - Insert an admin role to a role
-    *
-    * @param {Bytes<32>} roleId - The role identifier.
-    * @param {Bytes<32>} adminRole - The admin role identifier.
-    * @return {[]} - Empty tuple.
-    */
-  export circuit setRoleAdmin(roleId: Bytes<32>, adminRole: Bytes<32>): [] {
-    Initializable_assertInitialized();
-    Pausable_assertNotPaused();
-    _assertOnlyRole(default<Bytes<32>>);
-    adminRoles.insert(disclose(roleId), disclose(adminRole));
-  }
-
-  /**
-  * @description: Removes `adminRole` as `roleId`'s admin role.
-  *
-  * Requirements:
-  * - Check if initialized
-  * - Check if not paused
-  * - Check if transaction is created from an existing admin master account
-  * - Remove an admin role from a role
-  *
-  * @param {Bytes<32>} roleId - The role identifier.
-  * @param {Bytes<32>} adminRole - The admin role identifier.
-  * @return {[]} - Empty tuple.
-  */
-  export circuit removeRoleAdmin(roleId: Bytes<32>, adminRole: Bytes<32>): [] {
-    Initializable_assertInitialized();
-    Pausable_assertNotPaused();
-    _assertOnlyRole(default<Bytes<32>>);
-    adminRoles.remove(disclose(roleId));
   }
 
   /**
@@ -257,22 +206,6 @@ module AccessControl {
     Pausable_assertPaused();
     _assertOnlyRole(default<Bytes<32>>);
     Pausable__unpause();
-  }
-
-  /**
-   * @description: Returns the admin role that controls `roleId` or a byte array with all zero bytes if `roleId` doesn't exist.
-   *
-   * Requirements:
-   * - Check role mapping using explicit conditions
-   *
-   * @notice: Using explicit role mapping instead of adminRoles map lookup to ensure correct circuit execution.
-   *
-   * @param {Bytes<32>} roleId - The role identifier.
-   * @return {Bytes<32>} roleAdmin - The admin role that controls `roleId`.
-   */
-  export circuit _getRoleAdmin(roleId: Bytes<32>): Bytes<32> {
-    // All roles (minter=1, poolOperator=2, verifier=3) are directly managed by Admin (0)
-    return default<Bytes<32>>;
   }
 
   /**

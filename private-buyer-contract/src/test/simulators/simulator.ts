@@ -167,24 +167,6 @@ export class Simulator {
     return this.updateStateAndGetLedger(circuitResults);
   }
 
-  public setRoleAdmin(
-    roleId: Uint8Array,
-    adminRole: Uint8Array,
-    caller?: CoinPublicKey
-  ): Ledger {
-    const circuitResults = this.contract.impureCircuits.setRoleAdmin(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      roleId,
-      adminRole
-    );
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
   public pauseAccessControl(caller?: CoinPublicKey): Ledger {
     const circuitResults = this.contract.impureCircuits.pauseAccessControl({
       ...this.circuitContext,
