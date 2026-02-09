@@ -1,0 +1,466 @@
+// Edda Labs Compact Contracts v0.0.1
+pragma language_version >= 0.20.0;
+
+/**
+* @module: NFTPool
+*
+* @description: NFTPool is a module for managing a direct NFT purchase pool. Sellers list NFTs in the pool and buyers purchase them directly in a single transaction. NFT ownership post-purchase is stored as a hash commitment (ZK-provable), ensuring buyer privacy.
+*
+* @notice: This replaces the BucketDEFI module. Instead of buckets with matching/settling flow, buyers purchase NFTs directly from a pool. Sellers are public (ZswapCoinPublicKey), buyers are private (hash commitment).
+*
+* @notice: Initialization logic is all handled within the module. All callable circuits (not with prefix _) are protected by `Initializable_assertInitialized()`.
+*
+* @notice Missing Features and Improvements:
+* - Events
+* - Contract-to-Contract Communication
+*
+* @notice: Design patterns
+* - Initializable
+* - Pausable
+* - Concurrency-safe: use of simple, granular and critical ADTs
+* - Low fees: optimized circuits & minimal ADTs interactions
+* - High performance: use events to build complex queries offchain
+*/
+
+module NFTPool {
+  import CompactStandardLibrary;
+  import "./Initializable" prefix Initializable_;
+  import "./Pausable" prefix Pausable_;
+  import "../token-nft/NonFungibleToken" prefix NonFungibleToken_;
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // PUBLIC STATE
+  ///////////////////////////////////////////////////////////////////////////////
+
+  /**
+  * @description: Set of token IDs listed for sale in the pool
+  *
+  * @notice: none
+  *
+  * @type: {Uint<128>} tokenId - Token ID listed for sale
+  * @type: {Set<tokenId>}
+  */
+  export ledger _pool: Set<Uint<128>>;
+
+  /**
+  * @description: Mapping from token ID to buyer's owner commitment (post-purchase)
+  *
+  * @notice: The owner commitment is a hash that hides the buyer's identity
+  *
+  * @type: {Uint<128>} tokenId - The token ID
+  * @type: {Bytes<32>} ownerCommitment - Hash commitment hiding buyer identity
+  * @type: {Map<tokenId, ownerCommitment>}
+  */
+  export ledger _nftOwnerCommitment: Map<Uint<128>, Bytes<32>>;
+
+  /**
+  * @description: Counter for unique commitment generation
+  *
+  * @notice: none
+  *
+  * @type: {Counter}
+  */
+  export ledger _purchaseCounter: Counter;
+
+  /**
+  * @description: Commitment tracked with counter for ownership verification
+  *
+  * @notice: none
+  *
+  * @type: {Bytes<32>} ownerCommitment - The buyer's commitment
+  * @type: {Uint<64>} counter - Counter value used when computing the commitment
+  * @type: {Map<ownerCommitment, counter>}
+  */
+  export ledger _commitmentToCounter: Map<Bytes<32>, Uint<64>>;
+
+  /**
+  * @description: Used to track verifications made by the user using a challenge
+  *
+  * @notice: none
+  *
+  * @param {Bytes<32>} ownerCommitment - The representation of ownership
+  * @param {Bytes<32>} challenge - The challenge to be included
+  * @type: {Map<ownerCommitment, Challenge>}
+  */
+  export ledger _authVerifications: Map<Bytes<32>, Bytes<32>>;
+
+  /**
+  * @description: Track sold tokens
+  *
+  * @notice: none
+  *
+  * @type: {Uint<128>} tokenId - The token ID
+  * @type: {Boolean} isSold - Whether the token has been sold
+  * @type: {Map<tokenId, isSold>}
+  */
+  export ledger _tokenSold: Map<Uint<128>, Boolean>;
+
+  /**
+  * @description: Per-seller accumulated payment balance (shielded coin)
+  *
+  * @notice: Sellers are public (ZswapCoinPublicKey). Payments accumulate here until seller withdraws.
+  *
+  * @type: {Either<ZswapCoinPublicKey, ContractAddress>} seller - Seller's identity
+  * @type: {QualifiedShieldedCoinInfo} balance - Accumulated payment
+  * @type: {Map<seller, balance>}
+  */
+  export ledger _sellerBalance: Map<Either<ZswapCoinPublicKey, ContractAddress>, QualifiedShieldedCoinInfo>;
+
+  /**
+  * @description: Per-seller accumulated payment amount (numeric tracking)
+  *
+  * @notice: Tracks the total amount owed to each seller for withdrawal.
+  *
+  * @type: {Either<ZswapCoinPublicKey, ContractAddress>} seller - Seller's identity
+  * @type: {Uint<128>} amount - Accumulated payment amount
+  * @type: {Map<seller, amount>}
+  */
+  export ledger _sellerAmount: Map<Either<ZswapCoinPublicKey, ContractAddress>, Uint<128>>;
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // WITNESS
+  ///////////////////////////////////////////////////////////////////////////////
+
+  // Secret nonce used for calculating the owner commitment
+  export witness wit_secretNonce(): Bytes<32>;
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // CIRCUITS
+  ///////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @description: Initializes the contract.
+   *
+   * @notice: This MUST be called in the implementing contract's constructor. Failure to do so can lead to an irreparable contract.
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * @return {[]} - Empty tuple.
+   */
+  export circuit initialize(): [] {
+    Initializable_initialize();
+  }
+
+  /**
+   * @description: Add an NFT to the pool for sale
+   *
+   * @notice: Access control is enforced at the top-level contract (PoolOperator role required)
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * - Contract is not paused.
+   * - Token is not already listed in the pool
+   * - Token is not already sold
+   * @param {Uint<128>} tokenId - The token ID to list
+   * @return {[]} - Empty tuple.
+   */
+  export circuit addToPool(tokenId: Uint<128>): [] {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+
+    // Check token is not already in the pool
+    assert(!_pool.member(disclose(tokenId)), "NFTPool: Token already listed");
+
+    // Check token is not already sold
+    assert(!_isTokenSold(tokenId), "NFTPool: Token already sold");
+
+    // Add to pool
+    _pool.insert(disclose(tokenId));
+  }
+
+  /**
+   * @description: Remove an NFT from the pool (delist)
+   *
+   * @notice: Access control is enforced at the top-level contract (PoolOperator role required)
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * - Contract is not paused.
+   * - Token must be listed in the pool
+   * - Token must not be already sold
+   * @param {Uint<128>} tokenId - The token ID to delist
+   * @return {[]} - Empty tuple.
+   */
+  export circuit removeFromPool(tokenId: Uint<128>): [] {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+
+    // Check token is in the pool
+    assert(_pool.member(disclose(tokenId)), "NFTPool: Token not listed");
+
+    // Check token is not sold
+    assert(!_isTokenSold(tokenId), "NFTPool: Token already sold");
+
+    // Remove from pool
+    _pool.remove(disclose(tokenId));
+  }
+
+  /**
+   * @description: Purchase an NFT from the pool
+   *
+   * @notice: Identity verification and payment handling are done at the top-level contract.
+   * This circuit handles the pool state updates: marking sold, computing ownership commitment.
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * - Contract is not paused.
+   * - Token is listed in the pool
+   * - Token is not already sold
+   * - Compute buyer's owner commitment
+   * - Mark token as sold
+   * - Store owner commitment
+   * @param {Uint<128>} tokenId - The token ID to purchase
+   * @return {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+   */
+  export circuit purchaseNFT(tokenId: Uint<128>): Bytes<32> {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+
+    // Check token is listed
+    assert(_pool.member(disclose(tokenId)), "NFTPool: Token not listed");
+
+    // Check token is not sold
+    assert(!_isTokenSold(tokenId), "NFTPool: Token already sold");
+
+    // Compute buyer's owner commitment
+    const nonce = wit_secretNonce();
+    const callerAsEither =
+                  Either<ZswapCoinPublicKey, ContractAddress> { is_left: true,
+                                                                left: ownPublicKey(),
+                                                                right: ContractAddress { bytes: pad(32, "") } };
+    const id = _computeOwnerId(callerAsEither, disclose(nonce));
+    const ownerCommitment = _computeOwnerCommitment(id, _purchaseCounter);
+
+    // Store commitment with counter
+    _commitmentToCounter.insert(ownerCommitment, _purchaseCounter);
+
+    // Mark token as sold
+    _tokenSold.insert(disclose(tokenId), true);
+
+    // Store owner commitment for this token
+    _nftOwnerCommitment.insert(disclose(tokenId), ownerCommitment);
+
+    // Remove from active pool
+    _pool.remove(disclose(tokenId));
+
+    // Increment counter
+    _purchaseCounter += 1;
+
+    return ownerCommitment;
+  }
+
+  /**
+   * @description: Store payment for a seller
+   *
+   * @notice: Called from top-level contract after receiving payment
+   *
+   * @requirements:
+   * - Store coin info for the seller
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} seller - The seller's identity
+   * @param {ShieldedCoinInfo} coin - The payment coin info
+   * @return {[]} - Empty tuple.
+   */
+  export circuit storeSellerPayment(
+    seller: Either<ZswapCoinPublicKey, ContractAddress>,
+    coin: ShieldedCoinInfo,
+    price: Uint<64>
+  ): [] {
+    _sellerBalance.insertCoin(
+      disclose(seller), disclose(coin), right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+
+    // Track the amount
+    if (_sellerAmount.member(disclose(seller))) {
+      const currentAmount = _sellerAmount.lookup(disclose(seller));
+      const newAmount = (currentAmount + disclose(price)) as Uint<128>;
+      _sellerAmount.insert(disclose(seller), disclose(newAmount));
+    }
+    else {
+      const initialAmount = disclose(price) as Uint<128>;
+      _sellerAmount.insert(disclose(seller), disclose(initialAmount));
+    }
+  }
+
+  /**
+   * @description: Withdraw accumulated seller funds
+   *
+   * @notice: The caller must be the seller. Sends all accumulated balance.
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * - Contract is not paused.
+   * - Seller has a balance
+   * - Send the balance to the seller
+   * @return {[]} - Empty tuple.
+   */
+  export circuit withdrawSellerFunds(): [] {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+
+    const caller = left<ZswapCoinPublicKey, ContractAddress>(ownPublicKey());
+
+    // Check seller has balance
+    assert(_sellerBalance.member(disclose(caller)), "NFTPool: No balance to withdraw");
+    assert(_sellerAmount.member(disclose(caller)), "NFTPool: No amount to withdraw");
+
+    const balance = _sellerBalance.lookup(disclose(caller));
+    const amount = _sellerAmount.lookup(disclose(caller));
+
+    // Ensure there is actually a balance
+    assert(amount != 0, "NFTPool: Zero balance");
+
+    // Send the accumulated amount to the seller
+    const send_result = sendShielded(balance, caller, amount);
+
+    // Update or clear the balance
+    if (send_result.change.value.value != 0) {
+      _sellerBalance.insertCoin(
+        disclose(caller),
+        send_result.change.value,
+        right<ZswapCoinPublicKey, ContractAddress>(kernel.self()));
+    }
+    else {
+      _sellerBalance.insert(disclose(caller), default<QualifiedShieldedCoinInfo>);
+    }
+
+    // Clear the amount
+    _sellerAmount.insert(disclose(caller), 0);
+  }
+
+  /**
+   * @description: Proof that you are the owner of the purchased NFT
+   *
+   * @notice: Same ZK pattern as proofBucketOwnership in BucketDEFI
+   *
+   * @requirements:
+   * - Contract is initialized.
+   * - Contract is not paused.
+   * - Confirm caller is the owner of the commitment
+   * - Store the challenge for verification
+   * @param {Bytes<32>} ownerCommitment - The ownership commitment
+   * @param {Bytes<32>} challenge - The challenge to be included
+   * @return {[]} - Empty tuple.
+   */
+  export circuit proofOwnership(ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+
+    // Proof I am the owner of the commitment
+    const isOwner = _isCommitmentOwner(ownerCommitment);
+    assert(isOwner, "NFTPool: Not the owner");
+
+    // Include the challenge
+    _authVerifications.insert(disclose(ownerCommitment), disclose(challenge));
+  }
+
+  /**
+   * @description: Pause NFTPool calls.
+   *
+   * Requirements:
+   * - Check if initialized
+   * - Check if not paused
+   * - Pause NFTPool calls.
+   * @return {[]} - Empty tuple.
+   */
+  export circuit pauseNFTPool(): [] {
+    Initializable_assertInitialized();
+    Pausable_assertNotPaused();
+    Pausable__pause();
+  }
+
+  /**
+    * @description: Unpause NFTPool calls.
+    *
+    * Requirements:
+    * - Check if initialized
+    * - Check if paused
+    * - Unpause NFTPool calls.
+    * @return {[]} - Empty tuple.
+    */
+  export circuit unpauseNFTPool(): [] {
+    Initializable_assertInitialized();
+    Pausable_assertPaused();
+    Pausable__unpause();
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // PRIVATE CIRCUITS
+  ///////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @description: Creates the owner commitment based on the ownerID and the counter
+   *
+   * @notice: Uses "PrivateBuyer: shield:" domain separator to distinguish from BucketDEFI commitments
+   *
+   * @requirements:
+   * - Hash of id, counter and spacer
+   * @param {Bytes<32>} id - OwnerId created using _computeOwnerId.
+   * @param {Uint<64>} counter - The value of the counter
+   * @return {Bytes<32>} ownerCommitment - The ownership commitment
+   */
+  export circuit _computeOwnerCommitment(id: Bytes<32>, counter: Uint<64>): Bytes<32> {
+    return persistentHash<Vector<3, Bytes<32>>>(
+             [id, counter as Field as Bytes<32>, pad(32, "PrivateBuyer: shield:")]);
+  }
+
+  /**
+   * @description: Creates the owner ID based on the owner account and the nonce
+   *
+   * @notice: None.
+   *
+   * @requirements:
+   * - Confirm it is a public key
+   * - Hash of public key and nonce
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} pk - Owner account
+   * @param {Bytes<32>} nonce - The secret value from the client
+   * @return {Bytes<32>} ownerID - Used to calculate the owner commitment
+   */
+  export pure circuit _computeOwnerId(
+                        pk: Either<ZswapCoinPublicKey, ContractAddress>, nonce: Bytes<32>): Bytes<32> {
+    assert(pk.is_left, "NFTPool: contract address owners are not yet supported");
+    return persistentHash<Vector<2, Bytes<32>>>([pk.left.bytes, nonce]);
+  }
+
+  /**
+   * @description: Checks if a token is sold
+   *
+   * @notice: None.
+   *
+   * @requirements:
+   * - Check if token is in the sold map
+   * @param {Uint<128>} tokenId - The token ID
+   * @return {Boolean} result - Whether the token is sold
+   */
+  export circuit _isTokenSold(tokenId: Uint<128>): Boolean {
+    if (_tokenSold.member(disclose(tokenId))) {
+      return _tokenSold.lookup(disclose(tokenId));
+    }
+    return false;
+  }
+
+  /**
+   * @description: Checks if you are the owner of the commitment
+   *
+   * @notice: None.
+   *
+   * @requirements:
+   * - Get private key
+   * - Calculate hashes
+   * - Compare owner commitment
+   * @param {Bytes<32>} ownerCommitment - The ownership commitment
+   * @return {Boolean} result - Whether you are the owner
+   */
+  export circuit _isCommitmentOwner(ownerCommitment: Bytes<32>): Boolean {
+    // Read the witness secret nonce to calculate the owner commitment
+    const nonce = wit_secretNonce();
+    const callerAsEither =
+                  Either<ZswapCoinPublicKey, ContractAddress> { is_left: true,
+                                                                left: ownPublicKey(),
+                                                                right: ContractAddress { bytes: pad(32, "") } };
+    const id = _computeOwnerId(callerAsEither, disclose(nonce));
+    // Get the counter of the commitment
+    const counter = _commitmentToCounter.lookup(disclose(ownerCommitment));
+    const ownerCommitmentCalculated = _computeOwnerCommitment(id, counter);
+    const isOwner = (ownerCommitmentCalculated == ownerCommitment);
+    return isOwner;
+  }
+}
