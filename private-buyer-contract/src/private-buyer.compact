@@ -47,8 +47,6 @@ export { NonFungibleToken__name,
          NonFungibleToken__certificatesCreatedCounter,
          NonFungibleToken__owners,
          NonFungibleToken__balances,
-         NonFungibleToken__tokenApprovals,
-         NonFungibleToken__operatorApprovals,
          NonFungibleToken__tokenToCertificate,
          NonFungibleToken__tokenToPrice,
          NonFungibleToken_Certificate,
@@ -56,7 +54,8 @@ export { NonFungibleToken__name,
          NonFungibleToken_Impact,
          NonFungibleToken_Source };
 
-export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__nftOwnerCommitment }
+export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__nftOwnerCommitment, NFTPool__burnRecord,
+         NFTPool__tokenLifecycle, NFTPool__lifecycleSeller, NFTPool__lifecycleCommitment, NFTPool__lifecycleBurnChallenge }
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC STATE TOP LEVEL
@@ -867,21 +866,26 @@ export circuit unpauseNFTPool(): [] {
 * @description: Burn a single purchased token after verifying it belongs to the commitment.
 *
 * @notice: Used by burnPurchasedBatch circuits. Skips when tokenId == 0 (mock).
-* Verifies the token's stored commitment matches, cleans up pool state, then burns the NFT.
+* Verifies the token's stored commitment matches, records the burn with challenge, then burns the NFT.
+* The _tokenSold and _nftOwnerCommitment states are preserved for audit trail.
 *
 * @param {Uint<128>} tokenId - The token ID (0 for mock)
 * @param {Bytes<32>} ownerCommitment - The buyer's commitment
+* @param {Bytes<32>} challenge - The challenge used to authorize the burn
 * @return {[]} - Empty tuple.
 */
-export circuit _burnPurchasedToken(tokenId: Uint<128>, ownerCommitment: Bytes<32>): [] {
+export circuit _burnPurchasedToken(tokenId: Uint<128>, ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
   if (disclose(tokenId) != 0) {
     // Verify this token was purchased and belongs to this commitment
     assert(NFTPool__nftOwnerCommitment.member(disclose(tokenId)), "Token not purchased");
     const storedCommitment = NFTPool__nftOwnerCommitment.lookup(disclose(tokenId));
     assert(storedCommitment == disclose(ownerCommitment), "Token not owned by this commitment");
 
-    // Clean up pool state (sold status, commitment mapping)
-    NFTPool_cleanupSoldToken(tokenId);
+    // Read seller BEFORE burn (burn will change _owners to burn address)
+    const seller = NonFungibleToken__owners.lookup(disclose(tokenId));
+
+    // Record full lifecycle data (seller, commitment, challenge) and reset for next cycle
+    NFTPool_recordBurn(tokenId, seller, ownerCommitment, challenge);
 
     // Burn the NFT
     NonFungibleToken_burn(tokenId);
@@ -917,11 +921,11 @@ export circuit burnPurchasedBatch5(
   NFTPool_proofOwnership(ownerCommitment, challenge);
 
   // Burn each real token
-  _burnPurchasedToken(tokenId1, ownerCommitment);
-  _burnPurchasedToken(tokenId2, ownerCommitment);
-  _burnPurchasedToken(tokenId3, ownerCommitment);
-  _burnPurchasedToken(tokenId4, ownerCommitment);
-  _burnPurchasedToken(tokenId5, ownerCommitment);
+  _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
 }
 
 /**
@@ -950,16 +954,16 @@ export circuit burnPurchasedBatch10(
 ): [] {
   NFTPool_proofOwnership(ownerCommitment, challenge);
 
-  _burnPurchasedToken(tokenId1, ownerCommitment);
-  _burnPurchasedToken(tokenId2, ownerCommitment);
-  _burnPurchasedToken(tokenId3, ownerCommitment);
-  _burnPurchasedToken(tokenId4, ownerCommitment);
-  _burnPurchasedToken(tokenId5, ownerCommitment);
-  _burnPurchasedToken(tokenId6, ownerCommitment);
-  _burnPurchasedToken(tokenId7, ownerCommitment);
-  _burnPurchasedToken(tokenId8, ownerCommitment);
-  _burnPurchasedToken(tokenId9, ownerCommitment);
-  _burnPurchasedToken(tokenId10, ownerCommitment);
+  _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId6, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId7, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId8, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId9, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId10, ownerCommitment, challenge);
 }
 
 /**
@@ -998,24 +1002,24 @@ export circuit burnPurchasedBatch20(
 ): [] {
   NFTPool_proofOwnership(ownerCommitment, challenge);
 
-  _burnPurchasedToken(tokenId1, ownerCommitment);
-  _burnPurchasedToken(tokenId2, ownerCommitment);
-  _burnPurchasedToken(tokenId3, ownerCommitment);
-  _burnPurchasedToken(tokenId4, ownerCommitment);
-  _burnPurchasedToken(tokenId5, ownerCommitment);
-  _burnPurchasedToken(tokenId6, ownerCommitment);
-  _burnPurchasedToken(tokenId7, ownerCommitment);
-  _burnPurchasedToken(tokenId8, ownerCommitment);
-  _burnPurchasedToken(tokenId9, ownerCommitment);
-  _burnPurchasedToken(tokenId10, ownerCommitment);
-  _burnPurchasedToken(tokenId11, ownerCommitment);
-  _burnPurchasedToken(tokenId12, ownerCommitment);
-  _burnPurchasedToken(tokenId13, ownerCommitment);
-  _burnPurchasedToken(tokenId14, ownerCommitment);
-  _burnPurchasedToken(tokenId15, ownerCommitment);
-  _burnPurchasedToken(tokenId16, ownerCommitment);
-  _burnPurchasedToken(tokenId17, ownerCommitment);
-  _burnPurchasedToken(tokenId18, ownerCommitment);
-  _burnPurchasedToken(tokenId19, ownerCommitment);
-  _burnPurchasedToken(tokenId20, ownerCommitment);
+  _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId6, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId7, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId8, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId9, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId10, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId11, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId12, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId13, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId14, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId15, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId16, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId17, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId18, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId19, ownerCommitment, challenge);
+  _burnPurchasedToken(tokenId20, ownerCommitment, challenge);
 }

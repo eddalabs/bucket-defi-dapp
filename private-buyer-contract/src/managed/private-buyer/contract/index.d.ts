@@ -143,7 +143,8 @@ export type ImpureCircuits<PS> = {
   unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   _burnPurchasedToken(context: __compactRuntime.CircuitContext<PS>,
                       tokenId_0: bigint,
-                      ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+                      ownerCommitment_0: Uint8Array,
+                      challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   burnPurchasedBatch5(context: __compactRuntime.CircuitContext<PS>,
                       ownerCommitment_0: Uint8Array,
                       tokenId1_0: bigint,
@@ -296,7 +297,8 @@ export type Circuits<PS> = {
   unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   _burnPurchasedToken(context: __compactRuntime.CircuitContext<PS>,
                       tokenId_0: bigint,
-                      ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+                      ownerCommitment_0: Uint8Array,
+                      challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
   burnPurchasedBatch5(context: __compactRuntime.CircuitContext<PS>,
                       ownerCommitment_0: Uint8Array,
                       tokenId1_0: bigint,
@@ -380,25 +382,6 @@ export type Ledger = {
     lookup(key_0: Either<ZswapCoinPublicKey, ContractAddress>): bigint;
     [Symbol.iterator](): Iterator<[Either<ZswapCoinPublicKey, ContractAddress>, bigint]>
   };
-  NonFungibleToken__tokenApprovals: {
-    isEmpty(): boolean;
-    size(): bigint;
-    member(key_0: bigint): boolean;
-    lookup(key_0: bigint): Either<ZswapCoinPublicKey, ContractAddress>;
-    [Symbol.iterator](): Iterator<[bigint, Either<ZswapCoinPublicKey, ContractAddress>]>
-  };
-  NonFungibleToken__operatorApprovals: {
-    isEmpty(): boolean;
-    size(): bigint;
-    member(key_0: Either<ZswapCoinPublicKey, ContractAddress>): boolean;
-    lookup(key_0: Either<ZswapCoinPublicKey, ContractAddress>): {
-      isEmpty(): boolean;
-      size(): bigint;
-      member(key_1: Either<ZswapCoinPublicKey, ContractAddress>): boolean;
-      lookup(key_1: Either<ZswapCoinPublicKey, ContractAddress>): boolean;
-      [Symbol.iterator](): Iterator<[Either<ZswapCoinPublicKey, ContractAddress>, boolean]>
-    }
-  };
   NonFungibleToken__tokenToCertificate: {
     isEmpty(): boolean;
     size(): bigint;
@@ -433,6 +416,56 @@ export type Ledger = {
     member(key_0: bigint): boolean;
     lookup(key_0: bigint): boolean;
     [Symbol.iterator](): Iterator<[bigint, boolean]>
+  };
+  NFTPool__burnRecord: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: bigint): boolean;
+    lookup(key_0: bigint): Uint8Array;
+    [Symbol.iterator](): Iterator<[bigint, Uint8Array]>
+  };
+  NFTPool__tokenLifecycle: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: bigint): boolean;
+    lookup(key_0: bigint): bigint;
+    [Symbol.iterator](): Iterator<[bigint, bigint]>
+  };
+  NFTPool__lifecycleSeller: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: bigint): boolean;
+    lookup(key_0: bigint): {
+      isEmpty(): boolean;
+      size(): bigint;
+      member(key_1: bigint): boolean;
+      lookup(key_1: bigint): Either<ZswapCoinPublicKey, ContractAddress>;
+      [Symbol.iterator](): Iterator<[bigint, Either<ZswapCoinPublicKey, ContractAddress>]>
+    }
+  };
+  NFTPool__lifecycleCommitment: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: bigint): boolean;
+    lookup(key_0: bigint): {
+      isEmpty(): boolean;
+      size(): bigint;
+      member(key_1: bigint): boolean;
+      lookup(key_1: bigint): Uint8Array;
+      [Symbol.iterator](): Iterator<[bigint, Uint8Array]>
+    }
+  };
+  NFTPool__lifecycleBurnChallenge: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: bigint): boolean;
+    lookup(key_0: bigint): {
+      isEmpty(): boolean;
+      size(): bigint;
+      member(key_1: bigint): boolean;
+      lookup(key_1: bigint): Uint8Array;
+      [Symbol.iterator](): Iterator<[bigint, Uint8Array]>
+    }
   };
 }
 

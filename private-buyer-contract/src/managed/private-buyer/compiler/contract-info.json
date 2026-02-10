@@ -1342,6 +1342,13 @@
             "type-name": "Bytes",
             "length": 32
           }
+        },
+        {
+          "name": "challenge",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
         }
       ],
       "result-type": {

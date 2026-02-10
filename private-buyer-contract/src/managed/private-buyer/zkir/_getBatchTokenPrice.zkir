@@ -13,7 +13,7 @@
     { "op": "declare_pub_input", "var": 6 },
     { "op": "pi_skip", "guard": 4, "count": 1 },
     { "op": "load_imm", "imm": "51" },
-    { "op": "load_imm", "imm": "06" },
+    { "op": "load_imm", "imm": "0C" },
     { "op": "cond_select", "bit": 4, "a": 7, "b": 1 },
     { "op": "declare_pub_input", "var": 9 },
     { "op": "declare_pub_input", "var": 4 },
@@ -73,16 +73,15 @@
     { "op": "pi_skip", "guard": 4, "count": 4 },
     { "op": "public_input", "guard": 4 },
     { "op": "load_imm", "imm": "08" },
-    { "op": "load_imm", "imm": "0C" },
-    { "op": "cond_select", "bit": 4, "a": 31, "b": 1 },
-    { "op": "declare_pub_input", "var": 32 },
+    { "op": "cond_select", "bit": 4, "a": 8, "b": 1 },
+    { "op": "declare_pub_input", "var": 31 },
     { "op": "declare_pub_input", "var": 4 },
     { "op": "cond_select", "bit": 4, "a": 30, "b": 1 },
-    { "op": "declare_pub_input", "var": 33 },
+    { "op": "declare_pub_input", "var": 32 },
     { "op": "cond_select", "bit": 4, "a": 29, "b": 1 },
-    { "op": "declare_pub_input", "var": 34 },
+    { "op": "declare_pub_input", "var": 33 },
     { "op": "pi_skip", "guard": 4, "count": 4 },
     { "op": "cond_select", "bit": 2, "a": 1, "b": 29 },
-    { "op": "output", "var": 35 }
+    { "op": "output", "var": 34 }
   ]
 }
