@@ -17,9 +17,11 @@
 ```
 
 **Admin (0):** Assigns all roles, pauses/unpauses all modules, can perform all actions
-**Minter (1):** Mints NFTs (with initial price), burns unsold tokens, executes burns of purchased tokens (bot, after buyer authorization via challenge), withdraws seller funds
+**Minter (1):** Mints NFTs (to a seller address, with initial price), burns unsold tokens, executes burns of purchased tokens (bot, after buyer authorization via challenge)
 **PoolOperator (2):** Lists/unlists NFTs in the pool (token owner can also list/unlist their own tokens), updates NFT prices
 **Verifier (3):** Verifies/removes buyer identities (KYC), stores auth challenges
+**Seller (user):** Token owner (receives tokens from Minter), can list/unlist own tokens, withdraws own accumulated funds via `withdrawSellerFunds()`
+**Buyer (user):** Identity-verified user, purchases NFTs, proves ownership for burn authorization
 
 ---
 
@@ -83,22 +85,24 @@ Admin
 ### Flow B: List NFT for Sale
 
 ```
-Minter                     PoolOperator                   Contract State
-  |                              |                              |
-  |-- mint(to, tokenId,          |                              |
-  |    certificate, price) ----->|----------------------------->| Token created
-  |                              |                              | owner = minter
-  |                              |                              | certificate stored
-  |                              |                              | price set
-  |                              |                              |
-  |-- addToPool(tokenId) ------->|----------------------------->| Token added to _pool
-  |   (owner can list own token) |                              | Available for purchase
-  |         OR                   |                              |
-  |                    addToPool(tokenId) --------------------->| (PoolOperator can also list)
-  |                              |                              |
-  |                    setTokenPrice(tokenId, newPrice) ------->| Price updated
-  |                              |                              | (can update anytime,
-  |                              |                              |  even when listed)
+Minter              Seller (user)       PoolOperator        Contract State
+  |                      |                    |                    |
+  |-- mint(to=Seller,    |                    |                    |
+  |    tokenId,          |                    |                    |
+  |    certificate,      |                    |                    |
+  |    price) ---------->|                    |------------------->| Token created
+  |                      |                    |                    | owner = Seller
+  |                      |                    |                    | certificate stored
+  |                      |                    |                    | price set
+  |                      |                    |                    |
+  |                      |-- addToPool ------>|------------------->| Token added to _pool
+  |                      |  (owner can list)  |                    | Available for purchase
+  |                      |       OR           |                    |
+  |                      |              addToPool(tokenId) ------->| (PoolOperator can also list)
+  |                      |                    |                    |
+  |                      |              setTokenPrice(tokenId, --->| Price updated
+  |                      |                newPrice) (optional)     | (can update anytime,
+  |                      |                    |                    |  even when listed)
 ```
 
 ### Flow C: Purchase NFT (Single)
@@ -260,9 +264,9 @@ Buyer                    Bot (Minter role)                Contract State
 ### Flow H: Seller Withdraws Payment
 
 ```
-Minter (Seller)                                          Contract State
+Seller (token owner, user)                               Contract State
   |                                                            |
-  |   [Buyer purchased tokens, seller balance accumulated]     |
+  |   [Buyer purchased seller's tokens, balance accumulated]   |
   |                                                            |
   |-- withdrawSellerFunds() ---------------------------------->|
   |                                                            |
@@ -273,6 +277,9 @@ Minter (Seller)                                          Contract State
   |   [Clear seller amount to 0]                               |
   |                                                            |
   |<-- funds received -----------------------------------------|
+  |                                                            |
+  |   NOTE: Only the seller (token owner) can withdraw         |
+  |   their own funds. No role can do this on their behalf.    |
 ```
 
 ---
@@ -280,69 +287,72 @@ Minter (Seller)                                          Contract State
 ## 4. Full End-to-End Flow
 
 ```
-+--------+    +--------+    +-----------+    +--------+    +---------+
-|  Admin |    | Minter |    | PoolOper. |    |Verifier|    |  Buyer  |
-|        |    |        |    |           |    |        |    |         |
-+---+----+    +---+----+    +-----+-----+    +---+----+    +----+----+
-    |             |               |               |              |
-    | grantRole(1, Minter)       |               |              |
-    |------------>|               |               |              |
-    | grantRole(2, PoolOp)       |               |              |
-    |-------------------------->  |               |              |
-    | grantRole(3, Verifier)     |               |              |
-    |------------------------------------------>  |              |
-    |             |               |               |              |
-    |             | mint(tokenId) |               |              |
-    |             |-------------->|               |              |
-    |             |               |               |              |
-    |             |         addToPool(tokenId)     |              |
-    |             | OR addToPool   |               |              |
-    |             | (owner can     |               |              |
-    |             |  list own)     |               |              |
-    |             |               |               |              |
-    |             |         setTokenPrice(tokenId, |              |
-    |             |           newPrice) (optional) |              |
-    |             |               |               |              |
-    |             |               |          setUser(buyer)      |
-    |             |               |               |------------->|
-    |             |               |               |              |
-    |             |               |               |   purchaseNFT/Batch
-    |             |               |               |      (tokenIds, coin)
-    |             |               |               |              |
-    |             |               |               |   <- ownerCommitment
-    |             |               |               |              |
-    |             | withdrawFunds |               |              |
-    |             |<--------------|               |              |
-    |             |               |               |              |
-    |             |               |               |              |
-    |   === BURN PATH A: Unsold Token ===         |              |
-    |             |               |               |              |
-    |             |         removeFromPool         |              |
-    |             | OR removeFromPool              |              |
-    |             | (owner can unlist own)          |              |
-    |             |               |               |              |
-    |             | burn(tokenId) |               |              |
-    |             |---> Token destroyed            |              |
-    |             |     Web2 unlocked              |              |
-    |             |               |               |              |
-    |   === BURN PATH B: Purchased Token ===      |              |
-    |             |               |               |              |
-    |             |               |               | proofOwnership
-    |             |               |               | (commitment, |
-    |             |               |               |  challenge)  |
-    |             |               |               |   -> proves ownership (ZK)
-    |             |               |               |   -> stores challenge on-chain
-    |             |               |               |              |
-    |             | burnPurchasedBatch             |              |
-    |             | (commitment, tokenIds,         |              |
-    |             |  challenge)   |               |              |
-    |             |   -> verifies Minter role      |              |
-    |             |   -> verifies challenge matches|              |
-    |             |   -> records lifecycle history  |              |
-    |             |   -> burns all tokens          |              |
-    |             |               |               |              |
-    |             |               |               |   Tokens destroyed
-    |             |               |               |   Web2 unlocked
++--------+  +--------+  +--------+  +-----------+  +--------+  +---------+
+|  Admin |  | Minter |  | Seller |  | PoolOper. |  |Verifier|  |  Buyer  |
+| (Role 0)  |(Role 1)|  | (user) |  |  (Role 2) |  |(Role 3)|  | (user)  |
++---+----+  +---+----+  +---+----+  +-----+-----+  +---+----+  +----+----+
+    |           |            |             |             |            |
+    | grantRole(1, Minter)  |             |             |            |
+    |---------->|            |             |             |            |
+    | grantRole(2, PoolOp)  |             |             |            |
+    |------------------------------------->|             |            |
+    | grantRole(3, Verifier)|             |             |            |
+    |--------------------------------------------------->|            |
+    |           |            |             |             |            |
+    |           | mint(to=Seller,          |             |            |
+    |           |   tokenId, cert, price)  |             |            |
+    |           |----------->|             |             |            |
+    |           |            | (Seller now owns token)   |            |
+    |           |            |             |             |            |
+    |           |            |       addToPool(tokenId)  |            |
+    |           |            | OR addToPool|             |            |
+    |           |            | (owner can  |             |            |
+    |           |            |  list own)  |             |            |
+    |           |            |             |             |            |
+    |           |            |       setTokenPrice(tokenId,           |
+    |           |            |         newPrice) (optional)           |
+    |           |            |             |             |            |
+    |           |            |             |        setUser(buyer)    |
+    |           |            |             |             |----------->|
+    |           |            |             |             |            |
+    |           |            |             |             | purchaseNFT/Batch
+    |           |            |             |             |   (tokenIds, coin)
+    |           |            |             |             |            |
+    |           |            |             |             | <- ownerCommitment
+    |           |            |             |             |            |
+    |           |            |             |             |            |
+    |           |            | withdrawSellerFunds()     |            |
+    |           |            |---> (receives own funds)  |            |
+    |           |            |             |             |            |
+    |           |            |             |             |            |
+    |   === BURN PATH A: Unsold Token ===  |             |            |
+    |           |            |             |             |            |
+    |           |            |       removeFromPool      |            |
+    |           |            | OR removeFromPool         |            |
+    |           |            | (owner can unlist own)     |            |
+    |           |            |             |             |            |
+    |           | burn(tokenId)            |             |            |
+    |           |---> Token destroyed      |             |            |
+    |           |     Web2 unlocked        |             |            |
+    |           |            |             |             |            |
+    |   === BURN PATH B: Purchased Token ===             |            |
+    |           |            |             |             |            |
+    |           |            |             |             | proofOwnership
+    |           |            |             |             | (commitment,|
+    |           |            |             |             |  challenge) |
+    |           |            |             |             |  -> proves ownership (ZK)
+    |           |            |             |             |  -> stores challenge on-chain
+    |           |            |             |             |            |
+    |           | burnPurchasedBatch       |             |            |
+    |           | (commitment, tokenIds,   |             |            |
+    |           |  challenge)              |             |            |
+    |           |  -> verifies Minter role |             |            |
+    |           |  -> verifies challenge   |             |            |
+    |           |  -> records lifecycle    |             |            |
+    |           |  -> burns all tokens     |             |            |
+    |           |            |             |             |            |
+    |           |            |             |             | Tokens destroyed
+    |           |            |             |             | Web2 unlocked
 ```
 
 ---
