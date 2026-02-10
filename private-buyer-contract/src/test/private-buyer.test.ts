@@ -395,7 +395,7 @@ describe("Smart Contract Testing", () => {
       expect(initialLedgerState.NFTPool__purchaseCounter).toEqual(0n);
     });
 
-    it("Add NFT to pool (only PoolOperator)", () => {
+    it("Add NFT to pool (owner or PoolOperator)", () => {
       // Mint a token first
       simulator
         .as("minter")
@@ -410,7 +410,7 @@ describe("Smart Contract Testing", () => {
       // PoolOperator can add to pool
       simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
 
-      // Non-PoolOperator should fail
+      // Token owner (minter) can also add to pool
       simulator
         .as("minter")
         .mint(
@@ -420,11 +420,20 @@ describe("Smart Contract Testing", () => {
           TOKEN_PRICE,
           minter
         );
+      simulator.as("minter").addToPool(TOKENID_2, minter);
+
+      // Non-owner and non-PoolOperator should fail
+      simulator
+        .as("minter")
+        .mint(
+          Account_minter,
+          TOKENID_3,
+          createCertificate(3),
+          TOKEN_PRICE,
+          minter
+        );
       expect(() => {
-        simulator.as("minter").addToPool(TOKENID_2, minter);
-      }).toThrow();
-      expect(() => {
-        simulator.as("verifier").addToPool(TOKENID_2, verifier);
+        simulator.as("verifier").addToPool(TOKENID_3, verifier);
       }).toThrow();
     });
 
@@ -450,7 +459,7 @@ describe("Smart Contract Testing", () => {
       }).toThrow();
     });
 
-    it("Remove NFT from pool (only PoolOperator)", () => {
+    it("Remove NFT from pool (owner or PoolOperator)", () => {
       simulator
         .as("minter")
         .mint(
@@ -461,12 +470,17 @@ describe("Smart Contract Testing", () => {
           minter
         );
       simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
+      // PoolOperator can remove
       simulator.as("poolOperator").removeFromPool(TOKENID_1, poolOperator);
 
-      // Non-PoolOperator should fail
+      // Token owner (minter) can also remove
       simulator.as("poolOperator").addToPool(TOKENID_1, poolOperator);
+      simulator.as("minter").removeFromPool(TOKENID_1, minter);
+
+      // Non-owner and non-PoolOperator should fail
+      simulator.as("minter").addToPool(TOKENID_1, minter);
       expect(() => {
-        simulator.as("minter").removeFromPool(TOKENID_1, minter);
+        simulator.as("verifier").removeFromPool(TOKENID_1, verifier);
       }).toThrow();
     });
 
@@ -1107,11 +1121,15 @@ describe("Smart Contract Testing", () => {
           batchCoin, buyer1
         );
 
+        // Buyer proves ownership and stores challenge
         const challenge = randomBytes(32);
-        simulator.as("buyer1").burnPurchasedBatch5(
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        // Bot (minter role) executes burn with same challenge
+        simulator.as("minter").burnPurchasedBatch5(
           ownerCommitment,
           TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
-          challenge, buyer1
+          challenge, minter
         );
 
         // All tokens should be burned (balance 0)
@@ -1128,21 +1146,24 @@ describe("Smart Contract Testing", () => {
           batchCoin, buyer1
         );
 
+        // Buyer proves ownership and stores challenge
         const challenge = randomBytes(32);
-        simulator.as("buyer1").burnPurchasedBatch5(
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        // Bot (minter role) executes burn with same challenge
+        simulator.as("minter").burnPurchasedBatch5(
           ownerCommitment,
           TOKENID_1, TOKENID_2, TOKENID_3, MOCK_TOKEN, MOCK_TOKEN,
-          challenge, buyer1
+          challenge, minter
         );
 
         // All 3 real tokens should be burned
         expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
       });
 
-      it("burnPurchasedBatch5 - non-owner cannot burn", () => {
+      it("burnPurchasedBatch5 - wrong challenge fails", () => {
         mintAndPoolTokens(simulator, 5);
         verifyBuyer(simulator);
-        simulator.as("verifier").setUser(Account_buyer2.left, verifier);
 
         const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
         const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
@@ -1150,12 +1171,41 @@ describe("Smart Contract Testing", () => {
           batchCoin, buyer1
         );
 
+        // Buyer proves ownership with one challenge
         const challenge = randomBytes(32);
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        // Bot tries to burn with a different challenge - should fail
+        const wrongChallenge = randomBytes(32);
         expect(() => {
-          simulator.as("buyer2").burnPurchasedBatch5(
+          simulator.as("minter").burnPurchasedBatch5(
             ownerCommitment,
             TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
-            challenge, buyer2
+            wrongChallenge, minter
+          );
+        }).toThrow();
+      });
+
+      it("burnPurchasedBatch5 - non-minter cannot burn", () => {
+        mintAndPoolTokens(simulator, 5);
+        verifyBuyer(simulator);
+
+        const batchCoin = utils.coin(Number(TOKEN_PRICE) * 5);
+        const ownerCommitment = simulator.as("buyer1").purchaseBatch5(
+          TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+          batchCoin, buyer1
+        );
+
+        // Buyer proves ownership
+        const challenge = randomBytes(32);
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        // Buyer (not minter) tries to burn - should fail
+        expect(() => {
+          simulator.as("buyer1").burnPurchasedBatch5(
+            ownerCommitment,
+            TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
+            challenge, buyer1
           );
         }).toThrow();
       });
@@ -1170,14 +1220,14 @@ describe("Smart Contract Testing", () => {
           batchCoin, buyer1
         );
 
-        // Use a fake commitment
+        // Use a fake commitment - no proofOwnership stored for it
         const fakeCommitment = randomBytes(32);
         const challenge = randomBytes(32);
         expect(() => {
-          simulator.as("buyer1").burnPurchasedBatch5(
+          simulator.as("minter").burnPurchasedBatch5(
             fakeCommitment,
             TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
-            challenge, buyer1
+            challenge, minter
           );
         }).toThrow();
       });
@@ -1194,11 +1244,13 @@ describe("Smart Contract Testing", () => {
         );
 
         const challenge = randomBytes(32);
-        simulator.as("buyer1").burnPurchasedBatch10(
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        simulator.as("minter").burnPurchasedBatch10(
           ownerCommitment,
           TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
           TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
-          challenge, buyer1
+          challenge, minter
         );
 
         expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
@@ -1216,11 +1268,13 @@ describe("Smart Contract Testing", () => {
         );
 
         const challenge = randomBytes(32);
-        simulator.as("buyer1").burnPurchasedBatch10(
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        simulator.as("minter").burnPurchasedBatch10(
           ownerCommitment,
           TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
           MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
-          challenge, buyer1
+          challenge, minter
         );
 
         expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
@@ -1240,13 +1294,15 @@ describe("Smart Contract Testing", () => {
         );
 
         const challenge = randomBytes(32);
-        simulator.as("buyer1").burnPurchasedBatch20(
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        simulator.as("minter").burnPurchasedBatch20(
           ownerCommitment,
           TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
           TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
           TOKENID_11, TOKENID_12, TOKENID_13, TOKENID_14, TOKENID_15,
           TOKENID_16, TOKENID_17, TOKENID_18, TOKENID_19, TOKENID_20,
-          challenge, buyer1
+          challenge, minter
         );
 
         expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
@@ -1266,22 +1322,23 @@ describe("Smart Contract Testing", () => {
         );
 
         const challenge = randomBytes(32);
-        simulator.as("buyer1").burnPurchasedBatch20(
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        simulator.as("minter").burnPurchasedBatch20(
           ownerCommitment,
           TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
           TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
           MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
           MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN, MOCK_TOKEN,
-          challenge, buyer1
+          challenge, minter
         );
 
         expect(simulator.as("minter").balanceOf(Account_minter)).toBe(0n);
       });
 
-      it("burnPurchasedBatch10 - non-owner cannot burn", () => {
+      it("burnPurchasedBatch10 - wrong challenge from bot fails", () => {
         mintAndPoolTokens(simulator, 10);
         verifyBuyer(simulator);
-        simulator.as("verifier").setUser(Account_buyer2.left, verifier);
 
         const batchCoin = utils.coin(Number(TOKEN_PRICE) * 10);
         const ownerCommitment = simulator.as("buyer1").purchaseBatch10(
@@ -1290,13 +1347,18 @@ describe("Smart Contract Testing", () => {
           batchCoin, buyer1
         );
 
+        // Buyer proves ownership with one challenge
         const challenge = randomBytes(32);
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        // Bot tries with a different challenge - should fail
+        const wrongChallenge = randomBytes(32);
         expect(() => {
-          simulator.as("buyer2").burnPurchasedBatch10(
+          simulator.as("minter").burnPurchasedBatch10(
             ownerCommitment,
             TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
             TOKENID_6, TOKENID_7, TOKENID_8, TOKENID_9, TOKENID_10,
-            challenge, buyer2
+            wrongChallenge, minter
           );
         }).toThrow();
       });
@@ -1317,12 +1379,15 @@ describe("Smart Contract Testing", () => {
         // Seller withdraws
         simulator.as("minter").withdrawSellerFunds(minter);
 
-        // Buyer burns purchased tokens (proves ownership + burns atomically)
+        // Buyer proves ownership and stores challenge
         const challenge = randomBytes(32);
-        simulator.as("buyer1").burnPurchasedBatch5(
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge, buyer1);
+
+        // Bot (minter role) burns purchased tokens using the stored challenge
+        simulator.as("minter").burnPurchasedBatch5(
           ownerCommitment,
           TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
-          challenge, buyer1
+          challenge, minter
         );
 
         // Verify all tokens are burned
@@ -1362,20 +1427,23 @@ describe("Smart Contract Testing", () => {
           batchCoin, buyer1
         );
 
+        // First burn: buyer proves, bot burns
         const challenge1 = randomBytes(32);
-        simulator.as("buyer1").burnPurchasedBatch5(
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge1, buyer1);
+        simulator.as("minter").burnPurchasedBatch5(
           ownerCommitment,
           TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
-          challenge1, buyer1
+          challenge1, minter
         );
 
-        // Trying to burn again should fail
+        // Trying to burn again should fail (commitment was reset, tokens already burned)
         const challenge2 = randomBytes(32);
+        simulator.as("buyer1").proofOwnership(ownerCommitment, challenge2, buyer1);
         expect(() => {
-          simulator.as("buyer1").burnPurchasedBatch5(
+          simulator.as("minter").burnPurchasedBatch5(
             ownerCommitment,
             TOKENID_1, TOKENID_2, TOKENID_3, TOKENID_4, TOKENID_5,
-            challenge2, buyer1
+            challenge2, minter
           );
         }).toThrow();
       });

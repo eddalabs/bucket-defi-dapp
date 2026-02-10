@@ -417,13 +417,6 @@ export type Ledger = {
     lookup(key_0: bigint): boolean;
     [Symbol.iterator](): Iterator<[bigint, boolean]>
   };
-  NFTPool__burnRecord: {
-    isEmpty(): boolean;
-    size(): bigint;
-    member(key_0: bigint): boolean;
-    lookup(key_0: bigint): Uint8Array;
-    [Symbol.iterator](): Iterator<[bigint, Uint8Array]>
-  };
   NFTPool__tokenLifecycle: {
     isEmpty(): boolean;
     size(): bigint;

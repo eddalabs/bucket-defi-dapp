@@ -95,17 +95,6 @@ module NFTPool {
   export ledger _tokenSold: Map<Uint<128>, Boolean>;
 
   /**
-  * @description: Record of burned tokens with their burn challenge (latest lifecycle only)
-  *
-  * @notice: Quick-access map for the most recent burn. Full history is in _lifecycleBurnChallenge.
-  *
-  * @type: {Uint<128>} tokenId - The token ID that was burned
-  * @type: {Bytes<32>} challenge - The challenge used when burning
-  * @type: {Map<tokenId, challenge>}
-  */
-  export ledger _burnRecord: Map<Uint<128>, Bytes<32>>;
-
-  /**
   * @description: Lifecycle counter per token
   *
   * @notice: Incremented each time a token completes a full cycle (mint → sell → burn).
@@ -495,7 +484,6 @@ module NFTPool {
    *   - _tokenLifecycle[tokenId] = cycle + 1 (ready for next lifecycle)
    *   - _tokenSold[tokenId] = false (allows re-listing)
    *   - _nftOwnerCommitment[tokenId] = default (prevents stale commitment attacks)
-   *   - _burnRecord[tokenId] = challenge (quick access to latest burn)
    *
    * @requirements:
    * - Contract is initialized.
@@ -538,9 +526,6 @@ module NFTPool {
         disclose(tokenId), default<Map<Uint<64>, Bytes<32>>>);
     }
     _lifecycleBurnChallenge.lookup(disclose(tokenId)).insert(disclose(lifecycle), disclose(challenge));
-
-    // Quick-access burn record (latest only)
-    _burnRecord.insert(disclose(tokenId), disclose(challenge));
 
     // Advance lifecycle counter
     _tokenLifecycle.insert(disclose(tokenId), disclose(lifecycle) + 1 as Uint<64>);

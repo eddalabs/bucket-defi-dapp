@@ -19,6 +19,7 @@ The **Private Buyer Contract** is an upgrade of the **Bucket DEFI Contract**. Bo
 | **Burn by Buyer** | Not supported (Settler burns) | Supported (burnPurchasedBatch) |
 | **Seller Withdrawal** | Not applicable (rewards via bucket pot) | Direct seller withdrawal |
 | **Price Updates** | Owner-only (setTokenPrice) | PoolOperator role-based |
+| **Pool Listing** | N/A | Token owner OR PoolOperator |
 
 ---
 
@@ -69,17 +70,15 @@ Admin(0) -> Minter(1)
 
 **Private Buyer:** Supports `purchaseBatch5`, `purchaseBatch10`, and `purchaseBatch20` circuits. All NFTs in a batch share a single owner commitment, reducing on-chain state and proof overhead. Mock tokens (tokenId == 0) allow partial batches.
 
-### 1.5 Buyer-Initiated Burn
+### 1.5 Bot-Executed Burn with Buyer Authorization
 
-**Bucket DEFI:** Only the Settler role (6) can burn tokens. The buyer/commitment owner has no way to directly destroy their purchased NFTs.
+**Bucket DEFI:** Only the Settler role (6) can burn tokens. The buyer/commitment owner has no way to trigger destruction of their purchased NFTs.
 
-**Private Buyer:** Buyers can burn their own purchased tokens via `burnPurchasedBatch5/10/20`. The circuit:
-1. Proves ownership via ZK (witness nonce)
-2. Verifies each token belongs to the commitment
-3. Cleans up sold state
-4. Burns the NFTs
+**Private Buyer:** Burns of purchased tokens follow a 2-step authorization flow:
+1. **Buyer** calls `proofOwnership(commitment, challenge)` — proves they own the commitment via ZK and stores a challenge on-chain
+2. **Minter/Burner bot** (role 1) calls `burnPurchasedBatch5/10/20` — the contract verifies the challenge matches what the buyer stored, then burns the NFTs and records full lifecycle history
 
-This enables the buyer to unlock the web2 digital asset ledger without depending on a third-party role.
+The bot has access to the DB where the buyer's burn request and challenge are stored. The contract enforces that only the Minter role can execute burns, and only when the challenge matches the buyer's on-chain proof.
 
 ### 1.6 Direct Seller Payment & Withdrawal
 
@@ -105,7 +104,7 @@ This enables the buyer to unlock the web2 digital asset ledger without depending
 - Token must NOT be listed in the pool (`!NFTPool__pool.member(tokenId)`)
 - Token must NOT be sold (`!NFTPool__tokenSold.lookup(tokenId)`)
 - Only Minter role can burn unsold tokens
-- Sold tokens can ONLY be burned by the commitment owner via `burnPurchasedBatch`
+- Sold tokens can ONLY be burned by the Minter/Burner bot via `burnPurchasedBatch`, after the buyer has proved ownership with a matching challenge
 
 ### 2.2 Condition Matching Complexity
 
@@ -132,7 +131,7 @@ This enables the buyer to unlock the web2 digital asset ledger without depending
 Both contracts share these foundational modules (with adaptations):
 - **AccessControl** - Role-based access control. Private Buyer uses a simplified version: flat hierarchy (Admin manages all roles directly), no `adminRoles` map or admin-delegation circuits.
 - **Identity** - KYC/whitelist verification
-- **NonFungibleToken** - NFT management with Certificate metadata (Source, Impact, Location)
+- **NonFungibleToken** - NFT management with Certificate metadata (Source, Impact, Location). Private Buyer uses a simplified version: transfer, transferFrom, and the full approval system (approve, getApproved, setApprovalForAll, isApprovedForAll) were removed since transfers only happen at the web2 ledger.
 - **Initializable** - One-time initialization pattern
 - **Pausable** - Emergency pause/unpause per module
 - **Utils** - Pure utility circuits
@@ -152,7 +151,7 @@ Bucket DEFI                          Private Buyer
 +-----------------------+            +-----------------------+
 | AccessControl         | ---------> | AccessControl         |  (simplified roles)
 | Identity              | ---------> | Identity              |  (same)
-| NonFungibleToken      | ---------> | NonFungibleToken      |  (same)
+| NonFungibleToken      | ---------> | NonFungibleToken      |  (simplified: no transfers/approvals)
 | BucketDEFI            | ---------> | NFTPool               |  (replaced)
 +-----------------------+            +-----------------------+
 
@@ -164,7 +163,7 @@ BucketDEFI features         ->  NFTPool replacement
   withdrawBucketLeftover    ->  (removed - no leftover)
   proofBucketOwnership      ->  proofOwnership
   (no batch support)        ->  purchaseBatch5/10/20
-  (no buyer burn)           ->  burnPurchasedBatch5/10/20
+  (no buyer burn)           ->  burnPurchasedBatch5/10/20 (bot-executed, buyer-authorized)
 ```
 
 ---

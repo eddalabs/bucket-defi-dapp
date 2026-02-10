@@ -54,7 +54,7 @@ export { NonFungibleToken__name,
          NonFungibleToken_Impact,
          NonFungibleToken_Source };
 
-export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__nftOwnerCommitment, NFTPool__burnRecord,
+export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__nftOwnerCommitment,
          NFTPool__tokenLifecycle, NFTPool__lifecycleSeller, NFTPool__lifecycleCommitment, NFTPool__lifecycleBurnChallenge }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -408,21 +408,26 @@ export circuit unpauseToken(): [] {
 /**
 * @description: Add an NFT to the pool for sale
 *
-* @notice: Only PoolOperator role (2) can add to pool.
+* @notice: The token owner or PoolOperator role (2) can add to pool.
 * Cross-checks that the token exists in the NFT module.
 *
 * @requirements:
-* - The caller must have `PoolOperator role`.
+* - The caller must be the token owner OR have `PoolOperator role`
 * - Token must exist in the NFT module
 * - Wrapper call
 * @param {Uint<128>} tokenId - The token ID to list
 * @return {[]} - Empty tuple.
 */
 export circuit addToPool(tokenId: Uint<128>): [] {
-  assertOnlyRole(2 as Field as Bytes<32>);
-
   // Cross-check: token must exist in NFT module
   assert(NonFungibleToken__tokenToCertificate.member(disclose(tokenId)), "Token not found");
+
+  // Allow token owner or PoolOperator
+  const callerAsEither = left<ZswapCoinPublicKey, ContractAddress>(ownPublicKey());
+  const tokenOwner = NonFungibleToken__owners.lookup(disclose(tokenId));
+  if (tokenOwner != disclose(callerAsEither)) {
+    assertOnlyRole(2 as Field as Bytes<32>);
+  }
 
   NFTPool_addToPool(tokenId);
 }
@@ -430,16 +435,22 @@ export circuit addToPool(tokenId: Uint<128>): [] {
 /**
 * @description: Remove an NFT from the pool (delist)
 *
-* @notice: Only PoolOperator role (2) can remove from pool.
+* @notice: The token owner or PoolOperator role (2) can remove from pool.
 *
 * @requirements:
-* - The caller must have `PoolOperator role`.
+* - The caller must be the token owner OR have `PoolOperator role`
 * - Wrapper call
 * @param {Uint<128>} tokenId - The token ID to delist
 * @return {[]} - Empty tuple.
 */
 export circuit removeFromPool(tokenId: Uint<128>): [] {
-  assertOnlyRole(2 as Field as Bytes<32>);
+  // Allow token owner or PoolOperator
+  const callerAsEither = left<ZswapCoinPublicKey, ContractAddress>(ownPublicKey());
+  const tokenOwner = NonFungibleToken__owners.lookup(disclose(tokenId));
+  if (tokenOwner != disclose(callerAsEither)) {
+    assertOnlyRole(2 as Field as Bytes<32>);
+  }
+
   NFTPool_removeFromPool(tokenId);
 }
 
@@ -859,19 +870,18 @@ export circuit unpauseNFTPool(): [] {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// BURN PURCHASED TOKENS (BUYER-OWNED VIA COMMITMENT)
+// BURN PURCHASED TOKENS (BOT-EXECUTED, BUYER-AUTHORIZED VIA CHALLENGE)
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
 * @description: Burn a single purchased token after verifying it belongs to the commitment.
 *
 * @notice: Used by burnPurchasedBatch circuits. Skips when tokenId == 0 (mock).
-* Verifies the token's stored commitment matches, records the burn with challenge, then burns the NFT.
-* The _tokenSold and _nftOwnerCommitment states are preserved for audit trail.
+* Verifies the token's stored commitment matches, records lifecycle data, then burns the NFT.
 *
 * @param {Uint<128>} tokenId - The token ID (0 for mock)
 * @param {Bytes<32>} ownerCommitment - The buyer's commitment
-* @param {Bytes<32>} challenge - The challenge used to authorize the burn
+* @param {Bytes<32>} challenge - The challenge that was verified against _authVerifications
 * @return {[]} - Empty tuple.
 */
 export circuit _burnPurchasedToken(tokenId: Uint<128>, ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
@@ -893,19 +903,25 @@ export circuit _burnPurchasedToken(tokenId: Uint<128>, ownerCommitment: Bytes<32
 }
 
 /**
-* @description: Burn up to 5 purchased tokens owned by the caller via commitment.
+* @description: Burn up to 5 purchased tokens authorized by the commitment owner.
 *
-* @notice: The buyer must prove ownership of the commitment atomically within this circuit.
-* The challenge is stored for audit. Mock tokens (tokenId == 0) are skipped.
-* This represents unlocking the digital assets on the web2 ledger.
+* @notice: Executed by the Minter/Burner bot (role 1) on behalf of the buyer.
+* The buyer must have previously called proofOwnership(commitment, challenge) to authorize.
+* The bot passes the same challenge, and the contract verifies it matches.
+* Mock tokens (tokenId == 0) are skipped.
+*
+* Flow:
+* 1. Buyer calls proofOwnership(commitment, challenge) → stores challenge on-chain
+* 2. Bot reads challenge from DB, calls burnPurchasedBatch with same challenge
+* 3. Contract verifies challenge matches → confirms buyer authorized this burn
 *
 * @requirements:
-* - Caller must be the owner of the commitment (ZK proof via witness nonce)
+* - Caller must have Minter role (role 1)
+* - Buyer must have called proofOwnership with this commitment and challenge
 * - Each real token must belong to this commitment
-* - Challenge is stored for audit trail
 * @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
 * @param {Uint<128>} tokenId1-5 - Token IDs (0 for mock/empty slot)
-* @param {Bytes<32>} challenge - The challenge for ZK proof / audit trail
+* @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
 * @return {[]} - Empty tuple.
 */
 export circuit burnPurchasedBatch5(
@@ -917,8 +933,13 @@ export circuit burnPurchasedBatch5(
   tokenId5: Uint<128>,
   challenge: Bytes<32>
 ): [] {
-  // Prove ownership of the commitment and store challenge
-  NFTPool_proofOwnership(ownerCommitment, challenge);
+  // Only Minter/Burner role can execute burns
+  assertOnlyRole(1 as Field as Bytes<32>);
+
+  // Verify the challenge matches what the commitment owner stored via proofOwnership
+  assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
+  const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
+  assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
 
   // Burn each real token
   _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
@@ -929,13 +950,16 @@ export circuit burnPurchasedBatch5(
 }
 
 /**
-* @description: Burn up to 10 purchased tokens owned by the caller via commitment.
+* @description: Burn up to 10 purchased tokens authorized by the commitment owner.
 *
 * @notice: Same as burnPurchasedBatch5 but for up to 10 tokens.
 *
+* @requirements:
+* - Caller must have Minter role (role 1)
+* - Buyer must have called proofOwnership with this commitment and challenge
 * @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
 * @param {Uint<128>} tokenId1-10 - Token IDs (0 for mock/empty slot)
-* @param {Bytes<32>} challenge - The challenge for ZK proof / audit trail
+* @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
 * @return {[]} - Empty tuple.
 */
 export circuit burnPurchasedBatch10(
@@ -952,7 +976,13 @@ export circuit burnPurchasedBatch10(
   tokenId10: Uint<128>,
   challenge: Bytes<32>
 ): [] {
-  NFTPool_proofOwnership(ownerCommitment, challenge);
+  // Only Minter/Burner role can execute burns
+  assertOnlyRole(1 as Field as Bytes<32>);
+
+  // Verify the challenge matches what the commitment owner stored via proofOwnership
+  assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
+  const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
+  assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
 
   _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
   _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
@@ -967,13 +997,16 @@ export circuit burnPurchasedBatch10(
 }
 
 /**
-* @description: Burn up to 20 purchased tokens owned by the caller via commitment.
+* @description: Burn up to 20 purchased tokens authorized by the commitment owner.
 *
 * @notice: Same as burnPurchasedBatch5 but for up to 20 tokens.
 *
+* @requirements:
+* - Caller must have Minter role (role 1)
+* - Buyer must have called proofOwnership with this commitment and challenge
 * @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
 * @param {Uint<128>} tokenId1-20 - Token IDs (0 for mock/empty slot)
-* @param {Bytes<32>} challenge - The challenge for ZK proof / audit trail
+* @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
 * @return {[]} - Empty tuple.
 */
 export circuit burnPurchasedBatch20(
@@ -1000,7 +1033,13 @@ export circuit burnPurchasedBatch20(
   tokenId20: Uint<128>,
   challenge: Bytes<32>
 ): [] {
-  NFTPool_proofOwnership(ownerCommitment, challenge);
+  // Only Minter/Burner role can execute burns
+  assertOnlyRole(1 as Field as Bytes<32>);
+
+  // Verify the challenge matches what the commitment owner stored via proofOwnership
+  assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
+  const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
+  assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
 
   _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
   _burnPurchasedToken(tokenId2, ownerCommitment, challenge);

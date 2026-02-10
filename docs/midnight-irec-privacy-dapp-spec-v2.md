@@ -244,7 +244,7 @@ The smart contract enforces a flat, four-role access model. The Admin directly m
 | Role | Responsibility | Who holds it |
 |------|---------------|-------------|
 | **Admin** | Assigns and revokes all other roles. Pauses/unpauses any module in an emergency. | dApp deployer / organization owner |
-| **Minter** | Mints I-REC NFTs (from Totum-confirmed data) with certificate metadata and initial price. Burns unsold tokens (unlisting from the web2 ledger). | dApp operator (backend service or authorized personnel) |
+| **Minter** | Mints I-REC NFTs (from Totum-confirmed data) with certificate metadata and initial price. Burns unsold tokens (unlisting from the web2 ledger). Executes burns of purchased tokens on behalf of buyers (bot-executed after buyer authorization via challenge). | dApp operator (backend service / bot) |
 | **PoolOperator** | Lists and unlists NFTs in the purchase pool. Updates NFT prices to reflect market conditions. | dApp operator or designated market manager |
 | **Verifier** | Verifies and removes buyer identities (KYC/AML whitelist). | Compliance team or KYC service integration |
 
@@ -288,7 +288,7 @@ This separation ensures that certificate quality and provenance remain fully tra
 - **Prove ownership**: Buyers can generate a zero-knowledge proof that they own a specific certificate, shareable with auditors or regulators without revealing their wallet identity.
 - **Prove portfolio aggregates**: Buyers can make aggregate claims (e.g., "I own at least 1,000 MWh of wind energy from Brazil") without revealing which specific certificates they hold.
 - **Initiate retirement**: The buyer provides the beneficiary company name (required by I-REC standards) and triggers the retirement process. The dApp operator coordinates with Totum to execute the retirement in the Evident registry. Note: retirement makes the beneficiary name public — this is by design and required for compliance reporting.
-- **Burn purchased tokens**: Buyers can burn their own purchased NFTs to finalize the lifecycle on-chain and unlock the corresponding entry in the web2 digital asset ledger.
+- **Burn purchased tokens**: Buyers authorize burns by calling `proofOwnership` with a challenge. The Minter/Burner bot then executes `burnPurchasedBatch` with the matching challenge, which verifies authorization, records full lifecycle history (seller, commitment, challenge), and destroys the NFTs. This finalizes the lifecycle on-chain and unlocks the corresponding entry in the web2 digital asset ledger. The same token ID can be re-minted in a new lifecycle after burn.
 
 ### 5.4 Bridge Design: Totum Broker Integration
 
