@@ -94,10 +94,45 @@ async function main() {
       console.log(`  ${numOps} ops: ${serialized.length} bytes (${(serialized.length / 1024).toFixed(1)} KB) ${underLimit ? '✓ under 50KB' : '✗ EXCEEDS 50KB'}`);
     }
 
-    // Also check the unproven tx size
+    // Transaction size and cost analysis
     const unprovenTx = unprovenData.private.unprovenTx;
     const txSerialized = unprovenTx.serialize();
     console.log(`\nFull UnprovenTransaction serialized size: ${txSerialized.length} bytes (${(txSerialized.length / 1024).toFixed(1)} KB)`);
+
+    // Mock-prove the deploy tx (no ZK proofs needed for deploys)
+    const provenTx = unprovenTx.mockProve();
+    const params = ledger.LedgerParameters.initialParameters();
+
+    // Show transaction cost vs block limits
+    console.log('\n── Transaction Cost vs Block Limits ──');
+    try {
+      const cost = provenTx.cost(params);
+      console.log(`  readTime:     ${cost.readTime}`);
+      console.log(`  computeTime:  ${cost.computeTime}`);
+      console.log(`  blockUsage:   ${cost.blockUsage} (limit: 200,000)`);
+      console.log(`  bytesWritten: ${cost.bytesWritten} (limit: 50,000)`);
+      console.log(`  bytesChurned: ${cost.bytesChurned} (limit: 1,000,000)`);
+    } catch (e: any) {
+      console.log(`  cost() threw: ${e.message}`);
+    }
+
+    try {
+      const fee = provenTx.fees(params);
+      console.log(`\n  Fee: ${fee} tDUST (${Number(fee) / 1e12} DUST)`);
+    } catch (e: any) {
+      console.log(`\n  fees() threw: ${e.message}`);
+    }
+
+    try {
+      const feeMargin = provenTx.feesWithMargin(params, 2);
+      console.log(`  Fee (2-block margin): ${feeMargin} tDUST`);
+    } catch (e: any) {
+      console.log(`  feesWithMargin() threw: ${e.message}`);
+    }
+
+    // Show block limits for reference
+    console.log('\n── LedgerParameters (initial) ──');
+    console.log(params.toString(false));
 
   } catch (e: any) {
     console.error('Error during constructor execution:', e.message);

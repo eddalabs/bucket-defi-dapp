@@ -22,7 +22,7 @@ import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
 import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config-provider';
-import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
+import { deployContract, findDeployedContract, submitInsertVerifierKeyTx } from '@midnight-ntwrk/midnight-js-contracts';
 import { assertIsContractAddress, toHex } from '@midnight-ntwrk/midnight-js-utils';
 import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import {
@@ -169,6 +169,11 @@ export const grantRole = async (
   return result.public;
 };
 
+/*
+ * [INCREMENTAL DEPLOY TEST] Re-enabling circuit wrappers incrementally.
+ * Batch 2: revokeRole, renounceRole
+ */
+
 export const revokeRole = async (
   contract: DeployedPrivateBuyerContract,
   roleId: Uint8Array,
@@ -188,20 +193,7 @@ export const renounceRole = async (
   return result.public;
 };
 
-export const pauseAccessControl = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
-  logger.info('Pausing access control...');
-  const result = await contract.callTx.pauseAccessControl();
-  return result.public;
-};
-
-export const unpauseAccessControl = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
-  logger.info('Unpausing access control...');
-  const result = await contract.callTx.unpauseAccessControl();
-  return result.public;
-};
-
-// ─── Identity Circuits ─────────────────────────────────────────────────────
-
+// Batch 3: Identity circuit wrappers
 export const setUser = async (
   contract: DeployedPrivateBuyerContract,
   user: PrivateBuyer.ZswapCoinPublicKey,
@@ -226,20 +218,7 @@ export const assertOwnVerification = async (contract: DeployedPrivateBuyerContra
   return result.public;
 };
 
-export const pauseIdentity = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
-  logger.info('Pausing identity...');
-  const result = await contract.callTx.pauseIdentity();
-  return result.public;
-};
-
-export const unpauseIdentity = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
-  logger.info('Unpausing identity...');
-  const result = await contract.callTx.unpauseIdentity();
-  return result.public;
-};
-
-// ─── Token Circuits ────────────────────────────────────────────────────────
-
+// Batch 4: Token circuit wrappers
 export const mint = async (
   contract: DeployedPrivateBuyerContract,
   to: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress>,
@@ -271,56 +250,7 @@ export const setTokenPrice = async (
   return result.public;
 };
 
-export const balanceOf = async (
-  contract: DeployedPrivateBuyerContract,
-  owner: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress>,
-): Promise<bigint> => {
-  logger.info('Querying balance...');
-  const result = await contract.callTx.balanceOf(owner);
-  return result.public.txHash as unknown as bigint;
-};
-
-export const ownerOf = async (
-  contract: DeployedPrivateBuyerContract,
-  tokenId: bigint,
-): Promise<PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress>> => {
-  logger.info(`Querying owner of token ${tokenId}...`);
-  const result = await contract.callTx.ownerOf(tokenId);
-  return result.public.txHash as unknown as PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress>;
-};
-
-export const tokenCertificate = async (
-  contract: DeployedPrivateBuyerContract,
-  tokenId: bigint,
-): Promise<PrivateBuyer.NonFungibleToken_Certificate> => {
-  logger.info(`Querying certificate of token ${tokenId}...`);
-  const result = await contract.callTx.tokenCertificate(tokenId);
-  return result.public.txHash as unknown as PrivateBuyer.NonFungibleToken_Certificate;
-};
-
-export const tokenPrice = async (
-  contract: DeployedPrivateBuyerContract,
-  tokenId: bigint,
-): Promise<bigint> => {
-  logger.info(`Querying price of token ${tokenId}...`);
-  const result = await contract.callTx.tokenPrice(tokenId);
-  return result.public.txHash as unknown as bigint;
-};
-
-export const pauseToken = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
-  logger.info('Pausing token...');
-  const result = await contract.callTx.pauseToken();
-  return result.public;
-};
-
-export const unpauseToken = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
-  logger.info('Unpausing token...');
-  const result = await contract.callTx.unpauseToken();
-  return result.public;
-};
-
-// ─── NFT Pool Circuits ─────────────────────────────────────────────────────
-
+// Batch 5a: First 3 Pool circuit wrappers
 export const addToPool = async (
   contract: DeployedPrivateBuyerContract,
   tokenId: bigint,
@@ -349,36 +279,6 @@ export const purchaseNFT = async (
   return result.public;
 };
 
-export const purchaseBatch5 = async (
-  contract: DeployedPrivateBuyerContract,
-  tokenIds: [bigint, bigint, bigint, bigint, bigint],
-  coin: PrivateBuyer.ShieldedCoinInfo,
-): Promise<FinalizedTxData> => {
-  logger.info('Purchasing batch of 5 NFTs...');
-  const result = await contract.callTx.purchaseBatch5(...tokenIds, coin);
-  return result.public;
-};
-
-export const purchaseBatch10 = async (
-  contract: DeployedPrivateBuyerContract,
-  tokenIds: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
-  coin: PrivateBuyer.ShieldedCoinInfo,
-): Promise<FinalizedTxData> => {
-  logger.info('Purchasing batch of 10 NFTs...');
-  const result = await contract.callTx.purchaseBatch10(...tokenIds, coin);
-  return result.public;
-};
-
-export const purchaseBatch20 = async (
-  contract: DeployedPrivateBuyerContract,
-  tokenIds: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
-  coin: PrivateBuyer.ShieldedCoinInfo,
-): Promise<FinalizedTxData> => {
-  logger.info('Purchasing batch of 20 NFTs...');
-  const result = await contract.callTx.purchaseBatch20(...tokenIds, coin);
-  return result.public;
-};
-
 export const withdrawSellerFunds = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Withdrawing seller funds...');
   const result = await contract.callTx.withdrawSellerFunds();
@@ -395,49 +295,252 @@ export const proofOwnership = async (
   return result.public;
 };
 
+export const insertCircuitVerifierKey = async (
+  providers: PrivateBuyerProviders,
+  contractAddress: string,
+  circuitId: PrivateBuyerCircuits,
+): Promise<FinalizedTxData> => {
+  logger.info(`Inserting verifier key for circuit: ${circuitId}...`);
+  const zkConfigProvider = new NodeZkConfigProvider<PrivateBuyerCircuits>(contractConfig.zkConfigPath);
+  const vk = await zkConfigProvider.getVerifierKey(circuitId);
+  return submitInsertVerifierKeyTx(
+    providers,
+    privateBuyerCompiledContract,
+    contractAddress as ContractAddress,
+    circuitId,
+    vk,
+  );
+};
+
+export const burnPurchased = async (
+  contract: DeployedPrivateBuyerContract,
+  ownerCommitment: Uint8Array,
+  tokenId: bigint,
+  challenge: Uint8Array,
+): Promise<FinalizedTxData> => {
+  logger.info(`Burning purchased token ${tokenId}...`);
+  const result = await contract.callTx.burnPurchased(ownerCommitment, tokenId, challenge);
+  return result.public;
+};
+
+// ─── Maintenance Batch 1: Ownership & Emergency ────────────────────────────
+
+export const pauseAccessControl = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
+  logger.info('Pausing Access Control...');
+  const result = await contract.callTx.pauseAccessControl();
+  return result.public;
+};
+
+export const unpauseAccessControl = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
+  logger.info('Unpausing Access Control...');
+  const result = await contract.callTx.unpauseAccessControl();
+  return result.public;
+};
+
+export const pauseIdentity = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
+  logger.info('Pausing Identity...');
+  const result = await contract.callTx.pauseIdentity();
+  return result.public;
+};
+
+export const unpauseIdentity = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
+  logger.info('Unpausing Identity...');
+  const result = await contract.callTx.unpauseIdentity();
+  return result.public;
+};
+
+export const pauseToken = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
+  logger.info('Pausing Token...');
+  const result = await contract.callTx.pauseToken();
+  return result.public;
+};
+
+export const unpauseToken = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
+  logger.info('Unpausing Token...');
+  const result = await contract.callTx.unpauseToken();
+  return result.public;
+};
+
+export const pauseNFTPool = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
+  logger.info('Pausing NFTPool...');
+  const result = await contract.callTx.pauseNFTPool();
+  return result.public;
+};
+
+export const unpauseNFTPool = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
+  logger.info('Unpausing NFTPool...');
+  const result = await contract.callTx.unpauseNFTPool();
+  return result.public;
+};
+
+// ─── Maintenance Batch 2: Queries ──────────────────────────────────────────
+
+export const isUserVerified = async (
+  contract: DeployedPrivateBuyerContract,
+  user: PrivateBuyer.ZswapCoinPublicKey,
+): Promise<FinalizedTxData> => {
+  logger.info('Checking if user is verified...');
+  const result = await contract.callTx.isUserVerified(user);
+  return result.public;
+};
+
+export const balanceOf = async (
+  contract: DeployedPrivateBuyerContract,
+  owner: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress>,
+): Promise<FinalizedTxData> => {
+  logger.info('Querying balance...');
+  const result = await contract.callTx.balanceOf(owner);
+  return result.public;
+};
+
+export const ownerOf = async (
+  contract: DeployedPrivateBuyerContract,
+  tokenId: bigint,
+): Promise<FinalizedTxData> => {
+  logger.info(`Querying owner of token ${tokenId}...`);
+  const result = await contract.callTx.ownerOf(tokenId);
+  return result.public;
+};
+
+export const tokenCertificate = async (
+  contract: DeployedPrivateBuyerContract,
+  tokenId: bigint,
+): Promise<FinalizedTxData> => {
+  logger.info(`Querying certificate for token ${tokenId}...`);
+  const result = await contract.callTx.tokenCertificate(tokenId);
+  return result.public;
+};
+
+export const tokenPrice = async (
+  contract: DeployedPrivateBuyerContract,
+  tokenId: bigint,
+): Promise<FinalizedTxData> => {
+  logger.info(`Querying price for token ${tokenId}...`);
+  const result = await contract.callTx.tokenPrice(tokenId);
+  return result.public;
+};
+
+// ─── Maintenance Batch 3: Batch Purchase ───────────────────────────────────
+
+export const purchaseBatch5 = async (
+  contract: DeployedPrivateBuyerContract,
+  tokenIds: bigint[],
+  coin: PrivateBuyer.ShieldedCoinInfo,
+): Promise<FinalizedTxData> => {
+  logger.info(`Batch purchasing 5 NFTs...`);
+  const ids = [...tokenIds, ...Array(5 - tokenIds.length).fill(0n)].slice(0, 5);
+  const result = await contract.callTx.purchaseBatch5(ids[0], ids[1], ids[2], ids[3], ids[4], coin);
+  return result.public;
+};
+
+export const purchaseBatch10 = async (
+  contract: DeployedPrivateBuyerContract,
+  tokenIds: bigint[],
+  coin: PrivateBuyer.ShieldedCoinInfo,
+): Promise<FinalizedTxData> => {
+  logger.info(`Batch purchasing 10 NFTs...`);
+  const ids = [...tokenIds, ...Array(10 - tokenIds.length).fill(0n)].slice(0, 10);
+  const result = await contract.callTx.purchaseBatch10(
+    ids[0], ids[1], ids[2], ids[3], ids[4],
+    ids[5], ids[6], ids[7], ids[8], ids[9], coin,
+  );
+  return result.public;
+};
+
+export const purchaseBatch20 = async (
+  contract: DeployedPrivateBuyerContract,
+  tokenIds: bigint[],
+  coin: PrivateBuyer.ShieldedCoinInfo,
+): Promise<FinalizedTxData> => {
+  logger.info(`Batch purchasing 20 NFTs...`);
+  const ids = [...tokenIds, ...Array(20 - tokenIds.length).fill(0n)].slice(0, 20);
+  const result = await contract.callTx.purchaseBatch20(
+    ids[0], ids[1], ids[2], ids[3], ids[4],
+    ids[5], ids[6], ids[7], ids[8], ids[9],
+    ids[10], ids[11], ids[12], ids[13], ids[14],
+    ids[15], ids[16], ids[17], ids[18], ids[19], coin,
+  );
+  return result.public;
+};
+
+// ─── Maintenance Batch 4: Batch Burn ───────────────────────────────────────
+
 export const burnPurchasedBatch5 = async (
   contract: DeployedPrivateBuyerContract,
   ownerCommitment: Uint8Array,
-  tokenIds: [bigint, bigint, bigint, bigint, bigint],
+  tokenIds: bigint[],
   challenge: Uint8Array,
 ): Promise<FinalizedTxData> => {
-  logger.info('Burning purchased batch of 5...');
-  const result = await contract.callTx.burnPurchasedBatch5(ownerCommitment, ...tokenIds, challenge);
+  logger.info(`Batch burning 5 purchased tokens...`);
+  const ids = [...tokenIds, ...Array(5 - tokenIds.length).fill(0n)].slice(0, 5);
+  const result = await contract.callTx.burnPurchasedBatch5(
+    ownerCommitment, ids[0], ids[1], ids[2], ids[3], ids[4], challenge,
+  );
   return result.public;
 };
 
 export const burnPurchasedBatch10 = async (
   contract: DeployedPrivateBuyerContract,
   ownerCommitment: Uint8Array,
-  tokenIds: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
+  tokenIds: bigint[],
   challenge: Uint8Array,
 ): Promise<FinalizedTxData> => {
-  logger.info('Burning purchased batch of 10...');
-  const result = await contract.callTx.burnPurchasedBatch10(ownerCommitment, ...tokenIds, challenge);
+  logger.info(`Batch burning 10 purchased tokens...`);
+  const ids = [...tokenIds, ...Array(10 - tokenIds.length).fill(0n)].slice(0, 10);
+  const result = await contract.callTx.burnPurchasedBatch10(
+    ownerCommitment,
+    ids[0], ids[1], ids[2], ids[3], ids[4],
+    ids[5], ids[6], ids[7], ids[8], ids[9], challenge,
+  );
   return result.public;
 };
 
 export const burnPurchasedBatch20 = async (
   contract: DeployedPrivateBuyerContract,
   ownerCommitment: Uint8Array,
-  tokenIds: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
+  tokenIds: bigint[],
   challenge: Uint8Array,
 ): Promise<FinalizedTxData> => {
-  logger.info('Burning purchased batch of 20...');
-  const result = await contract.callTx.burnPurchasedBatch20(ownerCommitment, ...tokenIds, challenge);
+  logger.info(`Batch burning 20 purchased tokens...`);
+  const ids = [...tokenIds, ...Array(20 - tokenIds.length).fill(0n)].slice(0, 20);
+  const result = await contract.callTx.burnPurchasedBatch20(
+    ownerCommitment,
+    ids[0], ids[1], ids[2], ids[3], ids[4],
+    ids[5], ids[6], ids[7], ids[8], ids[9],
+    ids[10], ids[11], ids[12], ids[13], ids[14],
+    ids[15], ids[16], ids[17], ids[18], ids[19], challenge,
+  );
   return result.public;
 };
 
-export const pauseNFTPool = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
-  logger.info('Pausing NFT pool...');
-  const result = await contract.callTx.pauseNFTPool();
-  return result.public;
+// ─── Maintenance Batch VK Insertion ────────────────────────────────────────
+
+export const MAINTENANCE_BATCHES: Record<string, string[]> = {
+  '1': ['proofOwnership', 'pauseAccessControl', 'unpauseAccessControl',
+        'pauseIdentity', 'unpauseIdentity', 'pauseToken', 'unpauseToken',
+        'pauseNFTPool', 'unpauseNFTPool'],
+  '2': ['isUserVerified', 'balanceOf', 'ownerOf', 'tokenCertificate', 'tokenPrice'],
+  '3': ['_getBatchTokenPrice', '_storeBatchSellerPayment', '_executeBatchPurchase',
+        'purchaseBatch5', 'purchaseBatch10', 'purchaseBatch20'],
+  '4': ['_burnPurchasedToken', 'burnPurchasedBatch5', 'burnPurchasedBatch10', 'burnPurchasedBatch20'],
 };
 
-export const unpauseNFTPool = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
-  logger.info('Unpausing NFT pool...');
-  const result = await contract.callTx.unpauseNFTPool();
-  return result.public;
+export const insertBatchVerifierKeys = async (
+  providers: PrivateBuyerProviders,
+  contractAddress: string,
+  batchNumber: string,
+): Promise<void> => {
+  const circuits = MAINTENANCE_BATCHES[batchNumber];
+  if (!circuits) {
+    throw new Error(`Invalid batch number: ${batchNumber}. Valid: 1-4`);
+  }
+  logger.info(`Inserting ${circuits.length} VKs for maintenance batch ${batchNumber}...`);
+  for (const circuitId of circuits) {
+    logger.info(`  Inserting VK for ${circuitId}...`);
+    await insertCircuitVerifierKey(providers, contractAddress, circuitId as PrivateBuyerCircuits);
+    logger.info(`  VK for ${circuitId} inserted.`);
+  }
+  logger.info(`Batch ${batchNumber} complete (${circuits.length} VKs inserted).`);
 };
 
 // ─── Wallet Functions ──────────────────────────────────────────────────────

@@ -49,26 +49,11 @@ export type ImpureCircuits<PS> = {
              account_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, []>;
   renounceRole(context: __compactRuntime.CircuitContext<PS>,
                roleId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
-  assertOnlyRole(context: __compactRuntime.CircuitContext<PS>,
-                 roleId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
-  pauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  unpauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   assertOwnVerification(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  isUserVerified(context: __compactRuntime.CircuitContext<PS>,
-                 user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, boolean>;
   setUser(context: __compactRuntime.CircuitContext<PS>,
           user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, []>;
   removeUser(context: __compactRuntime.CircuitContext<PS>,
              user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, []>;
-  pauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  unpauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  balanceOf(context: __compactRuntime.CircuitContext<PS>,
-            owner_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, bigint>;
-  ownerOf(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, Either<ZswapCoinPublicKey,
-                                                                                                                       ContractAddress>>;
-  tokenCertificate(context: __compactRuntime.CircuitContext<PS>,
-                   tokenId_0: bigint): __compactRuntime.CircuitResults<PS, NonFungibleToken_Certificate>;
-  tokenPrice(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
   mint(context: __compactRuntime.CircuitContext<PS>,
        to_0: Either<ZswapCoinPublicKey, ContractAddress>,
        tokenId_0: bigint,
@@ -78,13 +63,36 @@ export type ImpureCircuits<PS> = {
   setTokenPrice(context: __compactRuntime.CircuitContext<PS>,
                 tokenId_0: bigint,
                 price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
-  pauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  unpauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   purchaseNFT(context: __compactRuntime.CircuitContext<PS>,
               tokenId_0: bigint,
               coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  withdrawSellerFunds(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchased(context: __compactRuntime.CircuitContext<PS>,
+                ownerCommitment_0: Uint8Array,
+                tokenId_0: bigint,
+                challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  proofOwnership(context: __compactRuntime.CircuitContext<PS>,
+                 ownerCommitment_0: Uint8Array,
+                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  pauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  isUserVerified(context: __compactRuntime.CircuitContext<PS>,
+                 user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, boolean>;
+  balanceOf(context: __compactRuntime.CircuitContext<PS>,
+            owner_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, bigint>;
+  ownerOf(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, Either<ZswapCoinPublicKey,
+                                                                                                                       ContractAddress>>;
+  tokenCertificate(context: __compactRuntime.CircuitContext<PS>,
+                   tokenId_0: bigint): __compactRuntime.CircuitResults<PS, NonFungibleToken_Certificate>;
+  tokenPrice(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
   _getBatchTokenPrice(context: __compactRuntime.CircuitContext<PS>,
                       tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
   _storeBatchSellerPayment(context: __compactRuntime.CircuitContext<PS>,
@@ -135,12 +143,6 @@ export type ImpureCircuits<PS> = {
                   tokenId19_0: bigint,
                   tokenId20_0: bigint,
                   coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
-  withdrawSellerFunds(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  proofOwnership(context: __compactRuntime.CircuitContext<PS>,
-                 ownerCommitment_0: Uint8Array,
-                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
-  pauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   _burnPurchasedToken(context: __compactRuntime.CircuitContext<PS>,
                       tokenId_0: bigint,
                       ownerCommitment_0: Uint8Array,
@@ -203,26 +205,11 @@ export type Circuits<PS> = {
              account_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, []>;
   renounceRole(context: __compactRuntime.CircuitContext<PS>,
                roleId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
-  assertOnlyRole(context: __compactRuntime.CircuitContext<PS>,
-                 roleId_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
-  pauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  unpauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   assertOwnVerification(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  isUserVerified(context: __compactRuntime.CircuitContext<PS>,
-                 user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, boolean>;
   setUser(context: __compactRuntime.CircuitContext<PS>,
           user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, []>;
   removeUser(context: __compactRuntime.CircuitContext<PS>,
              user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, []>;
-  pauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  unpauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  balanceOf(context: __compactRuntime.CircuitContext<PS>,
-            owner_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, bigint>;
-  ownerOf(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, Either<ZswapCoinPublicKey,
-                                                                                                                       ContractAddress>>;
-  tokenCertificate(context: __compactRuntime.CircuitContext<PS>,
-                   tokenId_0: bigint): __compactRuntime.CircuitResults<PS, NonFungibleToken_Certificate>;
-  tokenPrice(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
   mint(context: __compactRuntime.CircuitContext<PS>,
        to_0: Either<ZswapCoinPublicKey, ContractAddress>,
        tokenId_0: bigint,
@@ -232,13 +219,36 @@ export type Circuits<PS> = {
   setTokenPrice(context: __compactRuntime.CircuitContext<PS>,
                 tokenId_0: bigint,
                 price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
-  pauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  unpauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   purchaseNFT(context: __compactRuntime.CircuitContext<PS>,
               tokenId_0: bigint,
               coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  withdrawSellerFunds(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchased(context: __compactRuntime.CircuitContext<PS>,
+                ownerCommitment_0: Uint8Array,
+                tokenId_0: bigint,
+                challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  proofOwnership(context: __compactRuntime.CircuitContext<PS>,
+                 ownerCommitment_0: Uint8Array,
+                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  pauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  isUserVerified(context: __compactRuntime.CircuitContext<PS>,
+                 user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, boolean>;
+  balanceOf(context: __compactRuntime.CircuitContext<PS>,
+            owner_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, bigint>;
+  ownerOf(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, Either<ZswapCoinPublicKey,
+                                                                                                                       ContractAddress>>;
+  tokenCertificate(context: __compactRuntime.CircuitContext<PS>,
+                   tokenId_0: bigint): __compactRuntime.CircuitResults<PS, NonFungibleToken_Certificate>;
+  tokenPrice(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
   _getBatchTokenPrice(context: __compactRuntime.CircuitContext<PS>,
                       tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
   _storeBatchSellerPayment(context: __compactRuntime.CircuitContext<PS>,
@@ -289,12 +299,6 @@ export type Circuits<PS> = {
                   tokenId19_0: bigint,
                   tokenId20_0: bigint,
                   coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
-  withdrawSellerFunds(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  proofOwnership(context: __compactRuntime.CircuitContext<PS>,
-                 ownerCommitment_0: Uint8Array,
-                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
-  pauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
-  unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
   _burnPurchasedToken(context: __compactRuntime.CircuitContext<PS>,
                       tokenId_0: bigint,
                       ownerCommitment_0: Uint8Array,

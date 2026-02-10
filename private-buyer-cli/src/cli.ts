@@ -51,86 +51,45 @@ ${DIVIDER}
 ${DIVIDER}
   [1] Deploy a new private-buyer contract
   [2] Join an existing private-buyer contract
-  [3] Monitor DUST balance
-  [4] Exit
+  [3] Insert Verifier Key (maintenance)
+  [4] Monitor DUST balance
+  [5] Exit
 ${'─'.repeat(62)}
 > `;
 
 /** Build the main actions menu, showing current DUST balance in the header. */
 const mainMenu = (dustBalance: string) => `
 ${DIVIDER}
-  Main Actions${dustBalance ? `                        DUST: ${dustBalance}` : ''}
+  Main Actions (38 circuits)${dustBalance ? `            DUST: ${dustBalance}` : ''}
 ${DIVIDER}
-  [1] Access Control
-  [2] Identity
-  [3] Token Operations
-  [4] NFT Pool
-  [5] View Ledger State
-  [6] Exit
-${'─'.repeat(62)}
-> `;
-
-const accessControlMenu = () => `
-${DIVIDER}
-  Access Control
-${DIVIDER}
-  [1] Grant Role
-  [2] Revoke Role
-  [3] Renounce Role
-  [4] Pause Access Control
-  [5] Unpause Access Control
-  [6] Back
-${'─'.repeat(62)}
-> `;
-
-const identityMenu = () => `
-${DIVIDER}
-  Identity
-${DIVIDER}
-  [1] Set User
-  [2] Remove User
-  [3] Assert Own Verification
-  [4] Pause Identity
-  [5] Unpause Identity
-  [6] Back
-${'─'.repeat(62)}
-> `;
-
-const tokenMenu = () => `
-${DIVIDER}
-  Token Operations
-${DIVIDER}
-  [1] Mint
-  [2] Burn
-  [3] Set Token Price
-  [4] Query Balance Of
-  [5] Query Owner Of
-  [6] Query Token Certificate
-  [7] Query Token Price
-  [8] Pause Token
-  [9] Unpause Token
-  [10] Back
-${'─'.repeat(62)}
-> `;
-
-const poolMenu = () => `
-${DIVIDER}
-  NFT Pool
-${DIVIDER}
-  [1] Add to Pool
-  [2] Remove from Pool
-  [3] Purchase NFT
-  [4] Purchase Batch 5
-  [5] Purchase Batch 10
-  [6] Purchase Batch 20
-  [7] Withdraw Seller Funds
-  [8] Proof Ownership
-  [9] Burn Purchased Batch 5
-  [10] Burn Purchased Batch 10
-  [11] Burn Purchased Batch 20
-  [12] Pause NFT Pool
-  [13] Unpause NFT Pool
-  [14] Back
+  ── Deploy Batch (14 circuits) ──
+  [1] Grant Role                  [2] Revoke Role
+  [3] Renounce Role               [4] Set User
+  [5] Remove User                 [6] Assert Own Verification
+  [7] Mint                        [8] Burn
+  [9] Set Token Price             [10] Add to Pool
+  [11] Remove from Pool           [12] Purchase NFT
+  [13] Withdraw Seller Funds      [14] Burn Purchased Token
+  ── Maintenance Batch 1: Ownership & Emergency ──
+  [15] Proof Ownership            [16] Pause Access Control
+  [17] Unpause Access Control     [18] Pause Identity
+  [19] Unpause Identity           [20] Pause Token
+  [21] Unpause Token              [22] Pause NFT Pool
+  [23] Unpause NFT Pool
+  ── Maintenance Batch 2: Queries ──
+  [24] Is User Verified           [25] Balance Of
+  [26] Owner Of                   [27] Token Certificate
+  [28] Token Price
+  ── Maintenance Batch 3: Batch Purchase ──
+  [29] Purchase Batch 5           [30] Purchase Batch 10
+  [31] Purchase Batch 20
+  ── Maintenance Batch 4: Batch Burn ──
+  [32] Burn Purchased Batch 5     [33] Burn Purchased Batch 10
+  [34] Burn Purchased Batch 20
+  ── Admin ──
+  [35] Insert Verifier Key (maintenance)
+  [36] View Ledger State
+  [37] Exit
 ${'─'.repeat(62)}
 > `;
 
@@ -232,343 +191,10 @@ const readBigInt = async (rli: Interface, prompt: string): Promise<bigint> => {
 
 // ─── Sub-menus ──────────────────────────────────────────────────────────────
 
-const accessControlLoop = async (
-  contract: DeployedPrivateBuyerContract,
-  rli: Interface,
-): Promise<void> => {
-  while (true) {
-    const choice = await rli.question(accessControlMenu());
-    try {
-      switch (choice.trim()) {
-        case '1': {
-          const roleId = await readHexBytes(rli, 'Enter role ID (hex): ');
-          const accountHex = await readHexBytes(rli, 'Enter account public key (hex): ');
-          const account: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> = {
-            is_left: true,
-            left: { bytes: accountHex },
-            right: { bytes: new Uint8Array() },
-          };
-          await api.withStatus('Granting role', () => api.grantRole(contract, roleId, account));
-          break;
-        }
-        case '2': {
-          const roleId = await readHexBytes(rli, 'Enter role ID (hex): ');
-          const accountHex = await readHexBytes(rli, 'Enter account public key (hex): ');
-          const account: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> = {
-            is_left: true,
-            left: { bytes: accountHex },
-            right: { bytes: new Uint8Array() },
-          };
-          await api.withStatus('Revoking role', () => api.revokeRole(contract, roleId, account));
-          break;
-        }
-        case '3': {
-          const roleId = await readHexBytes(rli, 'Enter role ID (hex): ');
-          await api.withStatus('Renouncing role', () => api.renounceRole(contract, roleId));
-          break;
-        }
-        case '4':
-          await api.withStatus('Pausing access control', () => api.pauseAccessControl(contract));
-          break;
-        case '5':
-          await api.withStatus('Unpausing access control', () => api.unpauseAccessControl(contract));
-          break;
-        case '6':
-          return;
-        default:
-          console.log(`  Invalid choice: ${choice}`);
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.log(`  ✗ Failed: ${msg}\n`);
-    }
-  }
-};
-
-const identityLoop = async (
-  contract: DeployedPrivateBuyerContract,
-  rli: Interface,
-): Promise<void> => {
-  while (true) {
-    const choice = await rli.question(identityMenu());
-    try {
-      switch (choice.trim()) {
-        case '1': {
-          const userHex = await readHexBytes(rli, 'Enter user public key (hex): ');
-          const user: PrivateBuyer.ZswapCoinPublicKey = { bytes: userHex };
-          await api.withStatus('Setting user', () => api.setUser(contract, user));
-          break;
-        }
-        case '2': {
-          const userHex = await readHexBytes(rli, 'Enter user public key (hex): ');
-          const user: PrivateBuyer.ZswapCoinPublicKey = { bytes: userHex };
-          await api.withStatus('Removing user', () => api.removeUser(contract, user));
-          break;
-        }
-        case '3':
-          await api.withStatus('Asserting own verification', () => api.assertOwnVerification(contract));
-          break;
-        case '4':
-          await api.withStatus('Pausing identity', () => api.pauseIdentity(contract));
-          break;
-        case '5':
-          await api.withStatus('Unpausing identity', () => api.unpauseIdentity(contract));
-          break;
-        case '6':
-          return;
-        default:
-          console.log(`  Invalid choice: ${choice}`);
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.log(`  ✗ Failed: ${msg}\n`);
-    }
-  }
-};
-
-const tokenLoop = async (
-  contract: DeployedPrivateBuyerContract,
-  providers: PrivateBuyerProviders,
-  rli: Interface,
-): Promise<void> => {
-  while (true) {
-    const choice = await rli.question(tokenMenu());
-    try {
-      switch (choice.trim()) {
-        case '1': {
-          const toHex = await readHexBytes(rli, 'Enter recipient public key (hex): ');
-          const to: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> = {
-            is_left: true,
-            left: { bytes: toHex },
-            right: { bytes: new Uint8Array() },
-          };
-          const tokenId = await readBigInt(rli, 'Enter token ID: ');
-          const idStr = await rli.question('Enter certificate ID: ');
-          const sourceStr = await rli.question('Enter source (Solar=0,Wind=1,Hydro=2,Biomass=3,Geothermal=4,Nuclear=5): ');
-          const generation = await readBigInt(rli, 'Enter generation: ');
-          const vintage = await readBigInt(rli, 'Enter vintage: ');
-          const impactStr = await rli.question('Enter impact (Minimal=0,Low=1,Medium=2,High=3,Extreme=4): ');
-          const locationStr = await rli.question('Enter location (RJ=0,SP=1,MG=2,RS=3): ');
-          const price = await readBigInt(rli, 'Enter price: ');
-          const cert: PrivateBuyer.NonFungibleToken_Certificate = {
-            id: idStr.trim(),
-            source: Number(sourceStr.trim()) as PrivateBuyer.NonFungibleToken_Source,
-            generation,
-            vintage,
-            impact: Number(impactStr.trim()) as PrivateBuyer.NonFungibleToken_Impact,
-            location: Number(locationStr.trim()) as PrivateBuyer.NonFungibleToken_Location,
-          };
-          await api.withStatus('Minting token', () => api.mint(contract, to, tokenId, cert, price));
-          break;
-        }
-        case '2': {
-          const tokenId = await readBigInt(rli, 'Enter token ID to burn: ');
-          await api.withStatus('Burning token', () => api.burn(contract, tokenId));
-          break;
-        }
-        case '3': {
-          const tokenId = await readBigInt(rli, 'Enter token ID: ');
-          const price = await readBigInt(rli, 'Enter new price: ');
-          await api.withStatus('Setting token price', () => api.setTokenPrice(contract, tokenId, price));
-          break;
-        }
-        case '4': {
-          const ownerHex = await readHexBytes(rli, 'Enter owner public key (hex): ');
-          const owner: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> = {
-            is_left: true,
-            left: { bytes: ownerHex },
-            right: { bytes: new Uint8Array() },
-          };
-          await api.withStatus('Querying balance', () => api.balanceOf(contract, owner));
-          break;
-        }
-        case '5': {
-          const tokenId = await readBigInt(rli, 'Enter token ID: ');
-          await api.withStatus('Querying owner', () => api.ownerOf(contract, tokenId));
-          break;
-        }
-        case '6': {
-          const tokenId = await readBigInt(rli, 'Enter token ID: ');
-          await api.withStatus('Querying certificate', () => api.tokenCertificate(contract, tokenId));
-          break;
-        }
-        case '7': {
-          const tokenId = await readBigInt(rli, 'Enter token ID: ');
-          await api.withStatus('Querying price', () => api.tokenPrice(contract, tokenId));
-          break;
-        }
-        case '8':
-          await api.withStatus('Pausing token', () => api.pauseToken(contract));
-          break;
-        case '9':
-          await api.withStatus('Unpausing token', () => api.unpauseToken(contract));
-          break;
-        case '10':
-          return;
-        default:
-          console.log(`  Invalid choice: ${choice}`);
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.log(`  ✗ Failed: ${msg}\n`);
-    }
-  }
-};
-
-const poolLoop = async (
-  contract: DeployedPrivateBuyerContract,
-  rli: Interface,
-): Promise<void> => {
-  while (true) {
-    const choice = await rli.question(poolMenu());
-    try {
-      switch (choice.trim()) {
-        case '1': {
-          const tokenId = await readBigInt(rli, 'Enter token ID to add: ');
-          await api.withStatus('Adding to pool', () => api.addToPool(contract, tokenId));
-          break;
-        }
-        case '2': {
-          const tokenId = await readBigInt(rli, 'Enter token ID to remove: ');
-          await api.withStatus('Removing from pool', () => api.removeFromPool(contract, tokenId));
-          break;
-        }
-        case '3': {
-          const tokenId = await readBigInt(rli, 'Enter token ID to purchase: ');
-          const nonce = await readHexBytes(rli, 'Enter coin nonce (hex): ');
-          const color = await readHexBytes(rli, 'Enter coin color (hex): ');
-          const value = await readBigInt(rli, 'Enter coin value: ');
-          const coin: PrivateBuyer.ShieldedCoinInfo = { nonce, color, value };
-          await api.withStatus('Purchasing NFT', () => api.purchaseNFT(contract, tokenId, coin));
-          break;
-        }
-        case '4': {
-          const ids: bigint[] = [];
-          for (let i = 1; i <= 5; i++) {
-            ids.push(await readBigInt(rli, `Enter token ID ${i}: `));
-          }
-          const nonce = await readHexBytes(rli, 'Enter coin nonce (hex): ');
-          const color = await readHexBytes(rli, 'Enter coin color (hex): ');
-          const value = await readBigInt(rli, 'Enter coin value: ');
-          const coin: PrivateBuyer.ShieldedCoinInfo = { nonce, color, value };
-          await api.withStatus('Purchasing batch of 5', () =>
-            api.purchaseBatch5(contract, ids as [bigint, bigint, bigint, bigint, bigint], coin),
-          );
-          break;
-        }
-        case '5': {
-          const ids: bigint[] = [];
-          for (let i = 1; i <= 10; i++) {
-            ids.push(await readBigInt(rli, `Enter token ID ${i}: `));
-          }
-          const nonce = await readHexBytes(rli, 'Enter coin nonce (hex): ');
-          const color = await readHexBytes(rli, 'Enter coin color (hex): ');
-          const value = await readBigInt(rli, 'Enter coin value: ');
-          const coin: PrivateBuyer.ShieldedCoinInfo = { nonce, color, value };
-          await api.withStatus('Purchasing batch of 10', () =>
-            api.purchaseBatch10(
-              contract,
-              ids as [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
-              coin,
-            ),
-          );
-          break;
-        }
-        case '6': {
-          const ids: bigint[] = [];
-          for (let i = 1; i <= 20; i++) {
-            ids.push(await readBigInt(rli, `Enter token ID ${i}: `));
-          }
-          const nonce = await readHexBytes(rli, 'Enter coin nonce (hex): ');
-          const color = await readHexBytes(rli, 'Enter coin color (hex): ');
-          const value = await readBigInt(rli, 'Enter coin value: ');
-          const coin: PrivateBuyer.ShieldedCoinInfo = { nonce, color, value };
-          await api.withStatus('Purchasing batch of 20', () =>
-            api.purchaseBatch20(
-              contract,
-              ids as [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
-              coin,
-            ),
-          );
-          break;
-        }
-        case '7':
-          await api.withStatus('Withdrawing seller funds', () => api.withdrawSellerFunds(contract));
-          break;
-        case '8': {
-          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
-          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
-          await api.withStatus('Proving ownership', () => api.proofOwnership(contract, ownerCommitment, challenge));
-          break;
-        }
-        case '9': {
-          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
-          const ids: bigint[] = [];
-          for (let i = 1; i <= 5; i++) {
-            ids.push(await readBigInt(rli, `Enter token ID ${i}: `));
-          }
-          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
-          await api.withStatus('Burning purchased batch of 5', () =>
-            api.burnPurchasedBatch5(
-              contract,
-              ownerCommitment,
-              ids as [bigint, bigint, bigint, bigint, bigint],
-              challenge,
-            ),
-          );
-          break;
-        }
-        case '10': {
-          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
-          const ids: bigint[] = [];
-          for (let i = 1; i <= 10; i++) {
-            ids.push(await readBigInt(rli, `Enter token ID ${i}: `));
-          }
-          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
-          await api.withStatus('Burning purchased batch of 10', () =>
-            api.burnPurchasedBatch10(
-              contract,
-              ownerCommitment,
-              ids as [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
-              challenge,
-            ),
-          );
-          break;
-        }
-        case '11': {
-          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
-          const ids: bigint[] = [];
-          for (let i = 1; i <= 20; i++) {
-            ids.push(await readBigInt(rli, `Enter token ID ${i}: `));
-          }
-          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
-          await api.withStatus('Burning purchased batch of 20', () =>
-            api.burnPurchasedBatch20(
-              contract,
-              ownerCommitment,
-              ids as [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint],
-              challenge,
-            ),
-          );
-          break;
-        }
-        case '12':
-          await api.withStatus('Pausing NFT pool', () => api.pauseNFTPool(contract));
-          break;
-        case '13':
-          await api.withStatus('Unpausing NFT pool', () => api.unpauseNFTPool(contract));
-          break;
-        case '14':
-          return;
-        default:
-          console.log(`  Invalid choice: ${choice}`);
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.log(`  ✗ Failed: ${msg}\n`);
-    }
-  }
-};
+/*
+ * [MINIMAL DEPLOY TEST] Sub-menu loops commented out.
+ * Only grantRole is available directly from the main menu.
+ */
 
 /**
  * Deploy or join flow. Returns the contract handle, or null if the user exits.
@@ -622,10 +248,36 @@ const deployOrJoin = async (
           console.log(`  ✗ Failed to join contract: ${msg}\n`);
         }
         break;
-      case '3':
+      case '3': {
+        try {
+          const addr = await rli.question('Enter contract address (hex): ');
+          const input = await rli.question('Enter batch number (1-4) or circuit ID: ');
+          const trimmed = input.trim();
+          if (['1', '2', '3', '4'].includes(trimmed)) {
+            const circuits = api.MAINTENANCE_BATCHES[trimmed];
+            console.log(`  Inserting ${circuits.length} VKs for batch ${trimmed}...`);
+            for (const circuitId of circuits) {
+              await api.withStatus(`Inserting VK for ${circuitId}`, () =>
+                api.insertCircuitVerifierKey(providers, addr.trim(), circuitId as any),
+              );
+            }
+            console.log(`  Batch ${trimmed} complete (${circuits.length} VKs inserted).\n`);
+          } else {
+            await api.withStatus(`Inserting VK for ${trimmed}`, () =>
+              api.insertCircuitVerifierKey(providers, addr.trim(), trimmed as any),
+            );
+            console.log(`  VK for "${trimmed}" inserted successfully.\n`);
+          }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          console.log(`  ✗ VK insert failed: ${msg}\n`);
+        }
+        break;
+      }
+      case '4':
         await startDustMonitor(walletCtx.wallet, rli);
         break;
-      case '4':
+      case '5':
         return null;
       default:
         console.log(`  Invalid choice: ${choice}`);
@@ -650,26 +302,272 @@ const mainLoop = async (
   while (true) {
     const dustLabel = await getDustLabel(walletCtx.wallet);
     const choice = await rli.question(mainMenu(dustLabel));
-    switch (choice.trim()) {
-      case '1':
-        await accessControlLoop(contract, rli);
-        break;
-      case '2':
-        await identityLoop(contract, rli);
-        break;
-      case '3':
-        await tokenLoop(contract, providers, rli);
-        break;
-      case '4':
-        await poolLoop(contract, rli);
-        break;
-      case '5':
-        await api.displayLedgerSummary(providers, contract);
-        break;
-      case '6':
-        return;
-      default:
-        console.log(`  Invalid choice: ${choice}`);
+    try {
+      switch (choice.trim()) {
+        case '1': {
+          const roleId = await readHexBytes(rli, 'Enter role ID (hex): ');
+          const accountHex = await readHexBytes(rli, 'Enter account public key (hex): ');
+          const account: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> = {
+            is_left: true,
+            left: { bytes: accountHex },
+            right: { bytes: new Uint8Array() },
+          };
+          await api.withStatus('Granting role', () => api.grantRole(contract, roleId, account));
+          break;
+        }
+        case '2': {
+          const roleId = await readHexBytes(rli, 'Enter role ID (hex): ');
+          const accountHex = await readHexBytes(rli, 'Enter account public key (hex): ');
+          const account: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> = {
+            is_left: true,
+            left: { bytes: accountHex },
+            right: { bytes: new Uint8Array() },
+          };
+          await api.withStatus('Revoking role', () => api.revokeRole(contract, roleId, account));
+          break;
+        }
+        case '3': {
+          const roleId = await readHexBytes(rli, 'Enter role ID (hex): ');
+          await api.withStatus('Renouncing role', () => api.renounceRole(contract, roleId));
+          break;
+        }
+        case '4': {
+          const userHex = await readHexBytes(rli, 'Enter user public key (hex): ');
+          const user: PrivateBuyer.ZswapCoinPublicKey = { bytes: userHex };
+          await api.withStatus('Setting user', () => api.setUser(contract, user));
+          break;
+        }
+        case '5': {
+          const userHex = await readHexBytes(rli, 'Enter user public key (hex): ');
+          const user: PrivateBuyer.ZswapCoinPublicKey = { bytes: userHex };
+          await api.withStatus('Removing user', () => api.removeUser(contract, user));
+          break;
+        }
+        case '6':
+          await api.withStatus('Asserting own verification', () => api.assertOwnVerification(contract));
+          break;
+        case '7': {
+          const toHex = await readHexBytes(rli, 'Enter recipient public key (hex): ');
+          const to: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> = {
+            is_left: true,
+            left: { bytes: toHex },
+            right: { bytes: new Uint8Array() },
+          };
+          const tokenId = await readBigInt(rli, 'Enter token ID: ');
+          const idStr = await rli.question('Enter certificate ID: ');
+          const sourceStr = await rli.question('Enter source (Solar=0,Wind=1,Hydro=2,Biomass=3,Geothermal=4,Nuclear=5): ');
+          const generation = await readBigInt(rli, 'Enter generation: ');
+          const vintage = await readBigInt(rli, 'Enter vintage: ');
+          const impactStr = await rli.question('Enter impact (Minimal=0,Low=1,Medium=2,High=3,Extreme=4): ');
+          const locationStr = await rli.question('Enter location (RJ=0,SP=1,MG=2,RS=3): ');
+          const price = await readBigInt(rli, 'Enter price: ');
+          const cert: PrivateBuyer.NonFungibleToken_Certificate = {
+            id: idStr.trim(),
+            source: Number(sourceStr.trim()) as PrivateBuyer.NonFungibleToken_Source,
+            generation,
+            vintage,
+            impact: Number(impactStr.trim()) as PrivateBuyer.NonFungibleToken_Impact,
+            location: Number(locationStr.trim()) as PrivateBuyer.NonFungibleToken_Location,
+          };
+          await api.withStatus('Minting token', () => api.mint(contract, to, tokenId, cert, price));
+          break;
+        }
+        case '8': {
+          const tokenId = await readBigInt(rli, 'Enter token ID to burn: ');
+          await api.withStatus('Burning token', () => api.burn(contract, tokenId));
+          break;
+        }
+        case '9': {
+          const tokenId = await readBigInt(rli, 'Enter token ID: ');
+          const price = await readBigInt(rli, 'Enter new price: ');
+          await api.withStatus('Setting token price', () => api.setTokenPrice(contract, tokenId, price));
+          break;
+        }
+        case '10': {
+          const tokenId = await readBigInt(rli, 'Enter token ID to add: ');
+          await api.withStatus('Adding to pool', () => api.addToPool(contract, tokenId));
+          break;
+        }
+        case '11': {
+          const tokenId = await readBigInt(rli, 'Enter token ID to remove: ');
+          await api.withStatus('Removing from pool', () => api.removeFromPool(contract, tokenId));
+          break;
+        }
+        case '12': {
+          const tokenId = await readBigInt(rli, 'Enter token ID to purchase: ');
+          const nonce = await readHexBytes(rli, 'Enter coin nonce (hex): ');
+          const color = await readHexBytes(rli, 'Enter coin color (hex): ');
+          const value = await readBigInt(rli, 'Enter coin value: ');
+          const coin: PrivateBuyer.ShieldedCoinInfo = { nonce, color, value };
+          await api.withStatus('Purchasing NFT', () => api.purchaseNFT(contract, tokenId, coin));
+          break;
+        }
+        case '13':
+          await api.withStatus('Withdrawing seller funds', () => api.withdrawSellerFunds(contract));
+          break;
+        case '14': {
+          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
+          const tokenId = await readBigInt(rli, 'Enter token ID to burn: ');
+          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
+          await api.withStatus('Burning purchased token', () =>
+            api.burnPurchased(contract, ownerCommitment, tokenId, challenge),
+          );
+          break;
+        }
+        case '15': {
+          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
+          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
+          await api.withStatus('Proving ownership', () => api.proofOwnership(contract, ownerCommitment, challenge));
+          break;
+        }
+        case '16':
+          await api.withStatus('Pausing Access Control', () => api.pauseAccessControl(contract));
+          break;
+        case '17':
+          await api.withStatus('Unpausing Access Control', () => api.unpauseAccessControl(contract));
+          break;
+        case '18':
+          await api.withStatus('Pausing Identity', () => api.pauseIdentity(contract));
+          break;
+        case '19':
+          await api.withStatus('Unpausing Identity', () => api.unpauseIdentity(contract));
+          break;
+        case '20':
+          await api.withStatus('Pausing Token', () => api.pauseToken(contract));
+          break;
+        case '21':
+          await api.withStatus('Unpausing Token', () => api.unpauseToken(contract));
+          break;
+        case '22':
+          await api.withStatus('Pausing NFT Pool', () => api.pauseNFTPool(contract));
+          break;
+        case '23':
+          await api.withStatus('Unpausing NFT Pool', () => api.unpauseNFTPool(contract));
+          break;
+        case '24': {
+          const userHex = await readHexBytes(rli, 'Enter user public key (hex): ');
+          const user: PrivateBuyer.ZswapCoinPublicKey = { bytes: userHex };
+          await api.withStatus('Checking user verification', () => api.isUserVerified(contract, user));
+          break;
+        }
+        case '25': {
+          const ownerHex = await readHexBytes(rli, 'Enter owner public key (hex): ');
+          const owner: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> = {
+            is_left: true,
+            left: { bytes: ownerHex },
+            right: { bytes: new Uint8Array() },
+          };
+          await api.withStatus('Querying balance', () => api.balanceOf(contract, owner));
+          break;
+        }
+        case '26': {
+          const tokenId = await readBigInt(rli, 'Enter token ID: ');
+          await api.withStatus('Querying owner', () => api.ownerOf(contract, tokenId));
+          break;
+        }
+        case '27': {
+          const tokenId = await readBigInt(rli, 'Enter token ID: ');
+          await api.withStatus('Querying certificate', () => api.tokenCertificate(contract, tokenId));
+          break;
+        }
+        case '28': {
+          const tokenId = await readBigInt(rli, 'Enter token ID: ');
+          await api.withStatus('Querying price', () => api.tokenPrice(contract, tokenId));
+          break;
+        }
+        case '29': {
+          const tokenIdsStr = await rli.question('Enter token IDs (comma-separated, up to 5): ');
+          const tokenIds = tokenIdsStr.split(',').map((s) => BigInt(s.trim())).filter((id) => id > 0n);
+          const nonce = await readHexBytes(rli, 'Enter coin nonce (hex): ');
+          const color = await readHexBytes(rli, 'Enter coin color (hex): ');
+          const value = await readBigInt(rli, 'Enter coin value: ');
+          const coin: PrivateBuyer.ShieldedCoinInfo = { nonce, color, value };
+          await api.withStatus('Batch purchasing 5', () => api.purchaseBatch5(contract, tokenIds, coin));
+          break;
+        }
+        case '30': {
+          const tokenIdsStr = await rli.question('Enter token IDs (comma-separated, up to 10): ');
+          const tokenIds = tokenIdsStr.split(',').map((s) => BigInt(s.trim())).filter((id) => id > 0n);
+          const nonce = await readHexBytes(rli, 'Enter coin nonce (hex): ');
+          const color = await readHexBytes(rli, 'Enter coin color (hex): ');
+          const value = await readBigInt(rli, 'Enter coin value: ');
+          const coin: PrivateBuyer.ShieldedCoinInfo = { nonce, color, value };
+          await api.withStatus('Batch purchasing 10', () => api.purchaseBatch10(contract, tokenIds, coin));
+          break;
+        }
+        case '31': {
+          const tokenIdsStr = await rli.question('Enter token IDs (comma-separated, up to 20): ');
+          const tokenIds = tokenIdsStr.split(',').map((s) => BigInt(s.trim())).filter((id) => id > 0n);
+          const nonce = await readHexBytes(rli, 'Enter coin nonce (hex): ');
+          const color = await readHexBytes(rli, 'Enter coin color (hex): ');
+          const value = await readBigInt(rli, 'Enter coin value: ');
+          const coin: PrivateBuyer.ShieldedCoinInfo = { nonce, color, value };
+          await api.withStatus('Batch purchasing 20', () => api.purchaseBatch20(contract, tokenIds, coin));
+          break;
+        }
+        case '32': {
+          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
+          const tokenIdsStr = await rli.question('Enter token IDs (comma-separated, up to 5): ');
+          const tokenIds = tokenIdsStr.split(',').map((s) => BigInt(s.trim())).filter((id) => id > 0n);
+          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
+          await api.withStatus('Batch burning 5', () =>
+            api.burnPurchasedBatch5(contract, ownerCommitment, tokenIds, challenge),
+          );
+          break;
+        }
+        case '33': {
+          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
+          const tokenIdsStr = await rli.question('Enter token IDs (comma-separated, up to 10): ');
+          const tokenIds = tokenIdsStr.split(',').map((s) => BigInt(s.trim())).filter((id) => id > 0n);
+          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
+          await api.withStatus('Batch burning 10', () =>
+            api.burnPurchasedBatch10(contract, ownerCommitment, tokenIds, challenge),
+          );
+          break;
+        }
+        case '34': {
+          const ownerCommitment = await readHexBytes(rli, 'Enter owner commitment (hex): ');
+          const tokenIdsStr = await rli.question('Enter token IDs (comma-separated, up to 20): ');
+          const tokenIds = tokenIdsStr.split(',').map((s) => BigInt(s.trim())).filter((id) => id > 0n);
+          const challenge = await readHexBytes(rli, 'Enter challenge (hex): ');
+          await api.withStatus('Batch burning 20', () =>
+            api.burnPurchasedBatch20(contract, ownerCommitment, tokenIds, challenge),
+          );
+          break;
+        }
+        case '35': {
+          const contractAddress = contract.deployTxData.public.contractAddress;
+          console.log(`  Contract address: ${contractAddress}`);
+          const input = await rli.question('Enter batch number (1-4) or circuit ID: ');
+          const trimmed = input.trim();
+          if (['1', '2', '3', '4'].includes(trimmed)) {
+            const circuits = api.MAINTENANCE_BATCHES[trimmed];
+            console.log(`  Inserting ${circuits.length} VKs for batch ${trimmed}...`);
+            for (const circuitId of circuits) {
+              await api.withStatus(`Inserting VK for ${circuitId}`, () =>
+                api.insertCircuitVerifierKey(providers, contractAddress, circuitId as any),
+              );
+            }
+            console.log(`  Batch ${trimmed} complete (${circuits.length} VKs inserted).\n`);
+          } else {
+            await api.withStatus(`Inserting VK for ${trimmed}`, () =>
+              api.insertCircuitVerifierKey(providers, contractAddress, trimmed as any),
+            );
+            console.log(`  VK for "${trimmed}" inserted successfully.\n`);
+          }
+          break;
+        }
+        case '36':
+          await api.displayLedgerSummary(providers, contract);
+          break;
+        case '37':
+          return;
+        default:
+          console.log(`  Invalid choice: ${choice}`);
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log(`  ✗ Failed: ${msg}\n`);
     }
   }
 };

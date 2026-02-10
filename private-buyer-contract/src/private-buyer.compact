@@ -84,6 +84,10 @@ constructor(_name: Opaque<"string">, _symbol: Opaque<"string">) {
   NFTPool_initialize();
 }
 
+// ═══════════════════════════════════════════════════════════════
+// DEPLOY BATCH (14 circuits) — Initial deployment
+// ═══════════════════════════════════════════════════════════════
+
 ///////////////////////////////////////////////////////////////////////////////
 // CIRCUITS ACCESS CONTROL
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,39 +133,15 @@ export circuit renounceRole(roleId: Bytes<32>,): [] {
 /**
 * @description: Reverts if `ownPublicKey()` is missing `roleId`.
 *
+* @notice: Non-export circuit — inlined by callers, no VK needed.
+*
 * @requirements:
 * - Wrapper call
 * @param {Bytes<32>} roleId - The role identifier.
 * @return {[]} - Empty tuple.
 */
-export circuit assertOnlyRole(roleId: Bytes<32>): [] {
+circuit assertOnlyRole(roleId: Bytes<32>): [] {
   AccessControl_assertOnlyRole(roleId);
-}
-
-/**
-* @description: Pause Access Control calls.
-*
-* @notice: Only Admin master role can pause Access Control calls.
-*
-* @requirements:
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit pauseAccessControl(): [] {
-  AccessControl_pauseAccessControl();
-}
-
-/**
-* @description: Unpause Access Control calls.
-*
-* @notice: Only Admin master role can unpause Access Control calls.
-*
-* @requirements:
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit unpauseAccessControl(): [] {
-  AccessControl_unpauseAccessControl();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -176,18 +156,6 @@ export circuit unpauseAccessControl(): [] {
 */
 export circuit assertOwnVerification(): [] {
   Identity_assertOwnVerification();
-}
-
-/**
-* @description: This circuit verifies if the user passed as parameter is a member of the verified users set
-*
-* @requirements:
-* - Wrapper call
-* @param {ZswapCoinPublicKey} user - User public key.
-* @return {Boolean}
-*/
-export circuit isUserVerified(user: ZswapCoinPublicKey): Boolean {
-  return Identity_isUserVerified(user);
 }
 
 /**
@@ -222,87 +190,9 @@ export circuit removeUser(user: ZswapCoinPublicKey): [] {
   Identity_removeUser(user);
 }
 
-/**
-* @description: Pause Identity calls.
-*
-* @notice: Only Admin master role can pause Identity calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit pauseIdentity(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  Identity_pauseIdentity();
-}
-
-/**
-* @description: Unpause Identity calls.
-*
-* @notice: Only Admin master role can unpause Identity calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit unpauseIdentity(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  Identity_unpauseIdentity();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // CIRCUITS TOKEN
 ///////////////////////////////////////////////////////////////////////////////
-
-/**
-* @description Returns the number of tokens in `owner`'s account.
-*
-* @requirements:
-* - Wrapper call
-* @param {Either<ZswapCoinPublicKey, ContractAddress>)} owner - The account to query.
-* @return {Uint<128>} - The number of tokens in `owner`'s account.
-*/
-export circuit balanceOf(owner: Either<ZswapCoinPublicKey, ContractAddress>): Uint<128> {
-  return NonFungibleToken_balanceOf(owner);
-}
-
-/**
-* @description Returns the owner of the `tokenId` token.
-*
-* @requirements:
-* - Wrapper call
-* @param {Uint<128>} tokenId - The identifier for a token.
-* @return {Either<ZswapCoinPublicKey, ContractAddress>} - The account that owns the token.
-*/
-export circuit ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
-  return NonFungibleToken_ownerOf(tokenId);
-}
-
-/**
-* @description Returns the token Certificate for the given `tokenId`.
-*
-* @requirements:
-* - Wrapper call
-* @param {Uint<128>} tokenId - The identifier for a token.
-* @return {Certificate} - the token metadata
-*/
-export circuit tokenCertificate(tokenId: Uint<128>): NonFungibleToken_Certificate {
-  return NonFungibleToken_tokenCertificate(tokenId);
-}
-
-/**
-* @description Returns the token Price for the given `tokenId`.
-*
-* @requirements:
-* - Wrapper call
-* @param {Uint<128>} tokenId - The identifier for a token.
-* @return {Uint<64>} - the price of the token
-*/
-export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
-  return NonFungibleToken_tokenPrice(tokenId);
-}
 
 /**
 * @description Mints `tokenId` and transfers it to `to`.
@@ -369,36 +259,6 @@ export circuit burn(tokenId: Uint<128>): [] {
 export circuit setTokenPrice(tokenId: Uint<128>, price: Uint<64>): [] {
   assertOnlyRole(2 as Field as Bytes<32>);
   NonFungibleToken__setTokenPrice(tokenId, price);
-}
-
-/**
-* @description: Pause Token calls.
-*
-* @notice: Only Admin master role can pause Token calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit pauseToken(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  NonFungibleToken_pauseToken();
-}
-
-/**
-* @description: Unpause Token calls.
-*
-* @notice: Only Admin master role can unpause Token calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit unpauseToken(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  NonFungibleToken_unpauseToken();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -496,6 +356,257 @@ export circuit purchaseNFT(tokenId: Uint<128>, coin: ShieldedCoinInfo): Bytes<32
   // Execute pool purchase (marks sold, computes commitment, etc.)
   return NFTPool_purchaseNFT(tokenId);
 }
+
+/**
+* @description: Seller withdraws accumulated payment balance
+*
+* @notice: Caller (seller) withdraws their earnings via sendShielded.
+*
+* @requirements:
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit withdrawSellerFunds(): [] {
+  NFTPool_withdrawSellerFunds();
+}
+
+/**
+* @description: Burn a single purchased token authorized by the commitment owner.
+*
+* @notice: Executed by the Minter/Burner bot (role 1) on behalf of the buyer.
+* The buyer must have previously called proofOwnership(commitment, challenge) to authorize.
+*
+* @requirements:
+* - Caller must have Minter role (role 1)
+* - Buyer must have called proofOwnership with this commitment and challenge
+* - Token must belong to this commitment
+* @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+* @param {Uint<128>} tokenId - The token to burn
+* @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
+* @return {[]} - Empty tuple.
+*/
+export circuit burnPurchased(
+  ownerCommitment: Bytes<32>,
+  tokenId: Uint<128>,
+  challenge: Bytes<32>
+): [] {
+  assertOnlyRole(1 as Field as Bytes<32>);
+  assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
+  const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
+  assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
+  assert(NFTPool__nftOwnerCommitment.member(disclose(tokenId)), "Token not purchased");
+  const storedCommitment = NFTPool__nftOwnerCommitment.lookup(disclose(tokenId));
+  assert(storedCommitment == disclose(ownerCommitment), "Token not owned by this commitment");
+  const seller = NonFungibleToken__owners.lookup(disclose(tokenId));
+  NFTPool_recordBurn(tokenId, seller, ownerCommitment, challenge);
+  NonFungibleToken_burn(tokenId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAINTENANCE BATCH 1 — Ownership & Emergency (9 circuits)
+// Insert via: submitInsertVerifierKeyTx after deploy
+// ═══════════════════════════════════════════════════════════════
+
+/**
+* @description: Proof of NFT ownership
+*
+* @notice: Delegates to NFTPool module.
+*
+* @requirements:
+* - Wrapper call
+* @param {Bytes<32>} ownerCommitment - The ownership commitment
+* @param {Bytes<32>} challenge - The challenge for ZK proof
+* @return {[]} - Empty tuple.
+*/
+export circuit proofOwnership(ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
+  return NFTPool_proofOwnership(ownerCommitment, challenge);
+}
+
+/**
+* @description: Pause Access Control calls.
+*
+* @notice: Only Admin master role can pause Access Control calls.
+*
+* @requirements:
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit pauseAccessControl(): [] {
+  AccessControl_pauseAccessControl();
+}
+
+/**
+* @description: Unpause Access Control calls.
+*
+* @notice: Only Admin master role can unpause Access Control calls.
+*
+* @requirements:
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit unpauseAccessControl(): [] {
+  AccessControl_unpauseAccessControl();
+}
+
+/**
+* @description: Pause Identity calls.
+*
+* @notice: Only Admin master role can pause Identity calls.
+*
+* @requirements:
+* - The caller must have `Admins master role`.
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit pauseIdentity(): [] {
+  assertOnlyRole(default<Bytes<32>>);
+  Identity_pauseIdentity();
+}
+
+/**
+* @description: Unpause Identity calls.
+*
+* @notice: Only Admin master role can unpause Identity calls.
+*
+* @requirements:
+* - The caller must have `Admins master role`.
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit unpauseIdentity(): [] {
+  assertOnlyRole(default<Bytes<32>>);
+  Identity_unpauseIdentity();
+}
+
+/**
+* @description: Pause Token calls.
+*
+* @notice: Only Admin master role can pause Token calls.
+*
+* @requirements:
+* - The caller must have `Admins master role`.
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit pauseToken(): [] {
+  assertOnlyRole(default<Bytes<32>>);
+  NonFungibleToken_pauseToken();
+}
+
+/**
+* @description: Unpause Token calls.
+*
+* @notice: Only Admin master role can unpause Token calls.
+*
+* @requirements:
+* - The caller must have `Admins master role`.
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit unpauseToken(): [] {
+  assertOnlyRole(default<Bytes<32>>);
+  NonFungibleToken_unpauseToken();
+}
+
+/**
+* @description: Pause NFTPool calls.
+*
+* @notice: Only Admin master role can pause NFTPool calls.
+*
+* @requirements:
+* - The caller must have `Admins master role`.
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit pauseNFTPool(): [] {
+  assertOnlyRole(default<Bytes<32>>);
+  NFTPool_pauseNFTPool();
+}
+
+/**
+* @description: Unpause NFTPool calls.
+*
+* @notice: Only Admin master role can unpause NFTPool calls.
+*
+* @requirements:
+* - The caller must have `Admins master role`.
+* - Wrapper call
+* @return {[]} - Empty tuple.
+*/
+export circuit unpauseNFTPool(): [] {
+  assertOnlyRole(default<Bytes<32>>);
+  NFTPool_unpauseNFTPool();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAINTENANCE BATCH 2 — Queries (5 circuits)
+// Insert via: submitInsertVerifierKeyTx after deploy
+// ═══════════════════════════════════════════════════════════════
+
+/**
+* @description: This circuit verifies if the user passed as parameter is a member of the verified users set
+*
+* @requirements:
+* - Wrapper call
+* @param {ZswapCoinPublicKey} user - User public key.
+* @return {Boolean}
+*/
+export circuit isUserVerified(user: ZswapCoinPublicKey): Boolean {
+  return Identity_isUserVerified(user);
+}
+
+/**
+* @description Returns the number of tokens in `owner`'s account.
+*
+* @requirements:
+* - Wrapper call
+* @param {Either<ZswapCoinPublicKey, ContractAddress>)} owner - The account to query.
+* @return {Uint<128>} - The number of tokens in `owner`'s account.
+*/
+export circuit balanceOf(owner: Either<ZswapCoinPublicKey, ContractAddress>): Uint<128> {
+  return NonFungibleToken_balanceOf(owner);
+}
+
+/**
+* @description Returns the owner of the `tokenId` token.
+*
+* @requirements:
+* - Wrapper call
+* @param {Uint<128>} tokenId - The identifier for a token.
+* @return {Either<ZswapCoinPublicKey, ContractAddress>} - The account that owns the token.
+*/
+export circuit ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
+  return NonFungibleToken_ownerOf(tokenId);
+}
+
+/**
+* @description Returns the token Certificate for the given `tokenId`.
+*
+* @requirements:
+* - Wrapper call
+* @param {Uint<128>} tokenId - The identifier for a token.
+* @return {Certificate} - the token metadata
+*/
+export circuit tokenCertificate(tokenId: Uint<128>): NonFungibleToken_Certificate {
+  return NonFungibleToken_tokenCertificate(tokenId);
+}
+
+/**
+* @description Returns the token Price for the given `tokenId`.
+*
+* @requirements:
+* - Wrapper call
+* @param {Uint<128>} tokenId - The identifier for a token.
+* @return {Uint<64>} - the price of the token
+*/
+export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
+  return NonFungibleToken_tokenPrice(tokenId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAINTENANCE BATCH 3 — Batch Purchase (6 circuits)
+// Insert via: submitInsertVerifierKeyTx after deploy
+// ═══════════════════════════════════════════════════════════════
 
 ///////////////////////////////////////////////////////////////////////////////
 // BATCH HELPERS
@@ -811,63 +922,10 @@ export circuit purchaseBatch20(
   return ownerCommitment;
 }
 
-/**
-* @description: Seller withdraws accumulated payment balance
-*
-* @notice: Caller (seller) withdraws their earnings via sendShielded.
-*
-* @requirements:
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit withdrawSellerFunds(): [] {
-  NFTPool_withdrawSellerFunds();
-}
-
-/**
-* @description: Proof of NFT ownership
-*
-* @notice: Delegates to NFTPool module.
-*
-* @requirements:
-* - Wrapper call
-* @param {Bytes<32>} ownerCommitment - The ownership commitment
-* @param {Bytes<32>} challenge - The challenge for ZK proof
-* @return {[]} - Empty tuple.
-*/
-export circuit proofOwnership(ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
-  return NFTPool_proofOwnership(ownerCommitment, challenge);
-}
-
-/**
-* @description: Pause NFTPool calls.
-*
-* @notice: Only Admin master role can pause NFTPool calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit pauseNFTPool(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  NFTPool_pauseNFTPool();
-}
-
-/**
-* @description: Unpause NFTPool calls.
-*
-* @notice: Only Admin master role can unpause NFTPool calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit unpauseNFTPool(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  NFTPool_unpauseNFTPool();
-}
+// ═══════════════════════════════════════════════════════════════
+// MAINTENANCE BATCH 4 — Batch Burn (4 circuits)
+// Insert via: submitInsertVerifierKeyTx after deploy
+// ═══════════════════════════════════════════════════════════════
 
 ///////////////////////////////////////////////////////////////////////////////
 // BURN PURCHASED TOKENS (BOT-EXECUTED, BUYER-AUTHORIZED VIA CHALLENGE)
@@ -909,11 +967,6 @@ export circuit _burnPurchasedToken(tokenId: Uint<128>, ownerCommitment: Bytes<32
 * The buyer must have previously called proofOwnership(commitment, challenge) to authorize.
 * The bot passes the same challenge, and the contract verifies it matches.
 * Mock tokens (tokenId == 0) are skipped.
-*
-* Flow:
-* 1. Buyer calls proofOwnership(commitment, challenge) → stores challenge on-chain
-* 2. Bot reads challenge from DB, calls burnPurchasedBatch with same challenge
-* 3. Contract verifies challenge matches → confirms buyer authorized this burn
 *
 * @requirements:
 * - Caller must have Minter role (role 1)
