@@ -1,10 +1,10 @@
 # Track source contract files only (frontend copies during build)
-counter-contract/src/managed/counter/keys/*.prover filter=lfs diff=lfs merge=lfs -text
-counter-contract/src/managed/counter/keys/*.verifier filter=lfs diff=lfs merge=lfs -text
-counter-contract/src/managed/counter/zkir/*.bzkir filter=lfs diff=lfs merge=lfs -text
-counter-contract/src/managed/counter/zkir/*.zkir filter=lfs diff=lfs merge=lfs -text
-
 bucket-defi-contract/src/managed/bucket-defi/keys/*.prover filter=lfs diff=lfs merge=lfs -text
 bucket-defi-contract/src/managed/bucket-defi/keys/*.verifier filter=lfs diff=lfs merge=lfs -text
 bucket-defi-contract/src/managed/bucket-defi/zkir/*.bzkir filter=lfs diff=lfs merge=lfs -text
 bucket-defi-contract/src/managed/bucket-defi/zkir/*.zkir filter=lfs diff=lfs merge=lfs -text
+
+private-buyer-contract/src/managed/private-buyer/keys/*.prover filter=lfs diff=lfs merge=lfs -text
+private-buyer-contract/src/managed/private-buyer/keys/*.verifier filter=lfs diff=lfs merge=lfs -text
+private-buyer-contract/src/managed/private-buyer/zkir/*.bzkir filter=lfs diff=lfs merge=lfs -text
+private-buyer-contract/src/managed/private-buyer/zkir/*.zkir filter=lfs diff=lfs merge=lfs -text
