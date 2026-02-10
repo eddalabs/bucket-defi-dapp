@@ -26,7 +26,6 @@ module NFTPool {
   import CompactStandardLibrary;
   import "./Initializable" prefix Initializable_;
   import "./Pausable" prefix Pausable_;
-  import "../token-nft/NonFungibleToken" prefix NonFungibleToken_;
 
   ///////////////////////////////////////////////////////////////////////////////
   // PUBLIC STATE
@@ -94,6 +93,58 @@ module NFTPool {
   * @type: {Map<tokenId, isSold>}
   */
   export ledger _tokenSold: Map<Uint<128>, Boolean>;
+
+  /**
+  * @description: Lifecycle counter per token
+  *
+  * @notice: Incremented each time a token completes a full cycle (mint → sell → burn).
+  * Used as the index for lifecycle history maps.
+  *
+  * @type: {Uint<128>} tokenId - The token ID
+  * @type: {Uint<64>} lifecycle - Number of completed cycles
+  * @type: {Map<tokenId, lifecycle>}
+  */
+  export ledger _tokenLifecycle: Map<Uint<128>, Uint<64>>;
+
+  /**
+  * @description: Historical seller account per token per lifecycle
+  *
+  * @notice: Records which seller (public account) owned the token in each lifecycle.
+  *
+  * @type: {Uint<128>} tokenId - The token ID
+  * @type: {Uint<64>} lifecycle - The lifecycle index
+  * @type: {Either<ZswapCoinPublicKey, ContractAddress>} seller - The seller's identity
+  * @type: {Map<tokenId, Map<lifecycle, seller>>}
+  */
+  export ledger _lifecycleSeller: Map<Uint<128>, Map<Uint<64>, Either<ZswapCoinPublicKey, ContractAddress>>>;
+
+  /**
+  * @description: Historical buyer commitment per token per lifecycle
+  *
+  * @notice: Records which buyer commitment (hash) owned the token in each lifecycle.
+  * The buyer can recompute their commitment locally from (pubKey, nonce, counter) to
+  * find which lifecycle is theirs without disclosing their identity.
+  *
+  * @type: {Uint<128>} tokenId - The token ID
+  * @type: {Uint<64>} lifecycle - The lifecycle index
+  * @type: {Bytes<32>} commitment - The buyer's ownership commitment
+  * @type: {Map<tokenId, Map<lifecycle, commitment>>}
+  */
+  export ledger _lifecycleCommitment: Map<Uint<128>, Map<Uint<64>, Bytes<32>>>;
+
+  /**
+  * @description: Historical burn challenge per token per lifecycle
+  *
+  * @notice: Records the challenge used to authorize the burn in each lifecycle.
+  * Together with _lifecycleSeller and _lifecycleCommitment, provides a complete
+  * audit trail: who sold it, who bought it (as hash), and how the burn was authorized.
+  *
+  * @type: {Uint<128>} tokenId - The token ID
+  * @type: {Uint<64>} lifecycle - The lifecycle index
+  * @type: {Bytes<32>} challenge - The burn challenge
+  * @type: {Map<tokenId, Map<lifecycle, challenge>>}
+  */
+  export ledger _lifecycleBurnChallenge: Map<Uint<128>, Map<Uint<64>, Bytes<32>>>;
 
   /**
   * @description: Per-seller accumulated payment balance (shielded coin)
@@ -420,25 +471,67 @@ module NFTPool {
   }
 
   /**
-   * @description: Clean up sold token data when burning a purchased token
+   * @description: Record the burn of a purchased token with full lifecycle history
    *
-   * @notice: Called from top-level burn circuits to clear pool state for a purchased token.
-   * Does NOT clean up _commitmentToCounter or _authVerifications (audit trail preserved).
+   * @notice: Called from top-level burn circuits. Stores the complete lifecycle data
+   * (seller, buyer commitment, challenge) indexed by (tokenId, lifecycleIndex), then
+   * resets current-state maps so the token can be re-minted in a new cycle.
+   *
+   * After this call:
+   *   - _lifecycleSeller[tokenId][cycle] = seller who listed the token
+   *   - _lifecycleCommitment[tokenId][cycle] = buyer commitment hash
+   *   - _lifecycleBurnChallenge[tokenId][cycle] = challenge used to authorize burn
+   *   - _tokenLifecycle[tokenId] = cycle + 1 (ready for next lifecycle)
+   *   - _tokenSold[tokenId] = false (allows re-listing)
+   *   - _nftOwnerCommitment[tokenId] = default (prevents stale commitment attacks)
    *
    * @requirements:
    * - Contract is initialized.
    * - Contract is not paused.
-   * @param {Uint<128>} tokenId - The token ID to clean up
+   * @param {Uint<128>} tokenId - The token ID being burned
+   * @param {Either<ZswapCoinPublicKey, ContractAddress>} seller - The seller's identity
+   * @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+   * @param {Bytes<32>} challenge - The challenge used to authorize the burn
    * @return {[]} - Empty tuple.
    */
-  export circuit cleanupSoldToken(tokenId: Uint<128>): [] {
+  export circuit recordBurn(
+    tokenId: Uint<128>,
+    seller: Either<ZswapCoinPublicKey, ContractAddress>,
+    ownerCommitment: Bytes<32>,
+    challenge: Bytes<32>
+  ): [] {
     Initializable_assertInitialized();
     Pausable_assertNotPaused();
 
-    // Clear sold status
-    _tokenSold.insert(disclose(tokenId), false);
+    // Get current lifecycle index (0 if first cycle)
+    const lifecycle = _getTokenLifecycle(tokenId);
 
-    // Clear commitment mapping
+    // Store seller history
+    if (!_lifecycleSeller.member(disclose(tokenId))) {
+      _lifecycleSeller.insert(
+        disclose(tokenId), default<Map<Uint<64>, Either<ZswapCoinPublicKey, ContractAddress>>>);
+    }
+    _lifecycleSeller.lookup(disclose(tokenId)).insert(disclose(lifecycle), disclose(seller));
+
+    // Store buyer commitment history
+    if (!_lifecycleCommitment.member(disclose(tokenId))) {
+      _lifecycleCommitment.insert(
+        disclose(tokenId), default<Map<Uint<64>, Bytes<32>>>);
+    }
+    _lifecycleCommitment.lookup(disclose(tokenId)).insert(disclose(lifecycle), disclose(ownerCommitment));
+
+    // Store burn challenge history
+    if (!_lifecycleBurnChallenge.member(disclose(tokenId))) {
+      _lifecycleBurnChallenge.insert(
+        disclose(tokenId), default<Map<Uint<64>, Bytes<32>>>);
+    }
+    _lifecycleBurnChallenge.lookup(disclose(tokenId)).insert(disclose(lifecycle), disclose(challenge));
+
+    // Advance lifecycle counter
+    _tokenLifecycle.insert(disclose(tokenId), disclose(lifecycle) + 1 as Uint<64>);
+
+    // Reset current-state maps for next cycle
+    _tokenSold.insert(disclose(tokenId), false);
     _nftOwnerCommitment.insert(disclose(tokenId), default<Bytes<32>>);
   }
 
@@ -525,6 +618,21 @@ module NFTPool {
       return _tokenSold.lookup(disclose(tokenId));
     }
     return false;
+  }
+
+  /**
+   * @description: Get the current lifecycle index for a token
+   *
+   * @notice: Returns 0 if the token has never completed a cycle.
+   *
+   * @param {Uint<128>} tokenId - The token ID
+   * @return {Uint<64>} lifecycle - The current lifecycle index
+   */
+  export circuit _getTokenLifecycle(tokenId: Uint<128>): Uint<64> {
+    if (_tokenLifecycle.member(disclose(tokenId))) {
+      return _tokenLifecycle.lookup(disclose(tokenId));
+    }
+    return 0;
   }
 
   /**

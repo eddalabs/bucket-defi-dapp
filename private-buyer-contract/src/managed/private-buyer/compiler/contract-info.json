@@ -149,56 +149,6 @@
       }
     },
     {
-      "name": "setRoleAdmin",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "roleId",
-          "type": {
-            "type-name": "Bytes",
-            "length": 32
-          }
-        },
-        {
-          "name": "adminRole",
-          "type": {
-            "type-name": "Bytes",
-            "length": 32
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "removeRoleAdmin",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "roleId",
-          "type": {
-            "type-name": "Bytes",
-            "length": 32
-          }
-        },
-        {
-          "name": "adminRole",
-          "type": {
-            "type-name": "Bytes",
-            "length": 32
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
       "name": "assertOnlyRole",
       "pure": false,
       "arguments": [
@@ -1388,6 +1338,13 @@
         },
         {
           "name": "ownerCommitment",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        },
+        {
+          "name": "challenge",
           "type": {
             "type-name": "Bytes",
             "length": 32
