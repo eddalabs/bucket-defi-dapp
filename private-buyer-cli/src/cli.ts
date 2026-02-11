@@ -251,29 +251,8 @@ const deployOrJoin = async (
       case '3': {
         try {
           const addr = await rli.question('Enter contract address (hex): ');
-          const input = await rli.question('Enter batch number (1-4) or circuit ID: ');
-          const trimmed = input.trim();
-          if (['1', '2', '3', '4'].includes(trimmed)) {
-            const circuits = api.MAINTENANCE_BATCHES[trimmed];
-            console.log(`  Inserting ${circuits.length} VKs for batch ${trimmed}...`);
-            for (let i = 0; i < circuits.length; i++) {
-              const circuitId = circuits[i];
-              await api.withStatus(`Inserting VK for ${circuitId} (${i + 1}/${circuits.length})`, () =>
-                api.insertCircuitVerifierKey(providers, addr.trim(), circuitId as any),
-              );
-              if (i < circuits.length - 1) {
-                await api.withStatus('Waiting 10s before next VK insert', () =>
-                  new Promise((resolve) => setTimeout(resolve, 10_000)),
-                );
-              }
-            }
-            console.log(`  Batch ${trimmed} complete (${circuits.length} VKs inserted).\n`);
-          } else {
-            await api.withStatus(`Inserting VK for ${trimmed}`, () =>
-              api.insertCircuitVerifierKey(providers, addr.trim(), trimmed as any),
-            );
-            console.log(`  VK for "${trimmed}" inserted successfully.\n`);
-          }
+          const batchNum = await rli.question('Enter batch number (1-4): ');
+          await api.insertBatchVerifierKeys(providers, addr.trim(), batchNum.trim());
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
           console.log(`  ✗ VK insert failed: ${msg}\n`);
@@ -544,29 +523,8 @@ const mainLoop = async (
         case '35': {
           const contractAddress = contract.deployTxData.public.contractAddress;
           console.log(`  Contract address: ${contractAddress}`);
-          const input = await rli.question('Enter batch number (1-4) or circuit ID: ');
-          const trimmed = input.trim();
-          if (['1', '2', '3', '4'].includes(trimmed)) {
-            const circuits = api.MAINTENANCE_BATCHES[trimmed];
-            console.log(`  Inserting ${circuits.length} VKs for batch ${trimmed}...`);
-            for (let i = 0; i < circuits.length; i++) {
-              const circuitId = circuits[i];
-              await api.withStatus(`Inserting VK for ${circuitId} (${i + 1}/${circuits.length})`, () =>
-                api.insertCircuitVerifierKey(providers, contractAddress, circuitId as any),
-              );
-              if (i < circuits.length - 1) {
-                await api.withStatus('Waiting 10s before next VK insert', () =>
-                  new Promise((resolve) => setTimeout(resolve, 10_000)),
-                );
-              }
-            }
-            console.log(`  Batch ${trimmed} complete (${circuits.length} VKs inserted).\n`);
-          } else {
-            await api.withStatus(`Inserting VK for ${trimmed}`, () =>
-              api.insertCircuitVerifierKey(providers, contractAddress, trimmed as any),
-            );
-            console.log(`  VK for "${trimmed}" inserted successfully.\n`);
-          }
+          const batchNum = await rli.question('Enter batch number (1-4): ');
+          await api.insertBatchVerifierKeys(providers, contractAddress, batchNum.trim());
           break;
         }
         case '36':

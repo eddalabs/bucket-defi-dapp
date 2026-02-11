@@ -73,6 +73,124 @@ export type ImpureCircuits<PS> = {
                 ownerCommitment_0: Uint8Array,
                 tokenId_0: bigint,
                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  proofOwnership(context: __compactRuntime.CircuitContext<PS>,
+                 ownerCommitment_0: Uint8Array,
+                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  pauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  isUserVerified(context: __compactRuntime.CircuitContext<PS>,
+                 user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, boolean>;
+  balanceOf(context: __compactRuntime.CircuitContext<PS>,
+            owner_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, bigint>;
+  ownerOf(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, Either<ZswapCoinPublicKey,
+                                                                                                                       ContractAddress>>;
+  tokenCertificate(context: __compactRuntime.CircuitContext<PS>,
+                   tokenId_0: bigint): __compactRuntime.CircuitResults<PS, NonFungibleToken_Certificate>;
+  tokenPrice(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
+  _getBatchTokenPrice(context: __compactRuntime.CircuitContext<PS>,
+                      tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
+  _storeBatchSellerPayment(context: __compactRuntime.CircuitContext<PS>,
+                           tokenId_0: bigint,
+                           coin_0: ShieldedCoinInfo,
+                           price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  _executeBatchPurchase(context: __compactRuntime.CircuitContext<PS>,
+                        tokenId_0: bigint,
+                        ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  purchaseBatch5(context: __compactRuntime.CircuitContext<PS>,
+                 tokenId1_0: bigint,
+                 tokenId2_0: bigint,
+                 tokenId3_0: bigint,
+                 tokenId4_0: bigint,
+                 tokenId5_0: bigint,
+                 coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  purchaseBatch10(context: __compactRuntime.CircuitContext<PS>,
+                  tokenId1_0: bigint,
+                  tokenId2_0: bigint,
+                  tokenId3_0: bigint,
+                  tokenId4_0: bigint,
+                  tokenId5_0: bigint,
+                  tokenId6_0: bigint,
+                  tokenId7_0: bigint,
+                  tokenId8_0: bigint,
+                  tokenId9_0: bigint,
+                  tokenId10_0: bigint,
+                  coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  purchaseBatch20(context: __compactRuntime.CircuitContext<PS>,
+                  tokenId1_0: bigint,
+                  tokenId2_0: bigint,
+                  tokenId3_0: bigint,
+                  tokenId4_0: bigint,
+                  tokenId5_0: bigint,
+                  tokenId6_0: bigint,
+                  tokenId7_0: bigint,
+                  tokenId8_0: bigint,
+                  tokenId9_0: bigint,
+                  tokenId10_0: bigint,
+                  tokenId11_0: bigint,
+                  tokenId12_0: bigint,
+                  tokenId13_0: bigint,
+                  tokenId14_0: bigint,
+                  tokenId15_0: bigint,
+                  tokenId16_0: bigint,
+                  tokenId17_0: bigint,
+                  tokenId18_0: bigint,
+                  tokenId19_0: bigint,
+                  tokenId20_0: bigint,
+                  coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  _burnPurchasedToken(context: __compactRuntime.CircuitContext<PS>,
+                      tokenId_0: bigint,
+                      ownerCommitment_0: Uint8Array,
+                      challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch5(context: __compactRuntime.CircuitContext<PS>,
+                      ownerCommitment_0: Uint8Array,
+                      tokenId1_0: bigint,
+                      tokenId2_0: bigint,
+                      tokenId3_0: bigint,
+                      tokenId4_0: bigint,
+                      tokenId5_0: bigint,
+                      challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch10(context: __compactRuntime.CircuitContext<PS>,
+                       ownerCommitment_0: Uint8Array,
+                       tokenId1_0: bigint,
+                       tokenId2_0: bigint,
+                       tokenId3_0: bigint,
+                       tokenId4_0: bigint,
+                       tokenId5_0: bigint,
+                       tokenId6_0: bigint,
+                       tokenId7_0: bigint,
+                       tokenId8_0: bigint,
+                       tokenId9_0: bigint,
+                       tokenId10_0: bigint,
+                       challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch20(context: __compactRuntime.CircuitContext<PS>,
+                       ownerCommitment_0: Uint8Array,
+                       tokenId1_0: bigint,
+                       tokenId2_0: bigint,
+                       tokenId3_0: bigint,
+                       tokenId4_0: bigint,
+                       tokenId5_0: bigint,
+                       tokenId6_0: bigint,
+                       tokenId7_0: bigint,
+                       tokenId8_0: bigint,
+                       tokenId9_0: bigint,
+                       tokenId10_0: bigint,
+                       tokenId11_0: bigint,
+                       tokenId12_0: bigint,
+                       tokenId13_0: bigint,
+                       tokenId14_0: bigint,
+                       tokenId15_0: bigint,
+                       tokenId16_0: bigint,
+                       tokenId17_0: bigint,
+                       tokenId18_0: bigint,
+                       tokenId19_0: bigint,
+                       tokenId20_0: bigint,
+                       challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
 }
 
 export type PureCircuits = {
@@ -111,6 +229,124 @@ export type Circuits<PS> = {
                 ownerCommitment_0: Uint8Array,
                 tokenId_0: bigint,
                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  proofOwnership(context: __compactRuntime.CircuitContext<PS>,
+                 ownerCommitment_0: Uint8Array,
+                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  pauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseAccessControl(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseIdentity(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseToken(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  pauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  unpauseNFTPool(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  isUserVerified(context: __compactRuntime.CircuitContext<PS>,
+                 user_0: ZswapCoinPublicKey): __compactRuntime.CircuitResults<PS, boolean>;
+  balanceOf(context: __compactRuntime.CircuitContext<PS>,
+            owner_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, bigint>;
+  ownerOf(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, Either<ZswapCoinPublicKey,
+                                                                                                                       ContractAddress>>;
+  tokenCertificate(context: __compactRuntime.CircuitContext<PS>,
+                   tokenId_0: bigint): __compactRuntime.CircuitResults<PS, NonFungibleToken_Certificate>;
+  tokenPrice(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
+  _getBatchTokenPrice(context: __compactRuntime.CircuitContext<PS>,
+                      tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
+  _storeBatchSellerPayment(context: __compactRuntime.CircuitContext<PS>,
+                           tokenId_0: bigint,
+                           coin_0: ShieldedCoinInfo,
+                           price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  _executeBatchPurchase(context: __compactRuntime.CircuitContext<PS>,
+                        tokenId_0: bigint,
+                        ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  purchaseBatch5(context: __compactRuntime.CircuitContext<PS>,
+                 tokenId1_0: bigint,
+                 tokenId2_0: bigint,
+                 tokenId3_0: bigint,
+                 tokenId4_0: bigint,
+                 tokenId5_0: bigint,
+                 coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  purchaseBatch10(context: __compactRuntime.CircuitContext<PS>,
+                  tokenId1_0: bigint,
+                  tokenId2_0: bigint,
+                  tokenId3_0: bigint,
+                  tokenId4_0: bigint,
+                  tokenId5_0: bigint,
+                  tokenId6_0: bigint,
+                  tokenId7_0: bigint,
+                  tokenId8_0: bigint,
+                  tokenId9_0: bigint,
+                  tokenId10_0: bigint,
+                  coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  purchaseBatch20(context: __compactRuntime.CircuitContext<PS>,
+                  tokenId1_0: bigint,
+                  tokenId2_0: bigint,
+                  tokenId3_0: bigint,
+                  tokenId4_0: bigint,
+                  tokenId5_0: bigint,
+                  tokenId6_0: bigint,
+                  tokenId7_0: bigint,
+                  tokenId8_0: bigint,
+                  tokenId9_0: bigint,
+                  tokenId10_0: bigint,
+                  tokenId11_0: bigint,
+                  tokenId12_0: bigint,
+                  tokenId13_0: bigint,
+                  tokenId14_0: bigint,
+                  tokenId15_0: bigint,
+                  tokenId16_0: bigint,
+                  tokenId17_0: bigint,
+                  tokenId18_0: bigint,
+                  tokenId19_0: bigint,
+                  tokenId20_0: bigint,
+                  coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  _burnPurchasedToken(context: __compactRuntime.CircuitContext<PS>,
+                      tokenId_0: bigint,
+                      ownerCommitment_0: Uint8Array,
+                      challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch5(context: __compactRuntime.CircuitContext<PS>,
+                      ownerCommitment_0: Uint8Array,
+                      tokenId1_0: bigint,
+                      tokenId2_0: bigint,
+                      tokenId3_0: bigint,
+                      tokenId4_0: bigint,
+                      tokenId5_0: bigint,
+                      challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch10(context: __compactRuntime.CircuitContext<PS>,
+                       ownerCommitment_0: Uint8Array,
+                       tokenId1_0: bigint,
+                       tokenId2_0: bigint,
+                       tokenId3_0: bigint,
+                       tokenId4_0: bigint,
+                       tokenId5_0: bigint,
+                       tokenId6_0: bigint,
+                       tokenId7_0: bigint,
+                       tokenId8_0: bigint,
+                       tokenId9_0: bigint,
+                       tokenId10_0: bigint,
+                       challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchasedBatch20(context: __compactRuntime.CircuitContext<PS>,
+                       ownerCommitment_0: Uint8Array,
+                       tokenId1_0: bigint,
+                       tokenId2_0: bigint,
+                       tokenId3_0: bigint,
+                       tokenId4_0: bigint,
+                       tokenId5_0: bigint,
+                       tokenId6_0: bigint,
+                       tokenId7_0: bigint,
+                       tokenId8_0: bigint,
+                       tokenId9_0: bigint,
+                       tokenId10_0: bigint,
+                       tokenId11_0: bigint,
+                       tokenId12_0: bigint,
+                       tokenId13_0: bigint,
+                       tokenId14_0: bigint,
+                       tokenId15_0: bigint,
+                       tokenId16_0: bigint,
+                       tokenId17_0: bigint,
+                       tokenId18_0: bigint,
+                       tokenId19_0: bigint,
+                       tokenId20_0: bigint,
+                       challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
 }
 
 export type Ledger = {
