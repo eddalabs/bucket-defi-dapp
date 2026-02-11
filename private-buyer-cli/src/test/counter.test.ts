@@ -1,13 +1,12 @@
 import path from 'path';
 import * as api from '../api';
-import { type PrivateBuyerProviders } from '../common-types';
+import { type CounterProviders } from '../common-types';
 import { currentDir } from '../config';
 import { createLogger } from '../logger';
 import { TestEnvironment } from './simulators/simulator';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import 'dotenv/config';
 import * as Rx from 'rxjs';
-import { PrivateBuyer } from '@eddalabs/private-buyer-contract';
 
 let logDir: string;
 const network = process.env.TEST_ENV || 'undeployed';
@@ -23,7 +22,7 @@ const logger = await createLogger(logDir);
 describe('API', () => {
   let testEnvironment: TestEnvironment;
   let wallet: api.WalletContext;
-  let providers: PrivateBuyerProviders;
+  let providers: CounterProviders;
 
   beforeAll(
     async () => {
@@ -41,16 +40,15 @@ describe('API', () => {
     await testEnvironment.shutdown();
   });
 
-  it('should deploy the contract and verify ledger state [@slow]', async () => {
-    const contract = await api.deploy(providers, 'TestNFT', 'TNFT');
-    expect(contract).not.toBeNull();
+  it('should deploy the contract and increment the counter [@slow]', async () => {
+    const counterContractDeployed = await api.deploy(providers, { privateCounter: 0 });
+    expect(counterContractDeployed).not.toBeNull();
 
-    const { ledger } = await api.displayLedgerSummary(providers, contract);
-    expect(ledger).not.toBeNull();
-    expect(ledger!.NonFungibleToken__name).toEqual('TestNFT');
-    expect(ledger!.NonFungibleToken__symbol).toEqual('TNFT');
-    expect(ledger!.NonFungibleToken__certificatesCreatedCounter).toEqual(0n);
-    expect(ledger!.NFTPool__purchaseCounter).toEqual(0n);
+    const counter = await api.displayCounterValue(providers, counterContractDeployed);
+    expect(counter.counterValue).toEqual(BigInt(0));
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const response = await api.increment(counterContractDeployed);
 
     const state = await Rx.firstValueFrom(wallet.wallet.state().pipe(Rx.filter((s) => s.isSynced)));
     logger.info({
@@ -65,9 +63,16 @@ describe('API', () => {
       section: 'Unshielded Wallet State',
       unshielded: state.unshielded,
     });
+
+    expect(response.txHash).toMatch(/[0-9a-f]{64}/);
+    expect(response.blockHeight).toBeGreaterThan(BigInt(0));
+
+    const counterAfter = await api.displayCounterValue(providers, counterContractDeployed);
+    expect(counterAfter.counterValue).toEqual(BigInt(1));
+    expect(counterAfter.contractAddress).toEqual(counter.contractAddress);
   });
 
-  it('Wallet Functionalities', async () => {
+  it('Wallet Funcitonalities', async () => {
     logger.info({
       section: 'Wallet Context',
       dustSecretKey: wallet.dustSecretKey,
