@@ -1,145 +1,112 @@
-// Diagnostic script: check actual contract state sizes
+/**
+ * Contract Deploy Size Diagnostic
+ *
+ * Shows how many circuits fit in a single deploy transaction by measuring
+ * the serialized ContractState size at different VK counts against the
+ * network's bytesWritten block limit.
+ *
+ * Usage: npx tsx src/check-deploy-size.ts
+ */
 import * as ledger from '@midnight-ntwrk/ledger-v7';
 import { CompiledContract, ContractExecutable } from '@midnight-ntwrk/compact-js';
 import { PrivateBuyer, witnesses, createPrivateState } from '@eddalabs/private-buyer-contract';
 import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config-provider';
-import {
-  createUnprovenDeployTxFromVerifierKeys,
-} from '@midnight-ntwrk/midnight-js-contracts';
+import { createUnprovenDeployTxFromVerifierKeys } from '@midnight-ntwrk/midnight-js-contracts';
 import { contractConfig } from './config';
-import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import { type ContractState as CompactContractState, sampleSigningKey } from '@midnight-ntwrk/compact-runtime';
 
 async function main() {
-  console.log('=== Private Buyer Contract Size Diagnostic ===\n');
+  console.log('\n=== Contract Deploy Size Diagnostic ===\n');
 
+  // 1. Build the full compiled contract and list its circuits
   const compiledContract = CompiledContract.make('private-buyer', PrivateBuyer.Contract).pipe(
     CompiledContract.withWitnesses(witnesses),
     CompiledContract.withCompiledFileAssets(contractConfig.zkConfigPath),
   );
 
-  const contractExec = ContractExecutable.make(compiledContract);
-  const circuitIds = contractExec.getImpureCircuitIds();
-  console.log(`Number of impure circuits: ${circuitIds.length}\n`);
+  const circuitIds = ContractExecutable.make(compiledContract).getImpureCircuitIds();
+  console.log(`Total impure circuits: ${circuitIds.length}\n`);
 
-  // Get VKs
+  // 2. Create an unproven deploy tx to get the full ContractState with all VKs
   const zkConfigProvider = new NodeZkConfigProvider<string>(contractConfig.zkConfigPath);
-  const vks = await zkConfigProvider.getVerifierKeys(circuitIds);
-  console.log(`VK count: ${vks.length}`);
+  const dummyKey = '0'.repeat(64);
 
-  // Try to create the unproven deploy tx to get the full contract state
-  // We need a dummy coin public key for this
-  const dummyCoinPubKey = '0'.repeat(64);
-  const dummyEncPubKey = '0'.repeat(64);
+  const unprovenData = await createUnprovenDeployTxFromVerifierKeys(
+    zkConfigProvider,
+    dummyKey,
+    {
+      compiledContract,
+      initialPrivateState: createPrivateState(crypto.getRandomValues(new Uint8Array(32))),
+      signingKey: sampleSigningKey(),
+      args: ['TestNFT', 'TNFT'],
+    },
+    dummyKey,
+  );
 
-  try {
-    const unprovenData = await createUnprovenDeployTxFromVerifierKeys(
-      zkConfigProvider,
-      dummyCoinPubKey,
-      {
-        compiledContract,
-        initialPrivateState: createPrivateState(crypto.getRandomValues(new Uint8Array(32))),
-        signingKey: sampleSigningKey(),
-        args: ['TestNFT', 'TNFT'],
-      },
-      dummyEncPubKey,
-    );
+  // 3. Deserialize the full state and measure sizes at different VK counts
+  const compactState = unprovenData.public.initialContractState as unknown as CompactContractState;
+  const ledgerState = ledger.ContractState.deserialize(compactState.serialize());
+  const ops = ledgerState.operations();
 
-    // Get the contract state from compact-runtime format
-    const compactState = unprovenData.public.initialContractState as unknown as CompactContractState;
-    const serializedFull = compactState.serialize();
-    console.log(`\nFull ContractState serialized size: ${serializedFull.length} bytes (${(serializedFull.length / 1024).toFixed(1)} KB)`);
+  console.log('── Serialized ContractState by VK count ──\n');
 
-    // Convert to ledger-v7 ContractState
-    const ledgerState = ledger.ContractState.deserialize(serializedFull);
-    const ops = ledgerState.operations();
-    console.log(`Operations count: ${ops.length}`);
-
-    // Check each operation size
-    let totalOpSize = 0;
-    for (const op of ops) {
+  for (const n of [0, 5, 10, 14, 15, 20, 25, 30, 38]) {
+    const testState = new ledger.ContractState();
+    testState.data = ledgerState.data;
+    testState.maintenanceAuthority = ledgerState.maintenanceAuthority;
+    for (const op of ops.slice(0, n)) {
       const operation = ledgerState.operation(op);
-      if (operation) {
-        // Each operation has a verifier key
-        totalOpSize += operation.verifierKey.length;
-      }
+      if (operation) testState.setOperation(op, operation);
     }
-    console.log(`Total VK size in operations: ${totalOpSize} bytes (${(totalOpSize / 1024).toFixed(1)} KB)`);
-
-    // Create a stripped state with no operations
-    const strippedState = new ledger.ContractState();
-    strippedState.data = ledgerState.data;
-    strippedState.maintenanceAuthority = ledgerState.maintenanceAuthority;
-    // Don't copy operations - leave empty
-
-    const serializedStripped = strippedState.serialize();
-    console.log(`\nStripped ContractState (no ops) serialized size: ${serializedStripped.length} bytes (${(serializedStripped.length / 1024).toFixed(1)} KB)`);
-
-    // Check sizes with different numbers of operations
-    for (const numOps of [0, 5, 10, 15, 20, 25, 30, 35, 38]) {
-      const testState = new ledger.ContractState();
-      testState.data = ledgerState.data;
-      testState.maintenanceAuthority = ledgerState.maintenanceAuthority;
-
-      const opsToInclude = ops.slice(0, numOps);
-      for (const op of opsToInclude) {
-        const operation = ledgerState.operation(op);
-        if (operation) {
-          testState.setOperation(op, operation);
-        }
-      }
-
-      const serialized = testState.serialize();
-      const underLimit = serialized.length <= 50000;
-      console.log(`  ${numOps} ops: ${serialized.length} bytes (${(serialized.length / 1024).toFixed(1)} KB) ${underLimit ? '✓ under 50KB' : '✗ EXCEEDS 50KB'}`);
-    }
-
-    // Transaction size and cost analysis
-    const unprovenTx = unprovenData.private.unprovenTx;
-    const txSerialized = unprovenTx.serialize();
-    console.log(`\nFull UnprovenTransaction serialized size: ${txSerialized.length} bytes (${(txSerialized.length / 1024).toFixed(1)} KB)`);
-
-    // Mock-prove the deploy tx (no ZK proofs needed for deploys)
-    const provenTx = unprovenTx.mockProve();
-    const params = ledger.LedgerParameters.initialParameters();
-
-    // Show transaction cost vs block limits
-    console.log('\n── Transaction Cost vs Block Limits ──');
-    try {
-      const cost = provenTx.cost(params);
-      console.log(`  readTime:     ${cost.readTime}`);
-      console.log(`  computeTime:  ${cost.computeTime}`);
-      console.log(`  blockUsage:   ${cost.blockUsage} (limit: 200,000)`);
-      console.log(`  bytesWritten: ${cost.bytesWritten} (limit: 50,000)`);
-      console.log(`  bytesChurned: ${cost.bytesChurned} (limit: 1,000,000)`);
-    } catch (e: any) {
-      console.log(`  cost() threw: ${e.message}`);
-    }
-
-    try {
-      const fee = provenTx.fees(params);
-      console.log(`\n  Fee: ${fee} tDUST (${Number(fee) / 1e12} DUST)`);
-    } catch (e: any) {
-      console.log(`\n  fees() threw: ${e.message}`);
-    }
-
-    try {
-      const feeMargin = provenTx.feesWithMargin(params, 2);
-      console.log(`  Fee (2-block margin): ${feeMargin} tDUST`);
-    } catch (e: any) {
-      console.log(`  feesWithMargin() threw: ${e.message}`);
-    }
-
-    // Show block limits for reference
-    console.log('\n── LedgerParameters (initial) ──');
-    console.log(params.toString(false));
-
-  } catch (e: any) {
-    console.error('Error during constructor execution:', e.message);
-    if (e.stack) console.error(e.stack.split('\n').slice(0, 5).join('\n'));
+    const size = testState.serialize().length;
+    const kb = (size / 1024).toFixed(1);
+    console.log(`  ${String(n).padStart(2)} VKs: ${String(size).padStart(6)} bytes (${kb} KB)`);
   }
 
-  console.log('\n=== Done ===');
+  // 4. Full deploy tx cost and fee
+  const params = ledger.LedgerParameters.initialParameters();
+  const provenTx = unprovenData.private.unprovenTx.mockProve();
+
+  // 5. Derive block limits from the ledger parameters.
+  //    normalizeFullness returns cost/limit ratios, so limit = cost / normalized.
+  //    We probe with a unit cost {1,1,1,1,1} to get limit = 1 / normalized.
+  const unitCost = { readTime: 1n, computeTime: 1n, blockUsage: 1n, bytesWritten: 1n, bytesChurned: 1n };
+  const unitNorm = params.normalizeFullness(unitCost);
+
+  const limits = {
+    bytesWritten: Math.round(1 / unitNorm.bytesWritten),
+    blockUsage:   Math.round(1 / unitNorm.blockUsage),
+    bytesChurned: Math.round(1 / unitNorm.bytesChurned),
+  };
+
+  console.log('\n── Full deploy tx (all VKs) ──\n');
+  try {
+    const cost = provenTx.cost(params);
+    const metrics = [
+      { name: 'bytesWritten', value: cost.bytesWritten, limit: limits.bytesWritten },
+      { name: 'blockUsage',   value: cost.blockUsage,   limit: limits.blockUsage },
+      { name: 'bytesChurned', value: cost.bytesChurned, limit: limits.bytesChurned },
+    ];
+
+    const exceeded: string[] = [];
+    for (const m of metrics) {
+      const ok = Number(m.value) <= m.limit;
+      if (!ok) exceeded.push(m.name);
+      const flag = ok ? ' ' : 'X';
+      console.log(`  ${flag} ${m.name.padEnd(14)} ${String(m.value).padStart(9)} / ${m.limit.toLocaleString()}`);
+    }
+
+    try {
+      const fee = provenTx.feesWithMargin(params, 2);
+      console.log(`\n  fee (2-block margin): ${fee} tDUST`);
+    } catch {
+      console.log(`\n  fee: cannot compute (${exceeded.join(', ')} exceeds block limit)`);
+    }
+  } catch (e: any) {
+    console.log(`  cost error: ${e.message}`);
+  }
+
+  console.log('\n=== Done ===\n');
 }
 
 main().catch(console.error);
