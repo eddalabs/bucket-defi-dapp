@@ -8,6 +8,7 @@
     "counter-contract",
     "bucket-defi-contract",
     "private-buyer-contract",
+    "private-buyer-cli",
     "frontend-vite-react"
   ],
   "scripts": {

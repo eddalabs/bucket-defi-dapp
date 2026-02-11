@@ -149,46 +149,6 @@
       }
     },
     {
-      "name": "assertOnlyRole",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "roleId",
-          "type": {
-            "type-name": "Bytes",
-            "length": 32
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "pauseAccessControl",
-      "pure": false,
-      "arguments": [
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "unpauseAccessControl",
-      "pure": false,
-      "arguments": [
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
       "name": "assertOwnVerification",
       "pure": false,
       "arguments": [
@@ -197,31 +157,6 @@
         "type-name": "Tuple",
         "types": [
         ]
-      }
-    },
-    {
-      "name": "isUserVerified",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "user",
-          "type": {
-            "type-name": "Struct",
-            "name": "ZswapCoinPublicKey",
-            "elements": [
-              {
-                "name": "bytes",
-                "type": {
-                  "type-name": "Bytes",
-                  "length": 32
-                }
-              }
-            ]
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Boolean"
       }
     },
     {
@@ -279,6 +214,366 @@
       }
     },
     {
+      "name": "mint",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "to",
+          "type": {
+            "type-name": "Struct",
+            "name": "Either",
+            "elements": [
+              {
+                "name": "is_left",
+                "type": {
+                  "type-name": "Boolean"
+                }
+              },
+              {
+                "name": "left",
+                "type": {
+                  "type-name": "Struct",
+                  "name": "ZswapCoinPublicKey",
+                  "elements": [
+                    {
+                      "name": "bytes",
+                      "type": {
+                        "type-name": "Bytes",
+                        "length": 32
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "right",
+                "type": {
+                  "type-name": "Struct",
+                  "name": "ContractAddress",
+                  "elements": [
+                    {
+                      "name": "bytes",
+                      "type": {
+                        "type-name": "Bytes",
+                        "length": 32
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenCertificate",
+          "type": {
+            "type-name": "Struct",
+            "name": "Certificate",
+            "elements": [
+              {
+                "name": "id",
+                "type": {
+                  "type-name": "Opaque",
+                  "tsType": "string"
+                }
+              },
+              {
+                "name": "source",
+                "type": {
+                  "type-name": "Enum",
+                  "name": "Source",
+                  "elements": [
+                    "Solar",
+                    "Wind",
+                    "Hydro",
+                    "Biomass",
+                    "Geothermal",
+                    "Nuclear"
+                  ]
+                }
+              },
+              {
+                "name": "generation",
+                "type": {
+                  "type-name": "Uint",
+                  "maxval": 18446744073709551615
+                }
+              },
+              {
+                "name": "vintage",
+                "type": {
+                  "type-name": "Uint",
+                  "maxval": 18446744073709551615
+                }
+              },
+              {
+                "name": "impact",
+                "type": {
+                  "type-name": "Enum",
+                  "name": "Impact",
+                  "elements": [
+                    "Minimal",
+                    "Low",
+                    "Medium",
+                    "High",
+                    "Extreme"
+                  ]
+                }
+              },
+              {
+                "name": "location",
+                "type": {
+                  "type-name": "Enum",
+                  "name": "Location",
+                  "elements": [
+                    "RJ",
+                    "SP",
+                    "MG",
+                    "RS"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "price",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "burn",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "setTokenPrice",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "price",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "addToPool",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "removeFromPool",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "purchaseNFT",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "coin",
+          "type": {
+            "type-name": "Struct",
+            "name": "ShieldedCoinInfo",
+            "elements": [
+              {
+                "name": "nonce",
+                "type": {
+                  "type-name": "Bytes",
+                  "length": 32
+                }
+              },
+              {
+                "name": "color",
+                "type": {
+                  "type-name": "Bytes",
+                  "length": 32
+                }
+              },
+              {
+                "name": "value",
+                "type": {
+                  "type-name": "Uint",
+                  "maxval": 340282366920938463463374607431768211455
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Bytes",
+        "length": 32
+      }
+    },
+    {
+      "name": "withdrawSellerFunds",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "burnPurchased",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "ownerCommitment",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        },
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "challenge",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "proofOwnership",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "ownerCommitment",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        },
+        {
+          "name": "challenge",
+          "type": {
+            "type-name": "Bytes",
+            "length": 32
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "pauseAccessControl",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "unpauseAccessControl",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
       "name": "pauseIdentity",
       "pure": false,
       "arguments": [
@@ -298,6 +593,75 @@
         "type-name": "Tuple",
         "types": [
         ]
+      }
+    },
+    {
+      "name": "pauseToken",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "unpauseToken",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "pauseNFTPool",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "unpauseNFTPool",
+      "pure": false,
+      "arguments": [
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
+      "name": "isUserVerified",
+      "pure": false,
+      "arguments": [
+        {
+          "name": "user",
+          "type": {
+            "type-name": "Struct",
+            "name": "ZswapCoinPublicKey",
+            "elements": [
+              {
+                "name": "bytes",
+                "type": {
+                  "type-name": "Bytes",
+                  "length": 32
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Boolean"
       }
     },
     {
@@ -511,298 +875,6 @@
       "result-type": {
         "type-name": "Uint",
         "maxval": 18446744073709551615
-      }
-    },
-    {
-      "name": "mint",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "to",
-          "type": {
-            "type-name": "Struct",
-            "name": "Either",
-            "elements": [
-              {
-                "name": "is_left",
-                "type": {
-                  "type-name": "Boolean"
-                }
-              },
-              {
-                "name": "left",
-                "type": {
-                  "type-name": "Struct",
-                  "name": "ZswapCoinPublicKey",
-                  "elements": [
-                    {
-                      "name": "bytes",
-                      "type": {
-                        "type-name": "Bytes",
-                        "length": 32
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "name": "right",
-                "type": {
-                  "type-name": "Struct",
-                  "name": "ContractAddress",
-                  "elements": [
-                    {
-                      "name": "bytes",
-                      "type": {
-                        "type-name": "Bytes",
-                        "length": 32
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "name": "tokenId",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 340282366920938463463374607431768211455
-          }
-        },
-        {
-          "name": "tokenCertificate",
-          "type": {
-            "type-name": "Struct",
-            "name": "Certificate",
-            "elements": [
-              {
-                "name": "id",
-                "type": {
-                  "type-name": "Opaque",
-                  "tsType": "string"
-                }
-              },
-              {
-                "name": "source",
-                "type": {
-                  "type-name": "Enum",
-                  "name": "Source",
-                  "elements": [
-                    "Solar",
-                    "Wind",
-                    "Hydro",
-                    "Biomass",
-                    "Geothermal",
-                    "Nuclear"
-                  ]
-                }
-              },
-              {
-                "name": "generation",
-                "type": {
-                  "type-name": "Uint",
-                  "maxval": 18446744073709551615
-                }
-              },
-              {
-                "name": "vintage",
-                "type": {
-                  "type-name": "Uint",
-                  "maxval": 18446744073709551615
-                }
-              },
-              {
-                "name": "impact",
-                "type": {
-                  "type-name": "Enum",
-                  "name": "Impact",
-                  "elements": [
-                    "Minimal",
-                    "Low",
-                    "Medium",
-                    "High",
-                    "Extreme"
-                  ]
-                }
-              },
-              {
-                "name": "location",
-                "type": {
-                  "type-name": "Enum",
-                  "name": "Location",
-                  "elements": [
-                    "RJ",
-                    "SP",
-                    "MG",
-                    "RS"
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "name": "price",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "burn",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "tokenId",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 340282366920938463463374607431768211455
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "setTokenPrice",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "tokenId",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 340282366920938463463374607431768211455
-          }
-        },
-        {
-          "name": "price",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 18446744073709551615
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "pauseToken",
-      "pure": false,
-      "arguments": [
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "unpauseToken",
-      "pure": false,
-      "arguments": [
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "addToPool",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "tokenId",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 340282366920938463463374607431768211455
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "removeFromPool",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "tokenId",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 340282366920938463463374607431768211455
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "purchaseNFT",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "tokenId",
-          "type": {
-            "type-name": "Uint",
-            "maxval": 340282366920938463463374607431768211455
-          }
-        },
-        {
-          "name": "coin",
-          "type": {
-            "type-name": "Struct",
-            "name": "ShieldedCoinInfo",
-            "elements": [
-              {
-                "name": "nonce",
-                "type": {
-                  "type-name": "Bytes",
-                  "length": 32
-                }
-              },
-              {
-                "name": "color",
-                "type": {
-                  "type-name": "Bytes",
-                  "length": 32
-                }
-              },
-              {
-                "name": "value",
-                "type": {
-                  "type-name": "Uint",
-                  "maxval": 340282366920938463463374607431768211455
-                }
-              }
-            ]
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Bytes",
-        "length": 32
       }
     },
     {
@@ -1265,64 +1337,6 @@
       "result-type": {
         "type-name": "Bytes",
         "length": 32
-      }
-    },
-    {
-      "name": "withdrawSellerFunds",
-      "pure": false,
-      "arguments": [
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "proofOwnership",
-      "pure": false,
-      "arguments": [
-        {
-          "name": "ownerCommitment",
-          "type": {
-            "type-name": "Bytes",
-            "length": 32
-          }
-        },
-        {
-          "name": "challenge",
-          "type": {
-            "type-name": "Bytes",
-            "length": 32
-          }
-        }
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "pauseNFTPool",
-      "pure": false,
-      "arguments": [
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
-      }
-    },
-    {
-      "name": "unpauseNFTPool",
-      "pure": false,
-      "arguments": [
-      ],
-      "result-type": {
-        "type-name": "Tuple",
-        "types": [
-        ]
       }
     },
     {

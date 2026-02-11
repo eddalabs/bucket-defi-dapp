@@ -18,6 +18,7 @@
   "scripts": {
     "compact-fast": "compact compile --skip-zk +0.28.0 src/private-buyer.compact src/managed/private-buyer",
     "compact": "compact compile +0.28.0 src/private-buyer.compact src/managed/private-buyer",
+    "compact-deploy": "compact compile +0.28.0 src/private-buyer-deploy.compact src/managed/private-buyer-deploy",
     "test": "vitest run",
     "test:compile": "npm run compact && vitest run",
     "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/managed ./dist/managed && cp ./src/private-buyer.compact ./dist",

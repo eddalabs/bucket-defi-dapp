@@ -190,32 +190,32 @@ const _descriptor_16 = new _ShieldedSendResult_0();
 
 const _descriptor_17 = __compactRuntime.CompactTypeField;
 
-const _descriptor_18 = new __compactRuntime.CompactTypeVector(2, _descriptor_0);
+const _descriptor_18 = new __compactRuntime.CompactTypeVector(3, _descriptor_0);
 
-const _descriptor_19 = new __compactRuntime.CompactTypeVector(3, _descriptor_0);
-
-const _descriptor_20 = new __compactRuntime.CompactTypeVector(2, _descriptor_17);
-
-const _descriptor_21 = new __compactRuntime.CompactTypeBytes(21);
+const _descriptor_19 = new __compactRuntime.CompactTypeBytes(21);
 
 class _CoinPreimage_0 {
   alignment() {
-    return _descriptor_21.alignment().concat(_descriptor_6.alignment().concat(_descriptor_1.alignment().concat(_descriptor_0.alignment())));
+    return _descriptor_19.alignment().concat(_descriptor_6.alignment().concat(_descriptor_1.alignment().concat(_descriptor_0.alignment())));
   }
   fromValue(value_0) {
     return {
-      domain_sep: _descriptor_21.fromValue(value_0),
+      domain_sep: _descriptor_19.fromValue(value_0),
       info: _descriptor_6.fromValue(value_0),
       dataType: _descriptor_1.fromValue(value_0),
       data: _descriptor_0.fromValue(value_0)
     }
   }
   toValue(value_0) {
-    return _descriptor_21.toValue(value_0.domain_sep).concat(_descriptor_6.toValue(value_0.info).concat(_descriptor_1.toValue(value_0.dataType).concat(_descriptor_0.toValue(value_0.data))));
+    return _descriptor_19.toValue(value_0.domain_sep).concat(_descriptor_6.toValue(value_0.info).concat(_descriptor_1.toValue(value_0.dataType).concat(_descriptor_0.toValue(value_0.data))));
   }
 }
 
-const _descriptor_22 = new _CoinPreimage_0();
+const _descriptor_20 = new _CoinPreimage_0();
+
+const _descriptor_21 = new __compactRuntime.CompactTypeVector(2, _descriptor_17);
+
+const _descriptor_22 = new __compactRuntime.CompactTypeVector(2, _descriptor_0);
 
 class _Either_1 {
   alignment() {
@@ -262,21 +262,21 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('grantRole',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 100 char 1',
+                                     'private-buyer.compact line 104 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(roleId_0.buffer instanceof ArrayBuffer && roleId_0.BYTES_PER_ELEMENT === 1 && roleId_0.length === 32)) {
           __compactRuntime.typeError('grantRole',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 100 char 1',
+                                     'private-buyer.compact line 104 char 1',
                                      'Bytes<32>',
                                      roleId_0)
         }
         if (!(typeof(account_0) === 'object' && typeof(account_0.is_left) === 'boolean' && typeof(account_0.left) === 'object' && account_0.left.bytes.buffer instanceof ArrayBuffer && account_0.left.bytes.BYTES_PER_ELEMENT === 1 && account_0.left.bytes.length === 32 && typeof(account_0.right) === 'object' && account_0.right.bytes.buffer instanceof ArrayBuffer && account_0.right.bytes.BYTES_PER_ELEMENT === 1 && account_0.right.bytes.length === 32)) {
           __compactRuntime.typeError('grantRole',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 100 char 1',
+                                     'private-buyer.compact line 104 char 1',
                                      'struct Either<is_left: Boolean, left: struct ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes: Bytes<32>>>',
                                      account_0)
         }
@@ -307,21 +307,21 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('revokeRole',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 113 char 1',
+                                     'private-buyer.compact line 117 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(roleId_0.buffer instanceof ArrayBuffer && roleId_0.BYTES_PER_ELEMENT === 1 && roleId_0.length === 32)) {
           __compactRuntime.typeError('revokeRole',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 113 char 1',
+                                     'private-buyer.compact line 117 char 1',
                                      'Bytes<32>',
                                      roleId_0)
         }
         if (!(typeof(account_0) === 'object' && typeof(account_0.is_left) === 'boolean' && typeof(account_0.left) === 'object' && account_0.left.bytes.buffer instanceof ArrayBuffer && account_0.left.bytes.BYTES_PER_ELEMENT === 1 && account_0.left.bytes.length === 32 && typeof(account_0.right) === 'object' && account_0.right.bytes.buffer instanceof ArrayBuffer && account_0.right.bytes.BYTES_PER_ELEMENT === 1 && account_0.right.bytes.length === 32)) {
           __compactRuntime.typeError('revokeRole',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 113 char 1',
+                                     'private-buyer.compact line 117 char 1',
                                      'struct Either<is_left: Boolean, left: struct ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes: Bytes<32>>>',
                                      account_0)
         }
@@ -351,14 +351,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('renounceRole',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 125 char 1',
+                                     'private-buyer.compact line 129 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(roleId_0.buffer instanceof ArrayBuffer && roleId_0.BYTES_PER_ELEMENT === 1 && roleId_0.length === 32)) {
           __compactRuntime.typeError('renounceRole',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 125 char 1',
+                                     'private-buyer.compact line 129 char 1',
                                      'Bytes<32>',
                                      roleId_0)
         }
@@ -378,88 +378,6 @@ export class Contract {
         partialProofData.output = { value: [], alignment: [] };
         return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
       },
-      assertOnlyRole: (...args_1) => {
-        if (args_1.length !== 2) {
-          throw new __compactRuntime.CompactError(`assertOnlyRole: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        const roleId_0 = args_1[1];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('assertOnlyRole',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 137 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        if (!(roleId_0.buffer instanceof ArrayBuffer && roleId_0.BYTES_PER_ELEMENT === 1 && roleId_0.length === 32)) {
-          __compactRuntime.typeError('assertOnlyRole',
-                                     'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 137 char 1',
-                                     'Bytes<32>',
-                                     roleId_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: {
-            value: _descriptor_0.toValue(roleId_0),
-            alignment: _descriptor_0.alignment()
-          },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._assertOnlyRole_1(context,
-                                                partialProofData,
-                                                roleId_0);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      pauseAccessControl: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`pauseAccessControl: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('pauseAccessControl',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 150 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._pauseAccessControl_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      unpauseAccessControl: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`unpauseAccessControl: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('unpauseAccessControl',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 163 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._unpauseAccessControl_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
       assertOwnVerification: (...args_1) => {
         if (args_1.length !== 1) {
           throw new __compactRuntime.CompactError(`assertOwnVerification: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
@@ -468,7 +386,7 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('assertOwnVerification',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 177 char 1',
+                                     'private-buyer.compact line 157 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
@@ -483,42 +401,6 @@ export class Contract {
         partialProofData.output = { value: [], alignment: [] };
         return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
       },
-      isUserVerified: (...args_1) => {
-        if (args_1.length !== 2) {
-          throw new __compactRuntime.CompactError(`isUserVerified: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        const user_0 = args_1[1];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('isUserVerified',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 189 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        if (!(typeof(user_0) === 'object' && user_0.bytes.buffer instanceof ArrayBuffer && user_0.bytes.BYTES_PER_ELEMENT === 1 && user_0.bytes.length === 32)) {
-          __compactRuntime.typeError('isUserVerified',
-                                     'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 189 char 1',
-                                     'struct ZswapCoinPublicKey<bytes: Bytes<32>>',
-                                     user_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: {
-            value: _descriptor_3.toValue(user_0),
-            alignment: _descriptor_3.alignment()
-          },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._isUserVerified_1(context,
-                                                partialProofData,
-                                                user_0);
-        partialProofData.output = { value: _descriptor_1.toValue(result_0), alignment: _descriptor_1.alignment() };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
       setUser: (...args_1) => {
         if (args_1.length !== 2) {
           throw new __compactRuntime.CompactError(`setUser: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
@@ -528,14 +410,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('setUser',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 204 char 1',
+                                     'private-buyer.compact line 172 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(user_0) === 'object' && user_0.bytes.buffer instanceof ArrayBuffer && user_0.bytes.BYTES_PER_ELEMENT === 1 && user_0.bytes.length === 32)) {
           __compactRuntime.typeError('setUser',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 204 char 1',
+                                     'private-buyer.compact line 172 char 1',
                                      'struct ZswapCoinPublicKey<bytes: Bytes<32>>',
                                      user_0)
         }
@@ -562,14 +444,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('removeUser',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 220 char 1',
+                                     'private-buyer.compact line 188 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(user_0) === 'object' && user_0.bytes.buffer instanceof ArrayBuffer && user_0.bytes.BYTES_PER_ELEMENT === 1 && user_0.bytes.length === 32)) {
           __compactRuntime.typeError('removeUser',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 220 char 1',
+                                     'private-buyer.compact line 188 char 1',
                                      'struct ZswapCoinPublicKey<bytes: Bytes<32>>',
                                      user_0)
         }
@@ -587,190 +469,6 @@ export class Contract {
         partialProofData.output = { value: [], alignment: [] };
         return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
       },
-      pauseIdentity: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`pauseIdentity: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('pauseIdentity',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 235 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._pauseIdentity_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      unpauseIdentity: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`unpauseIdentity: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('unpauseIdentity',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 250 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._unpauseIdentity_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      balanceOf: (...args_1) => {
-        if (args_1.length !== 2) {
-          throw new __compactRuntime.CompactError(`balanceOf: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        const owner_0 = args_1[1];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('balanceOf',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 267 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        if (!(typeof(owner_0) === 'object' && typeof(owner_0.is_left) === 'boolean' && typeof(owner_0.left) === 'object' && owner_0.left.bytes.buffer instanceof ArrayBuffer && owner_0.left.bytes.BYTES_PER_ELEMENT === 1 && owner_0.left.bytes.length === 32 && typeof(owner_0.right) === 'object' && owner_0.right.bytes.buffer instanceof ArrayBuffer && owner_0.right.bytes.BYTES_PER_ELEMENT === 1 && owner_0.right.bytes.length === 32)) {
-          __compactRuntime.typeError('balanceOf',
-                                     'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 267 char 1',
-                                     'struct Either<is_left: Boolean, left: struct ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes: Bytes<32>>>',
-                                     owner_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: {
-            value: _descriptor_5.toValue(owner_0),
-            alignment: _descriptor_5.alignment()
-          },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._balanceOf_1(context, partialProofData, owner_0);
-        partialProofData.output = { value: _descriptor_2.toValue(result_0), alignment: _descriptor_2.alignment() };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      ownerOf: (...args_1) => {
-        if (args_1.length !== 2) {
-          throw new __compactRuntime.CompactError(`ownerOf: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        const tokenId_0 = args_1[1];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('ownerOf',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 279 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
-          __compactRuntime.typeError('ownerOf',
-                                     'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 279 char 1',
-                                     'Uint<0..340282366920938463463374607431768211456>',
-                                     tokenId_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: {
-            value: _descriptor_2.toValue(tokenId_0),
-            alignment: _descriptor_2.alignment()
-          },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._ownerOf_1(context, partialProofData, tokenId_0);
-        partialProofData.output = { value: _descriptor_5.toValue(result_0), alignment: _descriptor_5.alignment() };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      tokenCertificate: (...args_1) => {
-        if (args_1.length !== 2) {
-          throw new __compactRuntime.CompactError(`tokenCertificate: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        const tokenId_0 = args_1[1];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('tokenCertificate',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 291 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
-          __compactRuntime.typeError('tokenCertificate',
-                                     'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 291 char 1',
-                                     'Uint<0..340282366920938463463374607431768211456>',
-                                     tokenId_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: {
-            value: _descriptor_2.toValue(tokenId_0),
-            alignment: _descriptor_2.alignment()
-          },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._tokenCertificate_1(context,
-                                                  partialProofData,
-                                                  tokenId_0);
-        partialProofData.output = { value: _descriptor_12.toValue(result_0), alignment: _descriptor_12.alignment() };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      tokenPrice: (...args_1) => {
-        if (args_1.length !== 2) {
-          throw new __compactRuntime.CompactError(`tokenPrice: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        const tokenId_0 = args_1[1];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('tokenPrice',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 303 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
-          __compactRuntime.typeError('tokenPrice',
-                                     'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 303 char 1',
-                                     'Uint<0..340282366920938463463374607431768211456>',
-                                     tokenId_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: {
-            value: _descriptor_2.toValue(tokenId_0),
-            alignment: _descriptor_2.alignment()
-          },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._tokenPrice_1(context, partialProofData, tokenId_0);
-        partialProofData.output = { value: _descriptor_7.toValue(result_0), alignment: _descriptor_7.alignment() };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
       mint: (...args_1) => {
         if (args_1.length !== 5) {
           throw new __compactRuntime.CompactError(`mint: expected 5 arguments (as invoked from Typescript), received ${args_1.length}`);
@@ -783,35 +481,35 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('mint',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 321 char 1',
+                                     'private-buyer.compact line 211 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(to_0) === 'object' && typeof(to_0.is_left) === 'boolean' && typeof(to_0.left) === 'object' && to_0.left.bytes.buffer instanceof ArrayBuffer && to_0.left.bytes.BYTES_PER_ELEMENT === 1 && to_0.left.bytes.length === 32 && typeof(to_0.right) === 'object' && to_0.right.bytes.buffer instanceof ArrayBuffer && to_0.right.bytes.BYTES_PER_ELEMENT === 1 && to_0.right.bytes.length === 32)) {
           __compactRuntime.typeError('mint',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 321 char 1',
+                                     'private-buyer.compact line 211 char 1',
                                      'struct Either<is_left: Boolean, left: struct ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes: Bytes<32>>>',
                                      to_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('mint',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 321 char 1',
+                                     'private-buyer.compact line 211 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
         if (!(typeof(tokenCertificate_0) === 'object' && true && typeof(tokenCertificate_0.source) === 'number' && tokenCertificate_0.source >= 0 && tokenCertificate_0.source <= 5 && typeof(tokenCertificate_0.generation) === 'bigint' && tokenCertificate_0.generation >= 0n && tokenCertificate_0.generation <= 18446744073709551615n && typeof(tokenCertificate_0.vintage) === 'bigint' && tokenCertificate_0.vintage >= 0n && tokenCertificate_0.vintage <= 18446744073709551615n && typeof(tokenCertificate_0.impact) === 'number' && tokenCertificate_0.impact >= 0 && tokenCertificate_0.impact <= 4 && typeof(tokenCertificate_0.location) === 'number' && tokenCertificate_0.location >= 0 && tokenCertificate_0.location <= 3)) {
           __compactRuntime.typeError('mint',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 321 char 1',
+                                     'private-buyer.compact line 211 char 1',
                                      'struct Certificate<id: Opaque<"string">, source: Enum<Source, Solar, Wind, Hydro, Biomass, Geothermal, Nuclear>, generation: Uint<0..18446744073709551616>, vintage: Uint<0..18446744073709551616>, impact: Enum<Impact, Minimal, Low, Medium, High, Extreme>, location: Enum<Location, RJ, SP, MG, RS>>',
                                      tokenCertificate_0)
         }
         if (!(typeof(price_0) === 'bigint' && price_0 >= 0n && price_0 <= 18446744073709551615n)) {
           __compactRuntime.typeError('mint',
                                      'argument 4 (argument 5 as invoked from Typescript)',
-                                     'private-buyer.compact line 321 char 1',
+                                     'private-buyer.compact line 211 char 1',
                                      'Uint<0..18446744073709551616>',
                                      price_0)
         }
@@ -843,14 +541,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('burn',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 344 char 1',
+                                     'private-buyer.compact line 234 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burn',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 344 char 1',
+                                     'private-buyer.compact line 234 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
@@ -878,21 +576,21 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('setTokenPrice',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 369 char 1',
+                                     'private-buyer.compact line 259 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('setTokenPrice',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 369 char 1',
+                                     'private-buyer.compact line 259 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
         if (!(typeof(price_0) === 'bigint' && price_0 >= 0n && price_0 <= 18446744073709551615n)) {
           __compactRuntime.typeError('setTokenPrice',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 369 char 1',
+                                     'private-buyer.compact line 259 char 1',
                                      'Uint<0..18446744073709551616>',
                                      price_0)
         }
@@ -913,52 +611,6 @@ export class Contract {
         partialProofData.output = { value: [], alignment: [] };
         return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
       },
-      pauseToken: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`pauseToken: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('pauseToken',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 384 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._pauseToken_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      unpauseToken: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`unpauseToken: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('unpauseToken',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 399 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._unpauseToken_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
       addToPool: (...args_1) => {
         if (args_1.length !== 2) {
           throw new __compactRuntime.CompactError(`addToPool: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
@@ -968,14 +620,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('addToPool',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 421 char 1',
+                                     'private-buyer.compact line 281 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('addToPool',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 421 char 1',
+                                     'private-buyer.compact line 281 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
@@ -1002,14 +654,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('removeFromPool',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 446 char 1',
+                                     'private-buyer.compact line 306 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('removeFromPool',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 446 char 1',
+                                     'private-buyer.compact line 306 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
@@ -1039,21 +691,21 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('purchaseNFT',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 475 char 1',
+                                     'private-buyer.compact line 335 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseNFT',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 475 char 1',
+                                     'private-buyer.compact line 335 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
         if (!(typeof(coin_0) === 'object' && coin_0.nonce.buffer instanceof ArrayBuffer && coin_0.nonce.BYTES_PER_ELEMENT === 1 && coin_0.nonce.length === 32 && coin_0.color.buffer instanceof ArrayBuffer && coin_0.color.BYTES_PER_ELEMENT === 1 && coin_0.color.length === 32 && typeof(coin_0.value) === 'bigint' && coin_0.value >= 0n && coin_0.value <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseNFT',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 475 char 1',
+                                     'private-buyer.compact line 335 char 1',
                                      'struct ShieldedCoinInfo<nonce: Bytes<32>, color: Bytes<32>, value: Uint<0..340282366920938463463374607431768211456>>',
                                      coin_0)
         }
@@ -1074,6 +726,486 @@ export class Contract {
         partialProofData.output = { value: _descriptor_0.toValue(result_0), alignment: _descriptor_0.alignment() };
         return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
       },
+      withdrawSellerFunds: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`withdrawSellerFunds: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('withdrawSellerFunds',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 369 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._withdrawSellerFunds_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      burnPurchased: (...args_1) => {
+        if (args_1.length !== 4) {
+          throw new __compactRuntime.CompactError(`burnPurchased: expected 4 arguments (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        const ownerCommitment_0 = args_1[1];
+        const tokenId_0 = args_1[2];
+        const challenge_0 = args_1[3];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('burnPurchased',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 388 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        if (!(ownerCommitment_0.buffer instanceof ArrayBuffer && ownerCommitment_0.BYTES_PER_ELEMENT === 1 && ownerCommitment_0.length === 32)) {
+          __compactRuntime.typeError('burnPurchased',
+                                     'argument 1 (argument 2 as invoked from Typescript)',
+                                     'private-buyer.compact line 388 char 1',
+                                     'Bytes<32>',
+                                     ownerCommitment_0)
+        }
+        if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
+          __compactRuntime.typeError('burnPurchased',
+                                     'argument 2 (argument 3 as invoked from Typescript)',
+                                     'private-buyer.compact line 388 char 1',
+                                     'Uint<0..340282366920938463463374607431768211456>',
+                                     tokenId_0)
+        }
+        if (!(challenge_0.buffer instanceof ArrayBuffer && challenge_0.BYTES_PER_ELEMENT === 1 && challenge_0.length === 32)) {
+          __compactRuntime.typeError('burnPurchased',
+                                     'argument 3 (argument 4 as invoked from Typescript)',
+                                     'private-buyer.compact line 388 char 1',
+                                     'Bytes<32>',
+                                     challenge_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: {
+            value: _descriptor_0.toValue(ownerCommitment_0).concat(_descriptor_2.toValue(tokenId_0).concat(_descriptor_0.toValue(challenge_0))),
+            alignment: _descriptor_0.alignment().concat(_descriptor_2.alignment().concat(_descriptor_0.alignment()))
+          },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._burnPurchased_0(context,
+                                               partialProofData,
+                                               ownerCommitment_0,
+                                               tokenId_0,
+                                               challenge_0);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      proofOwnership: (...args_1) => {
+        if (args_1.length !== 3) {
+          throw new __compactRuntime.CompactError(`proofOwnership: expected 3 arguments (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        const ownerCommitment_0 = args_1[1];
+        const challenge_0 = args_1[2];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('proofOwnership',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 421 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        if (!(ownerCommitment_0.buffer instanceof ArrayBuffer && ownerCommitment_0.BYTES_PER_ELEMENT === 1 && ownerCommitment_0.length === 32)) {
+          __compactRuntime.typeError('proofOwnership',
+                                     'argument 1 (argument 2 as invoked from Typescript)',
+                                     'private-buyer.compact line 421 char 1',
+                                     'Bytes<32>',
+                                     ownerCommitment_0)
+        }
+        if (!(challenge_0.buffer instanceof ArrayBuffer && challenge_0.BYTES_PER_ELEMENT === 1 && challenge_0.length === 32)) {
+          __compactRuntime.typeError('proofOwnership',
+                                     'argument 2 (argument 3 as invoked from Typescript)',
+                                     'private-buyer.compact line 421 char 1',
+                                     'Bytes<32>',
+                                     challenge_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: {
+            value: _descriptor_0.toValue(ownerCommitment_0).concat(_descriptor_0.toValue(challenge_0)),
+            alignment: _descriptor_0.alignment().concat(_descriptor_0.alignment())
+          },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._proofOwnership_1(context,
+                                                partialProofData,
+                                                ownerCommitment_0,
+                                                challenge_0);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      pauseAccessControl: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`pauseAccessControl: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('pauseAccessControl',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 434 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._pauseAccessControl_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      unpauseAccessControl: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`unpauseAccessControl: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('unpauseAccessControl',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 447 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._unpauseAccessControl_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      pauseIdentity: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`pauseIdentity: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('pauseIdentity',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 461 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._pauseIdentity_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      unpauseIdentity: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`unpauseIdentity: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('unpauseIdentity',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 476 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._unpauseIdentity_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      pauseToken: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`pauseToken: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('pauseToken',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 491 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._pauseToken_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      unpauseToken: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`unpauseToken: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('unpauseToken',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 506 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._unpauseToken_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      pauseNFTPool: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`pauseNFTPool: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('pauseNFTPool',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 521 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._pauseNFTPool_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      unpauseNFTPool: (...args_1) => {
+        if (args_1.length !== 1) {
+          throw new __compactRuntime.CompactError(`unpauseNFTPool: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('unpauseNFTPool',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 536 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: { value: [], alignment: [] },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._unpauseNFTPool_1(context, partialProofData);
+        partialProofData.output = { value: [], alignment: [] };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      isUserVerified: (...args_1) => {
+        if (args_1.length !== 2) {
+          throw new __compactRuntime.CompactError(`isUserVerified: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        const user_0 = args_1[1];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('isUserVerified',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 554 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        if (!(typeof(user_0) === 'object' && user_0.bytes.buffer instanceof ArrayBuffer && user_0.bytes.BYTES_PER_ELEMENT === 1 && user_0.bytes.length === 32)) {
+          __compactRuntime.typeError('isUserVerified',
+                                     'argument 1 (argument 2 as invoked from Typescript)',
+                                     'private-buyer.compact line 554 char 1',
+                                     'struct ZswapCoinPublicKey<bytes: Bytes<32>>',
+                                     user_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: {
+            value: _descriptor_3.toValue(user_0),
+            alignment: _descriptor_3.alignment()
+          },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._isUserVerified_1(context,
+                                                partialProofData,
+                                                user_0);
+        partialProofData.output = { value: _descriptor_1.toValue(result_0), alignment: _descriptor_1.alignment() };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      balanceOf: (...args_1) => {
+        if (args_1.length !== 2) {
+          throw new __compactRuntime.CompactError(`balanceOf: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        const owner_0 = args_1[1];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('balanceOf',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 566 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        if (!(typeof(owner_0) === 'object' && typeof(owner_0.is_left) === 'boolean' && typeof(owner_0.left) === 'object' && owner_0.left.bytes.buffer instanceof ArrayBuffer && owner_0.left.bytes.BYTES_PER_ELEMENT === 1 && owner_0.left.bytes.length === 32 && typeof(owner_0.right) === 'object' && owner_0.right.bytes.buffer instanceof ArrayBuffer && owner_0.right.bytes.BYTES_PER_ELEMENT === 1 && owner_0.right.bytes.length === 32)) {
+          __compactRuntime.typeError('balanceOf',
+                                     'argument 1 (argument 2 as invoked from Typescript)',
+                                     'private-buyer.compact line 566 char 1',
+                                     'struct Either<is_left: Boolean, left: struct ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes: Bytes<32>>>',
+                                     owner_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: {
+            value: _descriptor_5.toValue(owner_0),
+            alignment: _descriptor_5.alignment()
+          },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._balanceOf_1(context, partialProofData, owner_0);
+        partialProofData.output = { value: _descriptor_2.toValue(result_0), alignment: _descriptor_2.alignment() };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      ownerOf: (...args_1) => {
+        if (args_1.length !== 2) {
+          throw new __compactRuntime.CompactError(`ownerOf: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        const tokenId_0 = args_1[1];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('ownerOf',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 578 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
+          __compactRuntime.typeError('ownerOf',
+                                     'argument 1 (argument 2 as invoked from Typescript)',
+                                     'private-buyer.compact line 578 char 1',
+                                     'Uint<0..340282366920938463463374607431768211456>',
+                                     tokenId_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: {
+            value: _descriptor_2.toValue(tokenId_0),
+            alignment: _descriptor_2.alignment()
+          },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._ownerOf_1(context, partialProofData, tokenId_0);
+        partialProofData.output = { value: _descriptor_5.toValue(result_0), alignment: _descriptor_5.alignment() };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      tokenCertificate: (...args_1) => {
+        if (args_1.length !== 2) {
+          throw new __compactRuntime.CompactError(`tokenCertificate: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        const tokenId_0 = args_1[1];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('tokenCertificate',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 590 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
+          __compactRuntime.typeError('tokenCertificate',
+                                     'argument 1 (argument 2 as invoked from Typescript)',
+                                     'private-buyer.compact line 590 char 1',
+                                     'Uint<0..340282366920938463463374607431768211456>',
+                                     tokenId_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: {
+            value: _descriptor_2.toValue(tokenId_0),
+            alignment: _descriptor_2.alignment()
+          },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._tokenCertificate_1(context,
+                                                  partialProofData,
+                                                  tokenId_0);
+        partialProofData.output = { value: _descriptor_12.toValue(result_0), alignment: _descriptor_12.alignment() };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
+      tokenPrice: (...args_1) => {
+        if (args_1.length !== 2) {
+          throw new __compactRuntime.CompactError(`tokenPrice: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
+        }
+        const contextOrig_0 = args_1[0];
+        const tokenId_0 = args_1[1];
+        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
+          __compactRuntime.typeError('tokenPrice',
+                                     'argument 1 (as invoked from Typescript)',
+                                     'private-buyer.compact line 602 char 1',
+                                     'CircuitContext',
+                                     contextOrig_0)
+        }
+        if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
+          __compactRuntime.typeError('tokenPrice',
+                                     'argument 1 (argument 2 as invoked from Typescript)',
+                                     'private-buyer.compact line 602 char 1',
+                                     'Uint<0..340282366920938463463374607431768211456>',
+                                     tokenId_0)
+        }
+        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
+        const partialProofData = {
+          input: {
+            value: _descriptor_2.toValue(tokenId_0),
+            alignment: _descriptor_2.alignment()
+          },
+          output: undefined,
+          publicTranscript: [],
+          privateTranscriptOutputs: []
+        };
+        const result_0 = this._tokenPrice_1(context, partialProofData, tokenId_0);
+        partialProofData.output = { value: _descriptor_7.toValue(result_0), alignment: _descriptor_7.alignment() };
+        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
+      },
       _getBatchTokenPrice: (...args_1) => {
         if (args_1.length !== 2) {
           throw new __compactRuntime.CompactError(`_getBatchTokenPrice: expected 2 arguments (as invoked from Typescript), received ${args_1.length}`);
@@ -1083,14 +1215,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('_getBatchTokenPrice',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 513 char 1',
+                                     'private-buyer.compact line 624 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('_getBatchTokenPrice',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 513 char 1',
+                                     'private-buyer.compact line 624 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
@@ -1121,28 +1253,28 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('_storeBatchSellerPayment',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 531 char 1',
+                                     'private-buyer.compact line 642 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('_storeBatchSellerPayment',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 531 char 1',
+                                     'private-buyer.compact line 642 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
         if (!(typeof(coin_0) === 'object' && coin_0.nonce.buffer instanceof ArrayBuffer && coin_0.nonce.BYTES_PER_ELEMENT === 1 && coin_0.nonce.length === 32 && coin_0.color.buffer instanceof ArrayBuffer && coin_0.color.BYTES_PER_ELEMENT === 1 && coin_0.color.length === 32 && typeof(coin_0.value) === 'bigint' && coin_0.value >= 0n && coin_0.value <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('_storeBatchSellerPayment',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 531 char 1',
+                                     'private-buyer.compact line 642 char 1',
                                      'struct ShieldedCoinInfo<nonce: Bytes<32>, color: Bytes<32>, value: Uint<0..340282366920938463463374607431768211456>>',
                                      coin_0)
         }
         if (!(typeof(price_0) === 'bigint' && price_0 >= 0n && price_0 <= 18446744073709551615n)) {
           __compactRuntime.typeError('_storeBatchSellerPayment',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 531 char 1',
+                                     'private-buyer.compact line 642 char 1',
                                      'Uint<0..18446744073709551616>',
                                      price_0)
         }
@@ -1174,21 +1306,21 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('_executeBatchPurchase',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 547 char 1',
+                                     'private-buyer.compact line 658 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('_executeBatchPurchase',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 547 char 1',
+                                     'private-buyer.compact line 658 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
         if (!(ownerCommitment_0.buffer instanceof ArrayBuffer && ownerCommitment_0.BYTES_PER_ELEMENT === 1 && ownerCommitment_0.length === 32)) {
           __compactRuntime.typeError('_executeBatchPurchase',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 547 char 1',
+                                     'private-buyer.compact line 658 char 1',
                                      'Bytes<32>',
                                      ownerCommitment_0)
         }
@@ -1223,49 +1355,49 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('purchaseBatch5',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 572 char 1',
+                                     'private-buyer.compact line 683 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId1_0) === 'bigint' && tokenId1_0 >= 0n && tokenId1_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch5',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 572 char 1',
+                                     'private-buyer.compact line 683 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId1_0)
         }
         if (!(typeof(tokenId2_0) === 'bigint' && tokenId2_0 >= 0n && tokenId2_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch5',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 572 char 1',
+                                     'private-buyer.compact line 683 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId2_0)
         }
         if (!(typeof(tokenId3_0) === 'bigint' && tokenId3_0 >= 0n && tokenId3_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch5',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 572 char 1',
+                                     'private-buyer.compact line 683 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId3_0)
         }
         if (!(typeof(tokenId4_0) === 'bigint' && tokenId4_0 >= 0n && tokenId4_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch5',
                                      'argument 4 (argument 5 as invoked from Typescript)',
-                                     'private-buyer.compact line 572 char 1',
+                                     'private-buyer.compact line 683 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId4_0)
         }
         if (!(typeof(tokenId5_0) === 'bigint' && tokenId5_0 >= 0n && tokenId5_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch5',
                                      'argument 5 (argument 6 as invoked from Typescript)',
-                                     'private-buyer.compact line 572 char 1',
+                                     'private-buyer.compact line 683 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId5_0)
         }
         if (!(typeof(coin_0) === 'object' && coin_0.nonce.buffer instanceof ArrayBuffer && coin_0.nonce.BYTES_PER_ELEMENT === 1 && coin_0.nonce.length === 32 && coin_0.color.buffer instanceof ArrayBuffer && coin_0.color.BYTES_PER_ELEMENT === 1 && coin_0.color.length === 32 && typeof(coin_0.value) === 'bigint' && coin_0.value >= 0n && coin_0.value <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch5',
                                      'argument 6 (argument 7 as invoked from Typescript)',
-                                     'private-buyer.compact line 572 char 1',
+                                     'private-buyer.compact line 683 char 1',
                                      'struct ShieldedCoinInfo<nonce: Bytes<32>, color: Bytes<32>, value: Uint<0..340282366920938463463374607431768211456>>',
                                      coin_0)
         }
@@ -1309,84 +1441,84 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId1_0) === 'bigint' && tokenId1_0 >= 0n && tokenId1_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId1_0)
         }
         if (!(typeof(tokenId2_0) === 'bigint' && tokenId2_0 >= 0n && tokenId2_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId2_0)
         }
         if (!(typeof(tokenId3_0) === 'bigint' && tokenId3_0 >= 0n && tokenId3_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId3_0)
         }
         if (!(typeof(tokenId4_0) === 'bigint' && tokenId4_0 >= 0n && tokenId4_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 4 (argument 5 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId4_0)
         }
         if (!(typeof(tokenId5_0) === 'bigint' && tokenId5_0 >= 0n && tokenId5_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 5 (argument 6 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId5_0)
         }
         if (!(typeof(tokenId6_0) === 'bigint' && tokenId6_0 >= 0n && tokenId6_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 6 (argument 7 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId6_0)
         }
         if (!(typeof(tokenId7_0) === 'bigint' && tokenId7_0 >= 0n && tokenId7_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 7 (argument 8 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId7_0)
         }
         if (!(typeof(tokenId8_0) === 'bigint' && tokenId8_0 >= 0n && tokenId8_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 8 (argument 9 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId8_0)
         }
         if (!(typeof(tokenId9_0) === 'bigint' && tokenId9_0 >= 0n && tokenId9_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 9 (argument 10 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId9_0)
         }
         if (!(typeof(tokenId10_0) === 'bigint' && tokenId10_0 >= 0n && tokenId10_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 10 (argument 11 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId10_0)
         }
         if (!(typeof(coin_0) === 'object' && coin_0.nonce.buffer instanceof ArrayBuffer && coin_0.nonce.BYTES_PER_ELEMENT === 1 && coin_0.nonce.length === 32 && coin_0.color.buffer instanceof ArrayBuffer && coin_0.color.BYTES_PER_ELEMENT === 1 && coin_0.color.length === 32 && typeof(coin_0.value) === 'bigint' && coin_0.value >= 0n && coin_0.value <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch10',
                                      'argument 11 (argument 12 as invoked from Typescript)',
-                                     'private-buyer.compact line 631 char 1',
+                                     'private-buyer.compact line 742 char 1',
                                      'struct ShieldedCoinInfo<nonce: Bytes<32>, color: Bytes<32>, value: Uint<0..340282366920938463463374607431768211456>>',
                                      coin_0)
         }
@@ -1445,154 +1577,154 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId1_0) === 'bigint' && tokenId1_0 >= 0n && tokenId1_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId1_0)
         }
         if (!(typeof(tokenId2_0) === 'bigint' && tokenId2_0 >= 0n && tokenId2_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId2_0)
         }
         if (!(typeof(tokenId3_0) === 'bigint' && tokenId3_0 >= 0n && tokenId3_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId3_0)
         }
         if (!(typeof(tokenId4_0) === 'bigint' && tokenId4_0 >= 0n && tokenId4_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 4 (argument 5 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId4_0)
         }
         if (!(typeof(tokenId5_0) === 'bigint' && tokenId5_0 >= 0n && tokenId5_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 5 (argument 6 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId5_0)
         }
         if (!(typeof(tokenId6_0) === 'bigint' && tokenId6_0 >= 0n && tokenId6_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 6 (argument 7 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId6_0)
         }
         if (!(typeof(tokenId7_0) === 'bigint' && tokenId7_0 >= 0n && tokenId7_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 7 (argument 8 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId7_0)
         }
         if (!(typeof(tokenId8_0) === 'bigint' && tokenId8_0 >= 0n && tokenId8_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 8 (argument 9 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId8_0)
         }
         if (!(typeof(tokenId9_0) === 'bigint' && tokenId9_0 >= 0n && tokenId9_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 9 (argument 10 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId9_0)
         }
         if (!(typeof(tokenId10_0) === 'bigint' && tokenId10_0 >= 0n && tokenId10_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 10 (argument 11 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId10_0)
         }
         if (!(typeof(tokenId11_0) === 'bigint' && tokenId11_0 >= 0n && tokenId11_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 11 (argument 12 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId11_0)
         }
         if (!(typeof(tokenId12_0) === 'bigint' && tokenId12_0 >= 0n && tokenId12_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 12 (argument 13 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId12_0)
         }
         if (!(typeof(tokenId13_0) === 'bigint' && tokenId13_0 >= 0n && tokenId13_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 13 (argument 14 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId13_0)
         }
         if (!(typeof(tokenId14_0) === 'bigint' && tokenId14_0 >= 0n && tokenId14_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 14 (argument 15 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId14_0)
         }
         if (!(typeof(tokenId15_0) === 'bigint' && tokenId15_0 >= 0n && tokenId15_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 15 (argument 16 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId15_0)
         }
         if (!(typeof(tokenId16_0) === 'bigint' && tokenId16_0 >= 0n && tokenId16_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 16 (argument 17 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId16_0)
         }
         if (!(typeof(tokenId17_0) === 'bigint' && tokenId17_0 >= 0n && tokenId17_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 17 (argument 18 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId17_0)
         }
         if (!(typeof(tokenId18_0) === 'bigint' && tokenId18_0 >= 0n && tokenId18_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 18 (argument 19 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId18_0)
         }
         if (!(typeof(tokenId19_0) === 'bigint' && tokenId19_0 >= 0n && tokenId19_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 19 (argument 20 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId19_0)
         }
         if (!(typeof(tokenId20_0) === 'bigint' && tokenId20_0 >= 0n && tokenId20_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 20 (argument 21 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId20_0)
         }
         if (!(typeof(coin_0) === 'object' && coin_0.nonce.buffer instanceof ArrayBuffer && coin_0.nonce.BYTES_PER_ELEMENT === 1 && coin_0.nonce.length === 32 && coin_0.color.buffer instanceof ArrayBuffer && coin_0.color.BYTES_PER_ELEMENT === 1 && coin_0.color.length === 32 && typeof(coin_0.value) === 'bigint' && coin_0.value >= 0n && coin_0.value <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('purchaseBatch20',
                                      'argument 21 (argument 22 as invoked from Typescript)',
-                                     'private-buyer.compact line 708 char 1',
+                                     'private-buyer.compact line 819 char 1',
                                      'struct ShieldedCoinInfo<nonce: Bytes<32>, color: Bytes<32>, value: Uint<0..340282366920938463463374607431768211456>>',
                                      coin_0)
         }
@@ -1632,120 +1764,6 @@ export class Contract {
         partialProofData.output = { value: _descriptor_0.toValue(result_0), alignment: _descriptor_0.alignment() };
         return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
       },
-      withdrawSellerFunds: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`withdrawSellerFunds: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('withdrawSellerFunds',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 823 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._withdrawSellerFunds_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      proofOwnership: (...args_1) => {
-        if (args_1.length !== 3) {
-          throw new __compactRuntime.CompactError(`proofOwnership: expected 3 arguments (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        const ownerCommitment_0 = args_1[1];
-        const challenge_0 = args_1[2];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('proofOwnership',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 838 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        if (!(ownerCommitment_0.buffer instanceof ArrayBuffer && ownerCommitment_0.BYTES_PER_ELEMENT === 1 && ownerCommitment_0.length === 32)) {
-          __compactRuntime.typeError('proofOwnership',
-                                     'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 838 char 1',
-                                     'Bytes<32>',
-                                     ownerCommitment_0)
-        }
-        if (!(challenge_0.buffer instanceof ArrayBuffer && challenge_0.BYTES_PER_ELEMENT === 1 && challenge_0.length === 32)) {
-          __compactRuntime.typeError('proofOwnership',
-                                     'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 838 char 1',
-                                     'Bytes<32>',
-                                     challenge_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: {
-            value: _descriptor_0.toValue(ownerCommitment_0).concat(_descriptor_0.toValue(challenge_0)),
-            alignment: _descriptor_0.alignment().concat(_descriptor_0.alignment())
-          },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._proofOwnership_1(context,
-                                                partialProofData,
-                                                ownerCommitment_0,
-                                                challenge_0);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      pauseNFTPool: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`pauseNFTPool: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('pauseNFTPool',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 852 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._pauseNFTPool_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
-      unpauseNFTPool: (...args_1) => {
-        if (args_1.length !== 1) {
-          throw new __compactRuntime.CompactError(`unpauseNFTPool: expected 1 argument (as invoked from Typescript), received ${args_1.length}`);
-        }
-        const contextOrig_0 = args_1[0];
-        if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
-          __compactRuntime.typeError('unpauseNFTPool',
-                                     'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 867 char 1',
-                                     'CircuitContext',
-                                     contextOrig_0)
-        }
-        const context = { ...contextOrig_0, gasCost: __compactRuntime.emptyRunningCost() };
-        const partialProofData = {
-          input: { value: [], alignment: [] },
-          output: undefined,
-          publicTranscript: [],
-          privateTranscriptOutputs: []
-        };
-        const result_0 = this._unpauseNFTPool_1(context, partialProofData);
-        partialProofData.output = { value: [], alignment: [] };
-        return { result: result_0, context: context, proofData: partialProofData, gasCost: context.gasCost };
-      },
       _burnPurchasedToken: (...args_1) => {
         if (args_1.length !== 4) {
           throw new __compactRuntime.CompactError(`_burnPurchasedToken: expected 4 arguments (as invoked from Typescript), received ${args_1.length}`);
@@ -1757,28 +1775,28 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('_burnPurchasedToken',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 887 char 1',
+                                     'private-buyer.compact line 945 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(tokenId_0) === 'bigint' && tokenId_0 >= 0n && tokenId_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('_burnPurchasedToken',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 887 char 1',
+                                     'private-buyer.compact line 945 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
         if (!(ownerCommitment_0.buffer instanceof ArrayBuffer && ownerCommitment_0.BYTES_PER_ELEMENT === 1 && ownerCommitment_0.length === 32)) {
           __compactRuntime.typeError('_burnPurchasedToken',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 887 char 1',
+                                     'private-buyer.compact line 945 char 1',
                                      'Bytes<32>',
                                      ownerCommitment_0)
         }
         if (!(challenge_0.buffer instanceof ArrayBuffer && challenge_0.BYTES_PER_ELEMENT === 1 && challenge_0.length === 32)) {
           __compactRuntime.typeError('_burnPurchasedToken',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 887 char 1',
+                                     'private-buyer.compact line 945 char 1',
                                      'Bytes<32>',
                                      challenge_0)
         }
@@ -1815,56 +1833,56 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('burnPurchasedBatch5',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 927 char 1',
+                                     'private-buyer.compact line 980 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(ownerCommitment_0.buffer instanceof ArrayBuffer && ownerCommitment_0.BYTES_PER_ELEMENT === 1 && ownerCommitment_0.length === 32)) {
           __compactRuntime.typeError('burnPurchasedBatch5',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 927 char 1',
+                                     'private-buyer.compact line 980 char 1',
                                      'Bytes<32>',
                                      ownerCommitment_0)
         }
         if (!(typeof(tokenId1_0) === 'bigint' && tokenId1_0 >= 0n && tokenId1_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch5',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 927 char 1',
+                                     'private-buyer.compact line 980 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId1_0)
         }
         if (!(typeof(tokenId2_0) === 'bigint' && tokenId2_0 >= 0n && tokenId2_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch5',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 927 char 1',
+                                     'private-buyer.compact line 980 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId2_0)
         }
         if (!(typeof(tokenId3_0) === 'bigint' && tokenId3_0 >= 0n && tokenId3_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch5',
                                      'argument 4 (argument 5 as invoked from Typescript)',
-                                     'private-buyer.compact line 927 char 1',
+                                     'private-buyer.compact line 980 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId3_0)
         }
         if (!(typeof(tokenId4_0) === 'bigint' && tokenId4_0 >= 0n && tokenId4_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch5',
                                      'argument 5 (argument 6 as invoked from Typescript)',
-                                     'private-buyer.compact line 927 char 1',
+                                     'private-buyer.compact line 980 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId4_0)
         }
         if (!(typeof(tokenId5_0) === 'bigint' && tokenId5_0 >= 0n && tokenId5_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch5',
                                      'argument 6 (argument 7 as invoked from Typescript)',
-                                     'private-buyer.compact line 927 char 1',
+                                     'private-buyer.compact line 980 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId5_0)
         }
         if (!(challenge_0.buffer instanceof ArrayBuffer && challenge_0.BYTES_PER_ELEMENT === 1 && challenge_0.length === 32)) {
           __compactRuntime.typeError('burnPurchasedBatch5',
                                      'argument 7 (argument 8 as invoked from Typescript)',
-                                     'private-buyer.compact line 927 char 1',
+                                     'private-buyer.compact line 980 char 1',
                                      'Bytes<32>',
                                      challenge_0)
         }
@@ -1910,91 +1928,91 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(ownerCommitment_0.buffer instanceof ArrayBuffer && ownerCommitment_0.BYTES_PER_ELEMENT === 1 && ownerCommitment_0.length === 32)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Bytes<32>',
                                      ownerCommitment_0)
         }
         if (!(typeof(tokenId1_0) === 'bigint' && tokenId1_0 >= 0n && tokenId1_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId1_0)
         }
         if (!(typeof(tokenId2_0) === 'bigint' && tokenId2_0 >= 0n && tokenId2_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId2_0)
         }
         if (!(typeof(tokenId3_0) === 'bigint' && tokenId3_0 >= 0n && tokenId3_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 4 (argument 5 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId3_0)
         }
         if (!(typeof(tokenId4_0) === 'bigint' && tokenId4_0 >= 0n && tokenId4_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 5 (argument 6 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId4_0)
         }
         if (!(typeof(tokenId5_0) === 'bigint' && tokenId5_0 >= 0n && tokenId5_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 6 (argument 7 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId5_0)
         }
         if (!(typeof(tokenId6_0) === 'bigint' && tokenId6_0 >= 0n && tokenId6_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 7 (argument 8 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId6_0)
         }
         if (!(typeof(tokenId7_0) === 'bigint' && tokenId7_0 >= 0n && tokenId7_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 8 (argument 9 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId7_0)
         }
         if (!(typeof(tokenId8_0) === 'bigint' && tokenId8_0 >= 0n && tokenId8_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 9 (argument 10 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId8_0)
         }
         if (!(typeof(tokenId9_0) === 'bigint' && tokenId9_0 >= 0n && tokenId9_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 10 (argument 11 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId9_0)
         }
         if (!(typeof(tokenId10_0) === 'bigint' && tokenId10_0 >= 0n && tokenId10_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 11 (argument 12 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId10_0)
         }
         if (!(challenge_0.buffer instanceof ArrayBuffer && challenge_0.BYTES_PER_ELEMENT === 1 && challenge_0.length === 32)) {
           __compactRuntime.typeError('burnPurchasedBatch10',
                                      'argument 12 (argument 13 as invoked from Typescript)',
-                                     'private-buyer.compact line 965 char 1',
+                                     'private-buyer.compact line 1018 char 1',
                                      'Bytes<32>',
                                      challenge_0)
         }
@@ -2055,161 +2073,161 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.currentQueryContext != undefined)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 1 (as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(ownerCommitment_0.buffer instanceof ArrayBuffer && ownerCommitment_0.BYTES_PER_ELEMENT === 1 && ownerCommitment_0.length === 32)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Bytes<32>',
                                      ownerCommitment_0)
         }
         if (!(typeof(tokenId1_0) === 'bigint' && tokenId1_0 >= 0n && tokenId1_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId1_0)
         }
         if (!(typeof(tokenId2_0) === 'bigint' && tokenId2_0 >= 0n && tokenId2_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 3 (argument 4 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId2_0)
         }
         if (!(typeof(tokenId3_0) === 'bigint' && tokenId3_0 >= 0n && tokenId3_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 4 (argument 5 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId3_0)
         }
         if (!(typeof(tokenId4_0) === 'bigint' && tokenId4_0 >= 0n && tokenId4_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 5 (argument 6 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId4_0)
         }
         if (!(typeof(tokenId5_0) === 'bigint' && tokenId5_0 >= 0n && tokenId5_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 6 (argument 7 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId5_0)
         }
         if (!(typeof(tokenId6_0) === 'bigint' && tokenId6_0 >= 0n && tokenId6_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 7 (argument 8 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId6_0)
         }
         if (!(typeof(tokenId7_0) === 'bigint' && tokenId7_0 >= 0n && tokenId7_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 8 (argument 9 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId7_0)
         }
         if (!(typeof(tokenId8_0) === 'bigint' && tokenId8_0 >= 0n && tokenId8_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 9 (argument 10 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId8_0)
         }
         if (!(typeof(tokenId9_0) === 'bigint' && tokenId9_0 >= 0n && tokenId9_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 10 (argument 11 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId9_0)
         }
         if (!(typeof(tokenId10_0) === 'bigint' && tokenId10_0 >= 0n && tokenId10_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 11 (argument 12 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId10_0)
         }
         if (!(typeof(tokenId11_0) === 'bigint' && tokenId11_0 >= 0n && tokenId11_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 12 (argument 13 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId11_0)
         }
         if (!(typeof(tokenId12_0) === 'bigint' && tokenId12_0 >= 0n && tokenId12_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 13 (argument 14 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId12_0)
         }
         if (!(typeof(tokenId13_0) === 'bigint' && tokenId13_0 >= 0n && tokenId13_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 14 (argument 15 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId13_0)
         }
         if (!(typeof(tokenId14_0) === 'bigint' && tokenId14_0 >= 0n && tokenId14_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 15 (argument 16 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId14_0)
         }
         if (!(typeof(tokenId15_0) === 'bigint' && tokenId15_0 >= 0n && tokenId15_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 16 (argument 17 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId15_0)
         }
         if (!(typeof(tokenId16_0) === 'bigint' && tokenId16_0 >= 0n && tokenId16_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 17 (argument 18 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId16_0)
         }
         if (!(typeof(tokenId17_0) === 'bigint' && tokenId17_0 >= 0n && tokenId17_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 18 (argument 19 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId17_0)
         }
         if (!(typeof(tokenId18_0) === 'bigint' && tokenId18_0 >= 0n && tokenId18_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 19 (argument 20 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId18_0)
         }
         if (!(typeof(tokenId19_0) === 'bigint' && tokenId19_0 >= 0n && tokenId19_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 20 (argument 21 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId19_0)
         }
         if (!(typeof(tokenId20_0) === 'bigint' && tokenId20_0 >= 0n && tokenId20_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 21 (argument 22 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId20_0)
         }
         if (!(challenge_0.buffer instanceof ArrayBuffer && challenge_0.BYTES_PER_ELEMENT === 1 && challenge_0.length === 32)) {
           __compactRuntime.typeError('burnPurchasedBatch20',
                                      'argument 22 (argument 23 as invoked from Typescript)',
-                                     'private-buyer.compact line 1012 char 1',
+                                     'private-buyer.compact line 1065 char 1',
                                      'Bytes<32>',
                                      challenge_0)
         }
@@ -2255,37 +2273,37 @@ export class Contract {
       grantRole: this.circuits.grantRole,
       revokeRole: this.circuits.revokeRole,
       renounceRole: this.circuits.renounceRole,
-      assertOnlyRole: this.circuits.assertOnlyRole,
-      pauseAccessControl: this.circuits.pauseAccessControl,
-      unpauseAccessControl: this.circuits.unpauseAccessControl,
       assertOwnVerification: this.circuits.assertOwnVerification,
-      isUserVerified: this.circuits.isUserVerified,
       setUser: this.circuits.setUser,
       removeUser: this.circuits.removeUser,
+      mint: this.circuits.mint,
+      burn: this.circuits.burn,
+      setTokenPrice: this.circuits.setTokenPrice,
+      addToPool: this.circuits.addToPool,
+      removeFromPool: this.circuits.removeFromPool,
+      purchaseNFT: this.circuits.purchaseNFT,
+      withdrawSellerFunds: this.circuits.withdrawSellerFunds,
+      burnPurchased: this.circuits.burnPurchased,
+      proofOwnership: this.circuits.proofOwnership,
+      pauseAccessControl: this.circuits.pauseAccessControl,
+      unpauseAccessControl: this.circuits.unpauseAccessControl,
       pauseIdentity: this.circuits.pauseIdentity,
       unpauseIdentity: this.circuits.unpauseIdentity,
+      pauseToken: this.circuits.pauseToken,
+      unpauseToken: this.circuits.unpauseToken,
+      pauseNFTPool: this.circuits.pauseNFTPool,
+      unpauseNFTPool: this.circuits.unpauseNFTPool,
+      isUserVerified: this.circuits.isUserVerified,
       balanceOf: this.circuits.balanceOf,
       ownerOf: this.circuits.ownerOf,
       tokenCertificate: this.circuits.tokenCertificate,
       tokenPrice: this.circuits.tokenPrice,
-      mint: this.circuits.mint,
-      burn: this.circuits.burn,
-      setTokenPrice: this.circuits.setTokenPrice,
-      pauseToken: this.circuits.pauseToken,
-      unpauseToken: this.circuits.unpauseToken,
-      addToPool: this.circuits.addToPool,
-      removeFromPool: this.circuits.removeFromPool,
-      purchaseNFT: this.circuits.purchaseNFT,
       _getBatchTokenPrice: this.circuits._getBatchTokenPrice,
       _storeBatchSellerPayment: this.circuits._storeBatchSellerPayment,
       _executeBatchPurchase: this.circuits._executeBatchPurchase,
       purchaseBatch5: this.circuits.purchaseBatch5,
       purchaseBatch10: this.circuits.purchaseBatch10,
       purchaseBatch20: this.circuits.purchaseBatch20,
-      withdrawSellerFunds: this.circuits.withdrawSellerFunds,
-      proofOwnership: this.circuits.proofOwnership,
-      pauseNFTPool: this.circuits.pauseNFTPool,
-      unpauseNFTPool: this.circuits.unpauseNFTPool,
       _burnPurchasedToken: this.circuits._burnPurchasedToken,
       burnPurchasedBatch5: this.circuits.burnPurchasedBatch5,
       burnPurchasedBatch10: this.circuits.burnPurchasedBatch10,
@@ -2351,37 +2369,37 @@ export class Contract {
     state_0.setOperation('grantRole', new __compactRuntime.ContractOperation());
     state_0.setOperation('revokeRole', new __compactRuntime.ContractOperation());
     state_0.setOperation('renounceRole', new __compactRuntime.ContractOperation());
-    state_0.setOperation('assertOnlyRole', new __compactRuntime.ContractOperation());
-    state_0.setOperation('pauseAccessControl', new __compactRuntime.ContractOperation());
-    state_0.setOperation('unpauseAccessControl', new __compactRuntime.ContractOperation());
     state_0.setOperation('assertOwnVerification', new __compactRuntime.ContractOperation());
-    state_0.setOperation('isUserVerified', new __compactRuntime.ContractOperation());
     state_0.setOperation('setUser', new __compactRuntime.ContractOperation());
     state_0.setOperation('removeUser', new __compactRuntime.ContractOperation());
+    state_0.setOperation('mint', new __compactRuntime.ContractOperation());
+    state_0.setOperation('burn', new __compactRuntime.ContractOperation());
+    state_0.setOperation('setTokenPrice', new __compactRuntime.ContractOperation());
+    state_0.setOperation('addToPool', new __compactRuntime.ContractOperation());
+    state_0.setOperation('removeFromPool', new __compactRuntime.ContractOperation());
+    state_0.setOperation('purchaseNFT', new __compactRuntime.ContractOperation());
+    state_0.setOperation('withdrawSellerFunds', new __compactRuntime.ContractOperation());
+    state_0.setOperation('burnPurchased', new __compactRuntime.ContractOperation());
+    state_0.setOperation('proofOwnership', new __compactRuntime.ContractOperation());
+    state_0.setOperation('pauseAccessControl', new __compactRuntime.ContractOperation());
+    state_0.setOperation('unpauseAccessControl', new __compactRuntime.ContractOperation());
     state_0.setOperation('pauseIdentity', new __compactRuntime.ContractOperation());
     state_0.setOperation('unpauseIdentity', new __compactRuntime.ContractOperation());
+    state_0.setOperation('pauseToken', new __compactRuntime.ContractOperation());
+    state_0.setOperation('unpauseToken', new __compactRuntime.ContractOperation());
+    state_0.setOperation('pauseNFTPool', new __compactRuntime.ContractOperation());
+    state_0.setOperation('unpauseNFTPool', new __compactRuntime.ContractOperation());
+    state_0.setOperation('isUserVerified', new __compactRuntime.ContractOperation());
     state_0.setOperation('balanceOf', new __compactRuntime.ContractOperation());
     state_0.setOperation('ownerOf', new __compactRuntime.ContractOperation());
     state_0.setOperation('tokenCertificate', new __compactRuntime.ContractOperation());
     state_0.setOperation('tokenPrice', new __compactRuntime.ContractOperation());
-    state_0.setOperation('mint', new __compactRuntime.ContractOperation());
-    state_0.setOperation('burn', new __compactRuntime.ContractOperation());
-    state_0.setOperation('setTokenPrice', new __compactRuntime.ContractOperation());
-    state_0.setOperation('pauseToken', new __compactRuntime.ContractOperation());
-    state_0.setOperation('unpauseToken', new __compactRuntime.ContractOperation());
-    state_0.setOperation('addToPool', new __compactRuntime.ContractOperation());
-    state_0.setOperation('removeFromPool', new __compactRuntime.ContractOperation());
-    state_0.setOperation('purchaseNFT', new __compactRuntime.ContractOperation());
     state_0.setOperation('_getBatchTokenPrice', new __compactRuntime.ContractOperation());
     state_0.setOperation('_storeBatchSellerPayment', new __compactRuntime.ContractOperation());
     state_0.setOperation('_executeBatchPurchase', new __compactRuntime.ContractOperation());
     state_0.setOperation('purchaseBatch5', new __compactRuntime.ContractOperation());
     state_0.setOperation('purchaseBatch10', new __compactRuntime.ContractOperation());
     state_0.setOperation('purchaseBatch20', new __compactRuntime.ContractOperation());
-    state_0.setOperation('withdrawSellerFunds', new __compactRuntime.ContractOperation());
-    state_0.setOperation('proofOwnership', new __compactRuntime.ContractOperation());
-    state_0.setOperation('pauseNFTPool', new __compactRuntime.ContractOperation());
-    state_0.setOperation('unpauseNFTPool', new __compactRuntime.ContractOperation());
     state_0.setOperation('_burnPurchasedToken', new __compactRuntime.ContractOperation());
     state_0.setOperation('burnPurchasedBatch5', new __compactRuntime.ContractOperation());
     state_0.setOperation('burnPurchasedBatch10', new __compactRuntime.ContractOperation());
@@ -2944,7 +2962,7 @@ export class Contract {
     return { is_left: false, left: { bytes: new Uint8Array(32) }, right: value_0 };
   }
   _transientHash_0(value_0) {
-    const result_0 = __compactRuntime.transientHash(_descriptor_20, value_0);
+    const result_0 = __compactRuntime.transientHash(_descriptor_21, value_0);
     return result_0;
   }
   _persistentHash_0(value_0) {
@@ -2956,7 +2974,7 @@ export class Contract {
     return result_0;
   }
   _persistentHash_2(value_0) {
-    const result_0 = __compactRuntime.persistentHash(_descriptor_19, value_0);
+    const result_0 = __compactRuntime.persistentHash(_descriptor_20, value_0);
     return result_0;
   }
   _degradeToTransient_0(x_0) {
@@ -3154,7 +3172,7 @@ export class Contract {
     return { nonce: coin_0.nonce, color: coin_0.color, value: coin_0.value };
   }
   _coinCommitment_0(coin_0, recipient_0) {
-    return this._persistentHash_0({ domain_sep:
+    return this._persistentHash_2({ domain_sep:
                                       new Uint8Array([109, 105, 100, 110, 105, 103, 104, 116, 58, 122, 115, 119, 97, 112, 45, 99, 99, 91, 118, 49, 93]),
                                     info: coin_0,
                                     dataType: recipient_0.is_left,
@@ -3164,7 +3182,7 @@ export class Contract {
                                       recipient_0.right.bytes });
   }
   _coinNullifier_0(coin_0, addr_0) {
-    return this._persistentHash_0({ domain_sep:
+    return this._persistentHash_2({ domain_sep:
                                       new Uint8Array([109, 105, 100, 110, 105, 103, 104, 116, 58, 122, 115, 119, 97, 112, 45, 99, 110, 91, 118, 49, 93]),
                                     info: coin_0,
                                     dataType: false,
@@ -5659,7 +5677,7 @@ export class Contract {
     return [];
   }
   __computeOwnerCommitment_0(id_0, counter_0) {
-    return this._persistentHash_2([id_0,
+    return this._persistentHash_1([id_0,
                                    __compactRuntime.convertFieldToBytes(32,
                                                                         counter_0,
                                                                         'NFTPool.compact line 585 char 19'),
@@ -5668,7 +5686,7 @@ export class Contract {
   __computeOwnerId_0(pk_0, nonce_0) {
     __compactRuntime.assert(pk_0.is_left,
                             'NFTPool: contract address owners are not yet supported');
-    return this._persistentHash_1([pk_0.left.bytes, nonce_0]);
+    return this._persistentHash_0([pk_0.left.bytes, nonce_0]);
   }
   __isTokenSold_0(context, partialProofData, tokenId_0) {
     if (_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
@@ -5951,24 +5969,15 @@ export class Contract {
   _assertOnlyRole_1(context, partialProofData, roleId_0) {
     this._assertOnlyRole_0(context, partialProofData, roleId_0); return [];
   }
-  _pauseAccessControl_1(context, partialProofData) {
-    this._pauseAccessControl_0(context, partialProofData); return [];
-  }
-  _unpauseAccessControl_1(context, partialProofData) {
-    this._unpauseAccessControl_0(context, partialProofData); return [];
-  }
   _assertOwnVerification_1(context, partialProofData) {
     this._assertOwnVerification_0(context, partialProofData); return [];
-  }
-  _isUserVerified_1(context, partialProofData, user_0) {
-    return this._isUserVerified_0(context, partialProofData, user_0);
   }
   _setUser_1(context, partialProofData, user_0) {
     this._assertOnlyRole_1(context,
                            partialProofData,
                            __compactRuntime.convertFieldToBytes(32,
                                                                 3n,
-                                                                'private-buyer.compact line 205 char 18'));
+                                                                'private-buyer.compact line 173 char 18'));
     this._setUser_0(context, partialProofData, user_0);
     return [];
   }
@@ -5977,31 +5986,9 @@ export class Contract {
                            partialProofData,
                            __compactRuntime.convertFieldToBytes(32,
                                                                 3n,
-                                                                'private-buyer.compact line 221 char 18'));
+                                                                'private-buyer.compact line 189 char 18'));
     this._removeUser_0(context, partialProofData, user_0);
     return [];
-  }
-  _pauseIdentity_1(context, partialProofData) {
-    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
-    this._pauseIdentity_0(context, partialProofData);
-    return [];
-  }
-  _unpauseIdentity_1(context, partialProofData) {
-    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
-    this._unpauseIdentity_0(context, partialProofData);
-    return [];
-  }
-  _balanceOf_1(context, partialProofData, owner_0) {
-    return this._balanceOf_0(context, partialProofData, owner_0);
-  }
-  _ownerOf_1(context, partialProofData, tokenId_0) {
-    return this._ownerOf_0(context, partialProofData, tokenId_0);
-  }
-  _tokenCertificate_1(context, partialProofData, tokenId_0) {
-    return this._tokenCertificate_0(context, partialProofData, tokenId_0);
-  }
-  _tokenPrice_1(context, partialProofData, tokenId_0) {
-    return this._tokenPrice_0(context, partialProofData, tokenId_0);
   }
   _mint_1(context,
           partialProofData,
@@ -6014,7 +6001,7 @@ export class Contract {
                            partialProofData,
                            __compactRuntime.convertFieldToBytes(32,
                                                                 1n,
-                                                                'private-buyer.compact line 326 char 18'));
+                                                                'private-buyer.compact line 216 char 18'));
     return this._mint_0(context,
                         partialProofData,
                         to_0,
@@ -6027,7 +6014,7 @@ export class Contract {
                            partialProofData,
                            __compactRuntime.convertFieldToBytes(32,
                                                                 1n,
-                                                                'private-buyer.compact line 345 char 18'));
+                                                                'private-buyer.compact line 235 char 18'));
     __compactRuntime.assert(!_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                        partialProofData,
                                                                                        [
@@ -6098,18 +6085,8 @@ export class Contract {
                            partialProofData,
                            __compactRuntime.convertFieldToBytes(32,
                                                                 2n,
-                                                                'private-buyer.compact line 370 char 18'));
+                                                                'private-buyer.compact line 260 char 18'));
     this.__setTokenPrice_0(context, partialProofData, tokenId_0, price_0);
-    return [];
-  }
-  _pauseToken_1(context, partialProofData) {
-    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
-    this._pauseToken_0(context, partialProofData);
-    return [];
-  }
-  _unpauseToken_1(context, partialProofData) {
-    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
-    this._unpauseToken_0(context, partialProofData);
     return [];
   }
   _addToPool_1(context, partialProofData, tokenId_0) {
@@ -6161,7 +6138,7 @@ export class Contract {
                              partialProofData,
                              __compactRuntime.convertFieldToBytes(32,
                                                                   2n,
-                                                                  'private-buyer.compact line 429 char 20'));
+                                                                  'private-buyer.compact line 289 char 20'));
     }
     this._addToPool_0(context, partialProofData, tokenId_0);
     return [];
@@ -6195,7 +6172,7 @@ export class Contract {
                              partialProofData,
                              __compactRuntime.convertFieldToBytes(32,
                                                                   2n,
-                                                                  'private-buyer.compact line 451 char 20'));
+                                                                  'private-buyer.compact line 311 char 20'));
     }
     this._removeFromPool_0(context, partialProofData, tokenId_0);
     return [];
@@ -6275,8 +6252,195 @@ export class Contract {
                                price_0);
     return this._purchaseNFT_0(context, partialProofData, tokenId_0);
   }
+  _withdrawSellerFunds_1(context, partialProofData) {
+    this._withdrawSellerFunds_0(context, partialProofData); return [];
+  }
+  _burnPurchased_0(context,
+                   partialProofData,
+                   ownerCommitment_0,
+                   tokenId_0,
+                   challenge_0)
+  {
+    this._assertOnlyRole_1(context,
+                           partialProofData,
+                           __compactRuntime.convertFieldToBytes(32,
+                                                                1n,
+                                                                'private-buyer.compact line 393 char 18'));
+    __compactRuntime.assert(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
+                                                                                      partialProofData,
+                                                                                      [
+                                                                                       { dup: { n: 0 } },
+                                                                                       { idx: { cached: false,
+                                                                                                pushPath: false,
+                                                                                                path: [
+                                                                                                       { tag: 'value',
+                                                                                                         value: { value: _descriptor_24.toValue(1n),
+                                                                                                                  alignment: _descriptor_24.alignment() } },
+                                                                                                       { tag: 'value',
+                                                                                                         value: { value: _descriptor_24.toValue(5n),
+                                                                                                                  alignment: _descriptor_24.alignment() } }] } },
+                                                                                       { push: { storage: false,
+                                                                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_0.toValue(ownerCommitment_0),
+                                                                                                                                              alignment: _descriptor_0.alignment() }).encode() } },
+                                                                                       'member',
+                                                                                       { popeq: { cached: true,
+                                                                                                  result: undefined } }]).value),
+                            'No ownership proof found');
+    const storedChallenge_0 = _descriptor_0.fromValue(__compactRuntime.queryLedgerState(context,
+                                                                                        partialProofData,
+                                                                                        [
+                                                                                         { dup: { n: 0 } },
+                                                                                         { idx: { cached: false,
+                                                                                                  pushPath: false,
+                                                                                                  path: [
+                                                                                                         { tag: 'value',
+                                                                                                           value: { value: _descriptor_24.toValue(1n),
+                                                                                                                    alignment: _descriptor_24.alignment() } },
+                                                                                                         { tag: 'value',
+                                                                                                           value: { value: _descriptor_24.toValue(5n),
+                                                                                                                    alignment: _descriptor_24.alignment() } }] } },
+                                                                                         { idx: { cached: false,
+                                                                                                  pushPath: false,
+                                                                                                  path: [
+                                                                                                         { tag: 'value',
+                                                                                                           value: { value: _descriptor_0.toValue(ownerCommitment_0),
+                                                                                                                    alignment: _descriptor_0.alignment() } }] } },
+                                                                                         { popeq: { cached: false,
+                                                                                                    result: undefined } }]).value);
+    __compactRuntime.assert(this._equal_9(storedChallenge_0, challenge_0),
+                            'Challenge does not match ownership proof');
+    __compactRuntime.assert(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
+                                                                                      partialProofData,
+                                                                                      [
+                                                                                       { dup: { n: 0 } },
+                                                                                       { idx: { cached: false,
+                                                                                                pushPath: false,
+                                                                                                path: [
+                                                                                                       { tag: 'value',
+                                                                                                         value: { value: _descriptor_24.toValue(1n),
+                                                                                                                  alignment: _descriptor_24.alignment() } },
+                                                                                                       { tag: 'value',
+                                                                                                         value: { value: _descriptor_24.toValue(2n),
+                                                                                                                  alignment: _descriptor_24.alignment() } }] } },
+                                                                                       { push: { storage: false,
+                                                                                                 value: __compactRuntime.StateValue.newCell({ value: _descriptor_2.toValue(tokenId_0),
+                                                                                                                                              alignment: _descriptor_2.alignment() }).encode() } },
+                                                                                       'member',
+                                                                                       { popeq: { cached: true,
+                                                                                                  result: undefined } }]).value),
+                            'Token not purchased');
+    const storedCommitment_0 = _descriptor_0.fromValue(__compactRuntime.queryLedgerState(context,
+                                                                                         partialProofData,
+                                                                                         [
+                                                                                          { dup: { n: 0 } },
+                                                                                          { idx: { cached: false,
+                                                                                                   pushPath: false,
+                                                                                                   path: [
+                                                                                                          { tag: 'value',
+                                                                                                            value: { value: _descriptor_24.toValue(1n),
+                                                                                                                     alignment: _descriptor_24.alignment() } },
+                                                                                                          { tag: 'value',
+                                                                                                            value: { value: _descriptor_24.toValue(2n),
+                                                                                                                     alignment: _descriptor_24.alignment() } }] } },
+                                                                                          { idx: { cached: false,
+                                                                                                   pushPath: false,
+                                                                                                   path: [
+                                                                                                          { tag: 'value',
+                                                                                                            value: { value: _descriptor_2.toValue(tokenId_0),
+                                                                                                                     alignment: _descriptor_2.alignment() } }] } },
+                                                                                          { popeq: { cached: false,
+                                                                                                     result: undefined } }]).value);
+    __compactRuntime.assert(this._equal_10(storedCommitment_0, ownerCommitment_0),
+                            'Token not owned by this commitment');
+    const seller_0 = _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
+                                                                               partialProofData,
+                                                                               [
+                                                                                { dup: { n: 0 } },
+                                                                                { idx: { cached: false,
+                                                                                         pushPath: false,
+                                                                                         path: [
+                                                                                                { tag: 'value',
+                                                                                                  value: { value: _descriptor_24.toValue(0n),
+                                                                                                           alignment: _descriptor_24.alignment() } },
+                                                                                                { tag: 'value',
+                                                                                                  value: { value: _descriptor_24.toValue(10n),
+                                                                                                           alignment: _descriptor_24.alignment() } }] } },
+                                                                                { idx: { cached: false,
+                                                                                         pushPath: false,
+                                                                                         path: [
+                                                                                                { tag: 'value',
+                                                                                                  value: { value: _descriptor_2.toValue(tokenId_0),
+                                                                                                           alignment: _descriptor_2.alignment() } }] } },
+                                                                                { popeq: { cached: false,
+                                                                                           result: undefined } }]).value);
+    this._recordBurn_0(context,
+                       partialProofData,
+                       tokenId_0,
+                       seller_0,
+                       ownerCommitment_0,
+                       challenge_0);
+    this._burn_0(context, partialProofData, tokenId_0);
+    return [];
+  }
+  _proofOwnership_1(context, partialProofData, ownerCommitment_0, challenge_0) {
+    return this._proofOwnership_0(context,
+                                  partialProofData,
+                                  ownerCommitment_0,
+                                  challenge_0);
+  }
+  _pauseAccessControl_1(context, partialProofData) {
+    this._pauseAccessControl_0(context, partialProofData); return [];
+  }
+  _unpauseAccessControl_1(context, partialProofData) {
+    this._unpauseAccessControl_0(context, partialProofData); return [];
+  }
+  _pauseIdentity_1(context, partialProofData) {
+    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
+    this._pauseIdentity_0(context, partialProofData);
+    return [];
+  }
+  _unpauseIdentity_1(context, partialProofData) {
+    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
+    this._unpauseIdentity_0(context, partialProofData);
+    return [];
+  }
+  _pauseToken_1(context, partialProofData) {
+    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
+    this._pauseToken_0(context, partialProofData);
+    return [];
+  }
+  _unpauseToken_1(context, partialProofData) {
+    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
+    this._unpauseToken_0(context, partialProofData);
+    return [];
+  }
+  _pauseNFTPool_1(context, partialProofData) {
+    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
+    this._pauseNFTPool_0(context, partialProofData);
+    return [];
+  }
+  _unpauseNFTPool_1(context, partialProofData) {
+    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
+    this._unpauseNFTPool_0(context, partialProofData);
+    return [];
+  }
+  _isUserVerified_1(context, partialProofData, user_0) {
+    return this._isUserVerified_0(context, partialProofData, user_0);
+  }
+  _balanceOf_1(context, partialProofData, owner_0) {
+    return this._balanceOf_0(context, partialProofData, owner_0);
+  }
+  _ownerOf_1(context, partialProofData, tokenId_0) {
+    return this._ownerOf_0(context, partialProofData, tokenId_0);
+  }
+  _tokenCertificate_1(context, partialProofData, tokenId_0) {
+    return this._tokenCertificate_0(context, partialProofData, tokenId_0);
+  }
+  _tokenPrice_1(context, partialProofData, tokenId_0) {
+    return this._tokenPrice_0(context, partialProofData, tokenId_0);
+  }
   __getBatchTokenPrice_0(context, partialProofData, tokenId_0) {
-    if (!this._equal_9(tokenId_0, 0n)) {
+    if (!this._equal_11(tokenId_0, 0n)) {
       __compactRuntime.assert(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                         partialProofData,
                                                                                         [
@@ -6328,7 +6492,7 @@ export class Contract {
                               coin_0,
                               price_0)
   {
-    if (!this._equal_10(tokenId_0, 0n)) {
+    if (!this._equal_12(tokenId_0, 0n)) {
       const seller_0 = _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                  partialProofData,
                                                                                  [
@@ -6363,7 +6527,7 @@ export class Contract {
                            tokenId_0,
                            ownerCommitment_0)
   {
-    if (!this._equal_11(tokenId_0, 0n)) {
+    if (!this._equal_13(tokenId_0, 0n)) {
       this._purchaseNFTBatch_0(context,
                                partialProofData,
                                tokenId_0,
@@ -6399,7 +6563,7 @@ export class Contract {
     const totalPrice_0 = price1_0 + price2_0 + price3_0 + price4_0 + price5_0;
     __compactRuntime.assert(coin_0.value >= totalPrice_0,
                             'Insufficient payment for batch');
-    __compactRuntime.assert(this._equal_12(coin_0.color, this._nativeToken_0()),
+    __compactRuntime.assert(this._equal_14(coin_0.color, this._nativeToken_0()),
                             'Invalid coin provided');
     this._receiveShielded_0(context, partialProofData, coin_0);
     this.__storeBatchSellerPayment_0(context,
@@ -6509,7 +6673,7 @@ export class Contract {
                          price10_0;
     __compactRuntime.assert(coin_0.value >= totalPrice_0,
                             'Insufficient payment for batch');
-    __compactRuntime.assert(this._equal_13(coin_0.color, this._nativeToken_0()),
+    __compactRuntime.assert(this._equal_15(coin_0.color, this._nativeToken_0()),
                             'Invalid coin provided');
     this._receiveShielded_0(context, partialProofData, coin_0);
     this.__storeBatchSellerPayment_0(context,
@@ -6724,7 +6888,7 @@ export class Contract {
                          price20_0;
     __compactRuntime.assert(coin_0.value >= totalPrice_0,
                             'Insufficient payment for batch');
-    __compactRuntime.assert(this._equal_14(coin_0.color, this._nativeToken_0()),
+    __compactRuntime.assert(this._equal_16(coin_0.color, this._nativeToken_0()),
                             'Invalid coin provided');
     this._receiveShielded_0(context, partialProofData, coin_0);
     this.__storeBatchSellerPayment_0(context,
@@ -6911,32 +7075,13 @@ export class Contract {
                                   ownerCommitment_0);
     return ownerCommitment_0;
   }
-  _withdrawSellerFunds_1(context, partialProofData) {
-    this._withdrawSellerFunds_0(context, partialProofData); return [];
-  }
-  _proofOwnership_1(context, partialProofData, ownerCommitment_0, challenge_0) {
-    return this._proofOwnership_0(context,
-                                  partialProofData,
-                                  ownerCommitment_0,
-                                  challenge_0);
-  }
-  _pauseNFTPool_1(context, partialProofData) {
-    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
-    this._pauseNFTPool_0(context, partialProofData);
-    return [];
-  }
-  _unpauseNFTPool_1(context, partialProofData) {
-    this._assertOnlyRole_1(context, partialProofData, new Uint8Array(32));
-    this._unpauseNFTPool_0(context, partialProofData);
-    return [];
-  }
   __burnPurchasedToken_0(context,
                          partialProofData,
                          tokenId_0,
                          ownerCommitment_0,
                          challenge_0)
   {
-    if (!this._equal_15(tokenId_0, 0n)) {
+    if (!this._equal_17(tokenId_0, 0n)) {
       __compactRuntime.assert(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                         partialProofData,
                                                                                         [
@@ -6978,7 +7123,7 @@ export class Contract {
                                                                                                                        alignment: _descriptor_2.alignment() } }] } },
                                                                                             { popeq: { cached: false,
                                                                                                        result: undefined } }]).value);
-      __compactRuntime.assert(this._equal_16(storedCommitment_0,
+      __compactRuntime.assert(this._equal_18(storedCommitment_0,
                                              ownerCommitment_0),
                               'Token not owned by this commitment');
       const seller_0 = _descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
@@ -7026,7 +7171,7 @@ export class Contract {
                            partialProofData,
                            __compactRuntime.convertFieldToBytes(32,
                                                                 1n,
-                                                                'private-buyer.compact line 937 char 18'));
+                                                                'private-buyer.compact line 990 char 18'));
     __compactRuntime.assert(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                       partialProofData,
                                                                                       [
@@ -7068,7 +7213,7 @@ export class Contract {
                                                                                                                     alignment: _descriptor_0.alignment() } }] } },
                                                                                          { popeq: { cached: false,
                                                                                                     result: undefined } }]).value);
-    __compactRuntime.assert(this._equal_17(storedChallenge_0, challenge_0),
+    __compactRuntime.assert(this._equal_19(storedChallenge_0, challenge_0),
                             'Challenge does not match ownership proof');
     this.__burnPurchasedToken_0(context,
                                 partialProofData,
@@ -7116,7 +7261,7 @@ export class Contract {
                            partialProofData,
                            __compactRuntime.convertFieldToBytes(32,
                                                                 1n,
-                                                                'private-buyer.compact line 980 char 18'));
+                                                                'private-buyer.compact line 1033 char 18'));
     __compactRuntime.assert(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                       partialProofData,
                                                                                       [
@@ -7158,7 +7303,7 @@ export class Contract {
                                                                                                                     alignment: _descriptor_0.alignment() } }] } },
                                                                                          { popeq: { cached: false,
                                                                                                     result: undefined } }]).value);
-    __compactRuntime.assert(this._equal_18(storedChallenge_0, challenge_0),
+    __compactRuntime.assert(this._equal_20(storedChallenge_0, challenge_0),
                             'Challenge does not match ownership proof');
     this.__burnPurchasedToken_0(context,
                                 partialProofData,
@@ -7241,7 +7386,7 @@ export class Contract {
                            partialProofData,
                            __compactRuntime.convertFieldToBytes(32,
                                                                 1n,
-                                                                'private-buyer.compact line 1037 char 18'));
+                                                                'private-buyer.compact line 1090 char 18'));
     __compactRuntime.assert(_descriptor_1.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                       partialProofData,
                                                                                       [
@@ -7283,7 +7428,7 @@ export class Contract {
                                                                                                                     alignment: _descriptor_0.alignment() } }] } },
                                                                                          { popeq: { cached: false,
                                                                                                     result: undefined } }]).value);
-    __compactRuntime.assert(this._equal_19(storedChallenge_0, challenge_0),
+    __compactRuntime.assert(this._equal_21(storedChallenge_0, challenge_0),
                             'Challenge does not match ownership proof');
     this.__burnPurchasedToken_0(context,
                                 partialProofData,
@@ -7476,11 +7621,11 @@ export class Contract {
     return true;
   }
   _equal_9(x0, y0) {
-    if (x0 !== y0) { return false; }
+    if (!x0.every((x, i) => y0[i] === x)) { return false; }
     return true;
   }
   _equal_10(x0, y0) {
-    if (x0 !== y0) { return false; }
+    if (!x0.every((x, i) => y0[i] === x)) { return false; }
     return true;
   }
   _equal_11(x0, y0) {
@@ -7488,11 +7633,11 @@ export class Contract {
     return true;
   }
   _equal_12(x0, y0) {
-    if (!x0.every((x, i) => y0[i] === x)) { return false; }
+    if (x0 !== y0) { return false; }
     return true;
   }
   _equal_13(x0, y0) {
-    if (!x0.every((x, i) => y0[i] === x)) { return false; }
+    if (x0 !== y0) { return false; }
     return true;
   }
   _equal_14(x0, y0) {
@@ -7500,7 +7645,7 @@ export class Contract {
     return true;
   }
   _equal_15(x0, y0) {
-    if (x0 !== y0) { return false; }
+    if (!x0.every((x, i) => y0[i] === x)) { return false; }
     return true;
   }
   _equal_16(x0, y0) {
@@ -7508,7 +7653,7 @@ export class Contract {
     return true;
   }
   _equal_17(x0, y0) {
-    if (!x0.every((x, i) => y0[i] === x)) { return false; }
+    if (x0 !== y0) { return false; }
     return true;
   }
   _equal_18(x0, y0) {
@@ -7516,6 +7661,14 @@ export class Contract {
     return true;
   }
   _equal_19(x0, y0) {
+    if (!x0.every((x, i) => y0[i] === x)) { return false; }
+    return true;
+  }
+  _equal_20(x0, y0) {
+    if (!x0.every((x, i) => y0[i] === x)) { return false; }
+    return true;
+  }
+  _equal_21(x0, y0) {
     if (!x0.every((x, i) => y0[i] === x)) { return false; }
     return true;
   }
