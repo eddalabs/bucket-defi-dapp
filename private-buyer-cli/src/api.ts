@@ -65,6 +65,13 @@ const privateBuyerCompiledContract = CompiledContract.make('private-buyer', Priv
   CompiledContract.withCompiledFileAssets(contractConfig.zkConfigPath),
 );
 
+// Deploy-only compiled contract is built lazily in deployOnly() via dynamic import.
+// The deploy-only Contract class (14 circuits) lives in a separate compact output
+// and its types are structurally identical but nominally different from the full contract,
+// so we cast CompiledContract to any to bypass the generic mismatch.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CC = CompiledContract as any;
+
 // Types for the new wallet
 export interface WalletContext {
   wallet: WalletFacade;
@@ -155,6 +162,32 @@ export const deploy = async (
   });
   logger.info(`Deployed contract at address: ${contract.deployTxData.public.contractAddress}`);
   return contract;
+};
+
+export const deployOnly = async (
+  providers: PrivateBuyerProviders,
+  name: string,
+  symbol: string,
+): Promise<DeployedPrivateBuyerContract> => {
+  logger.info('Deploying private-buyer contract (deploy-only, 14 circuits)...');
+
+  // Dynamically import the deploy-only Contract class (14 circuits).
+  // Using the full PrivateBuyer.Contract (38 circuits) would exceed the block limit
+  // because the contract IR itself encodes all circuit bytecode.
+  const { Contract: DeployContract } = await import(contractConfig.zkConfigDeployPath + '/contract/index.js');
+  const deployCC = CC.make('private-buyer-deploy', DeployContract).pipe(
+    CC.withWitnesses(witnesses),
+    CC.withCompiledFileAssets(contractConfig.zkConfigDeployPath),
+  );
+
+  const contract = await (deployContract as any)(providers, {
+    compiledContract: deployCC,
+    privateStateId: 'privateBuyerPrivateState',
+    initialPrivateState: createPrivateState(crypto.getRandomValues(new Uint8Array(32))),
+    args: [name, symbol],
+  });
+  logger.info(`Deployed contract at address: ${contract.deployTxData.public.contractAddress}`);
+  return contract as DeployedPrivateBuyerContract;
 };
 
 // ─── Access Control Circuits ───────────────────────────────────────────────
@@ -532,17 +565,33 @@ export const REMAINING_CIRCUITS: string[] = [
   '_burnPurchasedToken', 'burnPurchasedBatch5', 'burnPurchasedBatch10', 'burnPurchasedBatch20',
 ];
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const insertRemainingVerifierKeys = async (
   providers: PrivateBuyerProviders,
   contractAddress: string,
 ): Promise<void> => {
   const circuits = REMAINING_CIRCUITS;
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 10_000;
+
   logger.info(`Inserting ${circuits.length} remaining VKs...`);
   for (let i = 0; i < circuits.length; i++) {
     const circuitId = circuits[i];
-    logger.info(`  Inserting VK for ${circuitId} (${i + 1}/${circuits.length})...`);
-    await insertCircuitVerifierKey(providers, contractAddress, circuitId as PrivateBuyerCircuits);
-    logger.info(`  VK for ${circuitId} inserted.`);
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        logger.info(`  Inserting VK for ${circuitId} (${i + 1}/${circuits.length})...`);
+        await insertCircuitVerifierKey(providers, contractAddress, circuitId as PrivateBuyerCircuits);
+        logger.info(`  VK for ${circuitId} inserted.`);
+        break;
+      } catch (e) {
+        if (attempt === MAX_RETRIES) throw e;
+        const msg = e instanceof Error ? e.message : String(e);
+        logger.warn(`  VK insert for ${circuitId} failed (attempt ${attempt}/${MAX_RETRIES}): ${msg}`);
+        logger.info(`  Retrying in ${RETRY_DELAY_MS / 1000}s...`);
+        await delay(RETRY_DELAY_MS);
+      }
+    }
   }
   logger.info(`All ${circuits.length} VKs inserted.`);
 };

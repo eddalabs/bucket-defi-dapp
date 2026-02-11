@@ -213,10 +213,14 @@ const deployOrJoin = async (
         try {
           const name = await rli.question('Enter contract name: ');
           const symbol = await rli.question('Enter contract symbol: ');
-          const contract = await api.withStatus('Deploying private-buyer contract', () =>
-            api.deploy(providers, name.trim(), symbol.trim()),
+          const contract = await api.withStatus('Deploying contract (14 circuit VKs)', () =>
+            api.deployOnly(providers, name.trim(), symbol.trim()),
           );
-          console.log(`  Contract deployed at: ${contract.deployTxData.public.contractAddress}\n`);
+          const contractAddress = contract.deployTxData.public.contractAddress;
+          console.log(`  Contract deployed at: ${contractAddress}`);
+          console.log(`  Inserting remaining 24 VKs...\n`);
+          await api.insertRemainingVerifierKeys(providers, contractAddress);
+          console.log(`  Deploy complete.\n`);
           return contract;
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);

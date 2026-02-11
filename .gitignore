@@ -63,5 +63,8 @@ jspm_packages/
 # Frontend build artifacts (copied from contract source during build)
 frontend-vite-react/public/midnight/
 
+# Deploy-only compiled contract (generated via `npm run compact-deploy`)
+private-buyer-contract/src/managed/private-buyer-deploy/
+
 
 
