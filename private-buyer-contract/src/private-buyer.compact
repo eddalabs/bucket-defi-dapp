@@ -402,716 +402,716 @@ export circuit burnPurchased(
   NonFungibleToken_burn(tokenId);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MAINTENANCE BATCH 1 — Ownership & Emergency (9 circuits)
-// Insert via: submitInsertVerifierKeyTx after deploy
-// ═══════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════
+// // MAINTENANCE BATCH 1 — Ownership & Emergency (9 circuits)
+// // Insert via: submitInsertVerifierKeyTx after deploy
+// // ═══════════════════════════════════════════════════════════════
 
-/**
-* @description: Proof of NFT ownership
-*
-* @notice: Delegates to NFTPool module.
-*
-* @requirements:
-* - Wrapper call
-* @param {Bytes<32>} ownerCommitment - The ownership commitment
-* @param {Bytes<32>} challenge - The challenge for ZK proof
-* @return {[]} - Empty tuple.
-*/
-export circuit proofOwnership(ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
-  return NFTPool_proofOwnership(ownerCommitment, challenge);
-}
+// /**
+// * @description: Proof of NFT ownership
+// *
+// * @notice: Delegates to NFTPool module.
+// *
+// * @requirements:
+// * - Wrapper call
+// * @param {Bytes<32>} ownerCommitment - The ownership commitment
+// * @param {Bytes<32>} challenge - The challenge for ZK proof
+// * @return {[]} - Empty tuple.
+// */
+// export circuit proofOwnership(ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
+//   return NFTPool_proofOwnership(ownerCommitment, challenge);
+// }
 
-/**
-* @description: Pause Access Control calls.
-*
-* @notice: Only Admin master role can pause Access Control calls.
-*
-* @requirements:
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit pauseAccessControl(): [] {
-  AccessControl_pauseAccessControl();
-}
+// /**
+// * @description: Pause Access Control calls.
+// *
+// * @notice: Only Admin master role can pause Access Control calls.
+// *
+// * @requirements:
+// * - Wrapper call
+// * @return {[]} - Empty tuple.
+// */
+// export circuit pauseAccessControl(): [] {
+//   AccessControl_pauseAccessControl();
+// }
 
-/**
-* @description: Unpause Access Control calls.
-*
-* @notice: Only Admin master role can unpause Access Control calls.
-*
-* @requirements:
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit unpauseAccessControl(): [] {
-  AccessControl_unpauseAccessControl();
-}
+// /**
+// * @description: Unpause Access Control calls.
+// *
+// * @notice: Only Admin master role can unpause Access Control calls.
+// *
+// * @requirements:
+// * - Wrapper call
+// * @return {[]} - Empty tuple.
+// */
+// export circuit unpauseAccessControl(): [] {
+//   AccessControl_unpauseAccessControl();
+// }
 
-/**
-* @description: Pause Identity calls.
-*
-* @notice: Only Admin master role can pause Identity calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit pauseIdentity(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  Identity_pauseIdentity();
-}
+// /**
+// * @description: Pause Identity calls.
+// *
+// * @notice: Only Admin master role can pause Identity calls.
+// *
+// * @requirements:
+// * - The caller must have `Admins master role`.
+// * - Wrapper call
+// * @return {[]} - Empty tuple.
+// */
+// export circuit pauseIdentity(): [] {
+//   assertOnlyRole(default<Bytes<32>>);
+//   Identity_pauseIdentity();
+// }
 
-/**
-* @description: Unpause Identity calls.
-*
-* @notice: Only Admin master role can unpause Identity calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit unpauseIdentity(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  Identity_unpauseIdentity();
-}
+// /**
+// * @description: Unpause Identity calls.
+// *
+// * @notice: Only Admin master role can unpause Identity calls.
+// *
+// * @requirements:
+// * - The caller must have `Admins master role`.
+// * - Wrapper call
+// * @return {[]} - Empty tuple.
+// */
+// export circuit unpauseIdentity(): [] {
+//   assertOnlyRole(default<Bytes<32>>);
+//   Identity_unpauseIdentity();
+// }
 
-/**
-* @description: Pause Token calls.
-*
-* @notice: Only Admin master role can pause Token calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit pauseToken(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  NonFungibleToken_pauseToken();
-}
+// /**
+// * @description: Pause Token calls.
+// *
+// * @notice: Only Admin master role can pause Token calls.
+// *
+// * @requirements:
+// * - The caller must have `Admins master role`.
+// * - Wrapper call
+// * @return {[]} - Empty tuple.
+// */
+// export circuit pauseToken(): [] {
+//   assertOnlyRole(default<Bytes<32>>);
+//   NonFungibleToken_pauseToken();
+// }
 
-/**
-* @description: Unpause Token calls.
-*
-* @notice: Only Admin master role can unpause Token calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit unpauseToken(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  NonFungibleToken_unpauseToken();
-}
+// /**
+// * @description: Unpause Token calls.
+// *
+// * @notice: Only Admin master role can unpause Token calls.
+// *
+// * @requirements:
+// * - The caller must have `Admins master role`.
+// * - Wrapper call
+// * @return {[]} - Empty tuple.
+// */
+// export circuit unpauseToken(): [] {
+//   assertOnlyRole(default<Bytes<32>>);
+//   NonFungibleToken_unpauseToken();
+// }
 
-/**
-* @description: Pause NFTPool calls.
-*
-* @notice: Only Admin master role can pause NFTPool calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit pauseNFTPool(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  NFTPool_pauseNFTPool();
-}
+// /**
+// * @description: Pause NFTPool calls.
+// *
+// * @notice: Only Admin master role can pause NFTPool calls.
+// *
+// * @requirements:
+// * - The caller must have `Admins master role`.
+// * - Wrapper call
+// * @return {[]} - Empty tuple.
+// */
+// export circuit pauseNFTPool(): [] {
+//   assertOnlyRole(default<Bytes<32>>);
+//   NFTPool_pauseNFTPool();
+// }
 
-/**
-* @description: Unpause NFTPool calls.
-*
-* @notice: Only Admin master role can unpause NFTPool calls.
-*
-* @requirements:
-* - The caller must have `Admins master role`.
-* - Wrapper call
-* @return {[]} - Empty tuple.
-*/
-export circuit unpauseNFTPool(): [] {
-  assertOnlyRole(default<Bytes<32>>);
-  NFTPool_unpauseNFTPool();
-}
+// /**
+// * @description: Unpause NFTPool calls.
+// *
+// * @notice: Only Admin master role can unpause NFTPool calls.
+// *
+// * @requirements:
+// * - The caller must have `Admins master role`.
+// * - Wrapper call
+// * @return {[]} - Empty tuple.
+// */
+// export circuit unpauseNFTPool(): [] {
+//   assertOnlyRole(default<Bytes<32>>);
+//   NFTPool_unpauseNFTPool();
+// }
 
-// ═══════════════════════════════════════════════════════════════
-// MAINTENANCE BATCH 2 — Queries (5 circuits)
-// Insert via: submitInsertVerifierKeyTx after deploy
-// ═══════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════
+// // MAINTENANCE BATCH 2 — Queries (5 circuits)
+// // Insert via: submitInsertVerifierKeyTx after deploy
+// // ═══════════════════════════════════════════════════════════════
 
-/**
-* @description: This circuit verifies if the user passed as parameter is a member of the verified users set
-*
-* @requirements:
-* - Wrapper call
-* @param {ZswapCoinPublicKey} user - User public key.
-* @return {Boolean}
-*/
-export circuit isUserVerified(user: ZswapCoinPublicKey): Boolean {
-  return Identity_isUserVerified(user);
-}
+// /**
+// * @description: This circuit verifies if the user passed as parameter is a member of the verified users set
+// *
+// * @requirements:
+// * - Wrapper call
+// * @param {ZswapCoinPublicKey} user - User public key.
+// * @return {Boolean}
+// */
+// export circuit isUserVerified(user: ZswapCoinPublicKey): Boolean {
+//   return Identity_isUserVerified(user);
+// }
 
-/**
-* @description Returns the number of tokens in `owner`'s account.
-*
-* @requirements:
-* - Wrapper call
-* @param {Either<ZswapCoinPublicKey, ContractAddress>)} owner - The account to query.
-* @return {Uint<128>} - The number of tokens in `owner`'s account.
-*/
-export circuit balanceOf(owner: Either<ZswapCoinPublicKey, ContractAddress>): Uint<128> {
-  return NonFungibleToken_balanceOf(owner);
-}
+// /**
+// * @description Returns the number of tokens in `owner`'s account.
+// *
+// * @requirements:
+// * - Wrapper call
+// * @param {Either<ZswapCoinPublicKey, ContractAddress>)} owner - The account to query.
+// * @return {Uint<128>} - The number of tokens in `owner`'s account.
+// */
+// export circuit balanceOf(owner: Either<ZswapCoinPublicKey, ContractAddress>): Uint<128> {
+//   return NonFungibleToken_balanceOf(owner);
+// }
 
-/**
-* @description Returns the owner of the `tokenId` token.
-*
-* @requirements:
-* - Wrapper call
-* @param {Uint<128>} tokenId - The identifier for a token.
-* @return {Either<ZswapCoinPublicKey, ContractAddress>} - The account that owns the token.
-*/
-export circuit ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
-  return NonFungibleToken_ownerOf(tokenId);
-}
+// /**
+// * @description Returns the owner of the `tokenId` token.
+// *
+// * @requirements:
+// * - Wrapper call
+// * @param {Uint<128>} tokenId - The identifier for a token.
+// * @return {Either<ZswapCoinPublicKey, ContractAddress>} - The account that owns the token.
+// */
+// export circuit ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
+//   return NonFungibleToken_ownerOf(tokenId);
+// }
 
-/**
-* @description Returns the token Certificate for the given `tokenId`.
-*
-* @requirements:
-* - Wrapper call
-* @param {Uint<128>} tokenId - The identifier for a token.
-* @return {Certificate} - the token metadata
-*/
-export circuit tokenCertificate(tokenId: Uint<128>): NonFungibleToken_Certificate {
-  return NonFungibleToken_tokenCertificate(tokenId);
-}
+// /**
+// * @description Returns the token Certificate for the given `tokenId`.
+// *
+// * @requirements:
+// * - Wrapper call
+// * @param {Uint<128>} tokenId - The identifier for a token.
+// * @return {Certificate} - the token metadata
+// */
+// export circuit tokenCertificate(tokenId: Uint<128>): NonFungibleToken_Certificate {
+//   return NonFungibleToken_tokenCertificate(tokenId);
+// }
 
-/**
-* @description Returns the token Price for the given `tokenId`.
-*
-* @requirements:
-* - Wrapper call
-* @param {Uint<128>} tokenId - The identifier for a token.
-* @return {Uint<64>} - the price of the token
-*/
-export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
-  return NonFungibleToken_tokenPrice(tokenId);
-}
+// /**
+// * @description Returns the token Price for the given `tokenId`.
+// *
+// * @requirements:
+// * - Wrapper call
+// * @param {Uint<128>} tokenId - The identifier for a token.
+// * @return {Uint<64>} - the price of the token
+// */
+// export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
+//   return NonFungibleToken_tokenPrice(tokenId);
+// }
 
-// ═══════════════════════════════════════════════════════════════
-// MAINTENANCE BATCH 3 — Batch Purchase (6 circuits)
-// Insert via: submitInsertVerifierKeyTx after deploy
-// ═══════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════
+// // MAINTENANCE BATCH 3 — Batch Purchase (6 circuits)
+// // Insert via: submitInsertVerifierKeyTx after deploy
+// // ═══════════════════════════════════════════════════════════════
 
-///////////////////////////////////////////////////////////////////////////////
-// BATCH HELPERS
-///////////////////////////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////////////
+// // BATCH HELPERS
+// ///////////////////////////////////////////////////////////////////////////////
 
-/**
-* @description: Get token price or 0 for mock tokens (tokenId == 0)
-*
-* @notice: Used by batch purchase circuits to handle partial batches.
-* Mock tokens (tokenId == 0) return price 0.
-*
-* @param {Uint<128>} tokenId - The token ID (0 for mock)
-* @return {Uint<64>} price - The token price or 0
-*/
-export circuit _getBatchTokenPrice(tokenId: Uint<128>): Uint<64> {
-  if (disclose(tokenId) != 0) {
-    assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId)), "Token price not set");
-    return NonFungibleToken__tokenToPrice.lookup(disclose(tokenId));
-  }
-  return 0;
-}
+// /**
+// * @description: Get token price or 0 for mock tokens (tokenId == 0)
+// *
+// * @notice: Used by batch purchase circuits to handle partial batches.
+// * Mock tokens (tokenId == 0) return price 0.
+// *
+// * @param {Uint<128>} tokenId - The token ID (0 for mock)
+// * @return {Uint<64>} price - The token price or 0
+// */
+// export circuit _getBatchTokenPrice(tokenId: Uint<128>): Uint<64> {
+//   if (disclose(tokenId) != 0) {
+//     assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId)), "Token price not set");
+//     return NonFungibleToken__tokenToPrice.lookup(disclose(tokenId));
+//   }
+//   return 0;
+// }
 
-/**
-* @description: Store seller payment for a real token (skips mock tokens)
-*
-* @notice: Used by batch purchase circuits. Skips when tokenId == 0.
-*
-* @param {Uint<128>} tokenId - The token ID (0 for mock)
-* @param {ShieldedCoinInfo} coin - The payment coin
-* @param {Uint<64>} price - The token price
-* @return {[]} - Empty tuple.
-*/
-export circuit _storeBatchSellerPayment(tokenId: Uint<128>, coin: ShieldedCoinInfo, price: Uint<64>): [] {
-  if (disclose(tokenId) != 0) {
-    const seller = NonFungibleToken__owners.lookup(disclose(tokenId));
-    NFTPool_storeSellerPayment(seller, coin, price);
-  }
-}
+// /**
+// * @description: Store seller payment for a real token (skips mock tokens)
+// *
+// * @notice: Used by batch purchase circuits. Skips when tokenId == 0.
+// *
+// * @param {Uint<128>} tokenId - The token ID (0 for mock)
+// * @param {ShieldedCoinInfo} coin - The payment coin
+// * @param {Uint<64>} price - The token price
+// * @return {[]} - Empty tuple.
+// */
+// export circuit _storeBatchSellerPayment(tokenId: Uint<128>, coin: ShieldedCoinInfo, price: Uint<64>): [] {
+//   if (disclose(tokenId) != 0) {
+//     const seller = NonFungibleToken__owners.lookup(disclose(tokenId));
+//     NFTPool_storeSellerPayment(seller, coin, price);
+//   }
+// }
 
-/**
-* @description: Execute batch purchase for a real token (skips mock tokens)
-*
-* @notice: Used by batch purchase circuits. Skips when tokenId == 0.
-*
-* @param {Uint<128>} tokenId - The token ID (0 for mock)
-* @param {Bytes<32>} ownerCommitment - The shared batch commitment
-* @return {[]} - Empty tuple.
-*/
-export circuit _executeBatchPurchase(tokenId: Uint<128>, ownerCommitment: Bytes<32>): [] {
-  if (disclose(tokenId) != 0) {
-    NFTPool_purchaseNFTBatch(tokenId, ownerCommitment);
-  }
-}
+// /**
+// * @description: Execute batch purchase for a real token (skips mock tokens)
+// *
+// * @notice: Used by batch purchase circuits. Skips when tokenId == 0.
+// *
+// * @param {Uint<128>} tokenId - The token ID (0 for mock)
+// * @param {Bytes<32>} ownerCommitment - The shared batch commitment
+// * @return {[]} - Empty tuple.
+// */
+// export circuit _executeBatchPurchase(tokenId: Uint<128>, ownerCommitment: Bytes<32>): [] {
+//   if (disclose(tokenId) != 0) {
+//     NFTPool_purchaseNFTBatch(tokenId, ownerCommitment);
+//   }
+// }
 
-///////////////////////////////////////////////////////////////////////////////
-// BATCH PURCHASE CIRCUITS
-///////////////////////////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////////////
+// // BATCH PURCHASE CIRCUITS
+// ///////////////////////////////////////////////////////////////////////////////
 
-/**
-* @description: Batch purchase of up to 5 NFTs with a single shared commitment
-*
-* @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
-* are skipped. At least one real token must be included.
-*
-* @requirements:
-* - The caller must be identity-verified
-* - All real tokens must be listed in the pool
-* - Payment >= sum of real token prices
-* - Payment coin color must be native token
-* @param {Uint<128>} tokenId1-5 - Token IDs (0 for mock/empty slot)
-* @param {ShieldedCoinInfo} coin - The payment coin (covers total)
-* @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
-*/
-export circuit purchaseBatch5(
-  tokenId1: Uint<128>,
-  tokenId2: Uint<128>,
-  tokenId3: Uint<128>,
-  tokenId4: Uint<128>,
-  tokenId5: Uint<128>,
-  coin: ShieldedCoinInfo
-): Bytes<32> {
-  assertOwnVerification();
+// /**
+// * @description: Batch purchase of up to 5 NFTs with a single shared commitment
+// *
+// * @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
+// * are skipped. At least one real token must be included.
+// *
+// * @requirements:
+// * - The caller must be identity-verified
+// * - All real tokens must be listed in the pool
+// * - Payment >= sum of real token prices
+// * - Payment coin color must be native token
+// * @param {Uint<128>} tokenId1-5 - Token IDs (0 for mock/empty slot)
+// * @param {ShieldedCoinInfo} coin - The payment coin (covers total)
+// * @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
+// */
+// export circuit purchaseBatch5(
+//   tokenId1: Uint<128>,
+//   tokenId2: Uint<128>,
+//   tokenId3: Uint<128>,
+//   tokenId4: Uint<128>,
+//   tokenId5: Uint<128>,
+//   coin: ShieldedCoinInfo
+// ): Bytes<32> {
+//   assertOwnVerification();
 
-  // Get prices (0 for mock tokens)
-  const price1 = _getBatchTokenPrice(tokenId1);
-  const price2 = _getBatchTokenPrice(tokenId2);
-  const price3 = _getBatchTokenPrice(tokenId3);
-  const price4 = _getBatchTokenPrice(tokenId4);
-  const price5 = _getBatchTokenPrice(tokenId5);
+//   // Get prices (0 for mock tokens)
+//   const price1 = _getBatchTokenPrice(tokenId1);
+//   const price2 = _getBatchTokenPrice(tokenId2);
+//   const price3 = _getBatchTokenPrice(tokenId3);
+//   const price4 = _getBatchTokenPrice(tokenId4);
+//   const price5 = _getBatchTokenPrice(tokenId5);
 
-  const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
-                   + (price4 as Uint<128>) + (price5 as Uint<128>);
+//   const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
+//                    + (price4 as Uint<128>) + (price5 as Uint<128>);
 
-  assert(coin.value >= totalPrice, "Insufficient payment for batch");
-  assert(coin.color == nativeToken(), "Invalid coin provided");
+//   assert(coin.value >= totalPrice, "Insufficient payment for batch");
+//   assert(coin.color == nativeToken(), "Invalid coin provided");
 
-  receiveShielded(disclose(coin));
+//   receiveShielded(disclose(coin));
 
-  // Store seller payments for real tokens
-  _storeBatchSellerPayment(tokenId1, coin, price1);
-  _storeBatchSellerPayment(tokenId2, coin, price2);
-  _storeBatchSellerPayment(tokenId3, coin, price3);
-  _storeBatchSellerPayment(tokenId4, coin, price4);
-  _storeBatchSellerPayment(tokenId5, coin, price5);
+//   // Store seller payments for real tokens
+//   _storeBatchSellerPayment(tokenId1, coin, price1);
+//   _storeBatchSellerPayment(tokenId2, coin, price2);
+//   _storeBatchSellerPayment(tokenId3, coin, price3);
+//   _storeBatchSellerPayment(tokenId4, coin, price4);
+//   _storeBatchSellerPayment(tokenId5, coin, price5);
 
-  // Compute ONE commitment for all tokens in the batch
-  const ownerCommitment = NFTPool_computeBatchCommitment();
+//   // Compute ONE commitment for all tokens in the batch
+//   const ownerCommitment = NFTPool_computeBatchCommitment();
 
-  // Execute purchases for real tokens
-  _executeBatchPurchase(tokenId1, ownerCommitment);
-  _executeBatchPurchase(tokenId2, ownerCommitment);
-  _executeBatchPurchase(tokenId3, ownerCommitment);
-  _executeBatchPurchase(tokenId4, ownerCommitment);
-  _executeBatchPurchase(tokenId5, ownerCommitment);
+//   // Execute purchases for real tokens
+//   _executeBatchPurchase(tokenId1, ownerCommitment);
+//   _executeBatchPurchase(tokenId2, ownerCommitment);
+//   _executeBatchPurchase(tokenId3, ownerCommitment);
+//   _executeBatchPurchase(tokenId4, ownerCommitment);
+//   _executeBatchPurchase(tokenId5, ownerCommitment);
 
-  return ownerCommitment;
-}
+//   return ownerCommitment;
+// }
 
-/**
-* @description: Batch purchase of up to 10 NFTs with a single shared commitment
-*
-* @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
-* are skipped. At least one real token must be included.
-*
-* @requirements:
-* - The caller must be identity-verified
-* - All real tokens must be listed in the pool
-* - Payment >= sum of real token prices
-* @param {Uint<128>} tokenId1-10 - Token IDs (0 for mock/empty slot)
-* @param {ShieldedCoinInfo} coin - The payment coin (covers total)
-* @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
-*/
-export circuit purchaseBatch10(
-  tokenId1: Uint<128>,
-  tokenId2: Uint<128>,
-  tokenId3: Uint<128>,
-  tokenId4: Uint<128>,
-  tokenId5: Uint<128>,
-  tokenId6: Uint<128>,
-  tokenId7: Uint<128>,
-  tokenId8: Uint<128>,
-  tokenId9: Uint<128>,
-  tokenId10: Uint<128>,
-  coin: ShieldedCoinInfo
-): Bytes<32> {
-  assertOwnVerification();
+// /**
+// * @description: Batch purchase of up to 10 NFTs with a single shared commitment
+// *
+// * @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
+// * are skipped. At least one real token must be included.
+// *
+// * @requirements:
+// * - The caller must be identity-verified
+// * - All real tokens must be listed in the pool
+// * - Payment >= sum of real token prices
+// * @param {Uint<128>} tokenId1-10 - Token IDs (0 for mock/empty slot)
+// * @param {ShieldedCoinInfo} coin - The payment coin (covers total)
+// * @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
+// */
+// export circuit purchaseBatch10(
+//   tokenId1: Uint<128>,
+//   tokenId2: Uint<128>,
+//   tokenId3: Uint<128>,
+//   tokenId4: Uint<128>,
+//   tokenId5: Uint<128>,
+//   tokenId6: Uint<128>,
+//   tokenId7: Uint<128>,
+//   tokenId8: Uint<128>,
+//   tokenId9: Uint<128>,
+//   tokenId10: Uint<128>,
+//   coin: ShieldedCoinInfo
+// ): Bytes<32> {
+//   assertOwnVerification();
 
-  const price1 = _getBatchTokenPrice(tokenId1);
-  const price2 = _getBatchTokenPrice(tokenId2);
-  const price3 = _getBatchTokenPrice(tokenId3);
-  const price4 = _getBatchTokenPrice(tokenId4);
-  const price5 = _getBatchTokenPrice(tokenId5);
-  const price6 = _getBatchTokenPrice(tokenId6);
-  const price7 = _getBatchTokenPrice(tokenId7);
-  const price8 = _getBatchTokenPrice(tokenId8);
-  const price9 = _getBatchTokenPrice(tokenId9);
-  const price10 = _getBatchTokenPrice(tokenId10);
+//   const price1 = _getBatchTokenPrice(tokenId1);
+//   const price2 = _getBatchTokenPrice(tokenId2);
+//   const price3 = _getBatchTokenPrice(tokenId3);
+//   const price4 = _getBatchTokenPrice(tokenId4);
+//   const price5 = _getBatchTokenPrice(tokenId5);
+//   const price6 = _getBatchTokenPrice(tokenId6);
+//   const price7 = _getBatchTokenPrice(tokenId7);
+//   const price8 = _getBatchTokenPrice(tokenId8);
+//   const price9 = _getBatchTokenPrice(tokenId9);
+//   const price10 = _getBatchTokenPrice(tokenId10);
 
-  const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
-                   + (price4 as Uint<128>) + (price5 as Uint<128>) + (price6 as Uint<128>)
-                   + (price7 as Uint<128>) + (price8 as Uint<128>) + (price9 as Uint<128>)
-                   + (price10 as Uint<128>);
+//   const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
+//                    + (price4 as Uint<128>) + (price5 as Uint<128>) + (price6 as Uint<128>)
+//                    + (price7 as Uint<128>) + (price8 as Uint<128>) + (price9 as Uint<128>)
+//                    + (price10 as Uint<128>);
 
-  assert(coin.value >= totalPrice, "Insufficient payment for batch");
-  assert(coin.color == nativeToken(), "Invalid coin provided");
+//   assert(coin.value >= totalPrice, "Insufficient payment for batch");
+//   assert(coin.color == nativeToken(), "Invalid coin provided");
 
-  receiveShielded(disclose(coin));
+//   receiveShielded(disclose(coin));
 
-  _storeBatchSellerPayment(tokenId1, coin, price1);
-  _storeBatchSellerPayment(tokenId2, coin, price2);
-  _storeBatchSellerPayment(tokenId3, coin, price3);
-  _storeBatchSellerPayment(tokenId4, coin, price4);
-  _storeBatchSellerPayment(tokenId5, coin, price5);
-  _storeBatchSellerPayment(tokenId6, coin, price6);
-  _storeBatchSellerPayment(tokenId7, coin, price7);
-  _storeBatchSellerPayment(tokenId8, coin, price8);
-  _storeBatchSellerPayment(tokenId9, coin, price9);
-  _storeBatchSellerPayment(tokenId10, coin, price10);
+//   _storeBatchSellerPayment(tokenId1, coin, price1);
+//   _storeBatchSellerPayment(tokenId2, coin, price2);
+//   _storeBatchSellerPayment(tokenId3, coin, price3);
+//   _storeBatchSellerPayment(tokenId4, coin, price4);
+//   _storeBatchSellerPayment(tokenId5, coin, price5);
+//   _storeBatchSellerPayment(tokenId6, coin, price6);
+//   _storeBatchSellerPayment(tokenId7, coin, price7);
+//   _storeBatchSellerPayment(tokenId8, coin, price8);
+//   _storeBatchSellerPayment(tokenId9, coin, price9);
+//   _storeBatchSellerPayment(tokenId10, coin, price10);
 
-  const ownerCommitment = NFTPool_computeBatchCommitment();
+//   const ownerCommitment = NFTPool_computeBatchCommitment();
 
-  _executeBatchPurchase(tokenId1, ownerCommitment);
-  _executeBatchPurchase(tokenId2, ownerCommitment);
-  _executeBatchPurchase(tokenId3, ownerCommitment);
-  _executeBatchPurchase(tokenId4, ownerCommitment);
-  _executeBatchPurchase(tokenId5, ownerCommitment);
-  _executeBatchPurchase(tokenId6, ownerCommitment);
-  _executeBatchPurchase(tokenId7, ownerCommitment);
-  _executeBatchPurchase(tokenId8, ownerCommitment);
-  _executeBatchPurchase(tokenId9, ownerCommitment);
-  _executeBatchPurchase(tokenId10, ownerCommitment);
+//   _executeBatchPurchase(tokenId1, ownerCommitment);
+//   _executeBatchPurchase(tokenId2, ownerCommitment);
+//   _executeBatchPurchase(tokenId3, ownerCommitment);
+//   _executeBatchPurchase(tokenId4, ownerCommitment);
+//   _executeBatchPurchase(tokenId5, ownerCommitment);
+//   _executeBatchPurchase(tokenId6, ownerCommitment);
+//   _executeBatchPurchase(tokenId7, ownerCommitment);
+//   _executeBatchPurchase(tokenId8, ownerCommitment);
+//   _executeBatchPurchase(tokenId9, ownerCommitment);
+//   _executeBatchPurchase(tokenId10, ownerCommitment);
 
-  return ownerCommitment;
-}
+//   return ownerCommitment;
+// }
 
-/**
-* @description: Batch purchase of up to 20 NFTs with a single shared commitment
-*
-* @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
-* are skipped. At least one real token must be included.
-*
-* @requirements:
-* - The caller must be identity-verified
-* - All real tokens must be listed in the pool
-* - Payment >= sum of real token prices
-* @param {Uint<128>} tokenId1-20 - Token IDs (0 for mock/empty slot)
-* @param {ShieldedCoinInfo} coin - The payment coin (covers total)
-* @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
-*/
-export circuit purchaseBatch20(
-  tokenId1: Uint<128>,
-  tokenId2: Uint<128>,
-  tokenId3: Uint<128>,
-  tokenId4: Uint<128>,
-  tokenId5: Uint<128>,
-  tokenId6: Uint<128>,
-  tokenId7: Uint<128>,
-  tokenId8: Uint<128>,
-  tokenId9: Uint<128>,
-  tokenId10: Uint<128>,
-  tokenId11: Uint<128>,
-  tokenId12: Uint<128>,
-  tokenId13: Uint<128>,
-  tokenId14: Uint<128>,
-  tokenId15: Uint<128>,
-  tokenId16: Uint<128>,
-  tokenId17: Uint<128>,
-  tokenId18: Uint<128>,
-  tokenId19: Uint<128>,
-  tokenId20: Uint<128>,
-  coin: ShieldedCoinInfo
-): Bytes<32> {
-  assertOwnVerification();
+// /**
+// * @description: Batch purchase of up to 20 NFTs with a single shared commitment
+// *
+// * @notice: All NFTs in the batch share ONE commitment. Mock tokens (tokenId == 0)
+// * are skipped. At least one real token must be included.
+// *
+// * @requirements:
+// * - The caller must be identity-verified
+// * - All real tokens must be listed in the pool
+// * - Payment >= sum of real token prices
+// * @param {Uint<128>} tokenId1-20 - Token IDs (0 for mock/empty slot)
+// * @param {ShieldedCoinInfo} coin - The payment coin (covers total)
+// * @return {Bytes<32>} ownerCommitment - Single shared ownership commitment
+// */
+// export circuit purchaseBatch20(
+//   tokenId1: Uint<128>,
+//   tokenId2: Uint<128>,
+//   tokenId3: Uint<128>,
+//   tokenId4: Uint<128>,
+//   tokenId5: Uint<128>,
+//   tokenId6: Uint<128>,
+//   tokenId7: Uint<128>,
+//   tokenId8: Uint<128>,
+//   tokenId9: Uint<128>,
+//   tokenId10: Uint<128>,
+//   tokenId11: Uint<128>,
+//   tokenId12: Uint<128>,
+//   tokenId13: Uint<128>,
+//   tokenId14: Uint<128>,
+//   tokenId15: Uint<128>,
+//   tokenId16: Uint<128>,
+//   tokenId17: Uint<128>,
+//   tokenId18: Uint<128>,
+//   tokenId19: Uint<128>,
+//   tokenId20: Uint<128>,
+//   coin: ShieldedCoinInfo
+// ): Bytes<32> {
+//   assertOwnVerification();
 
-  const price1 = _getBatchTokenPrice(tokenId1);
-  const price2 = _getBatchTokenPrice(tokenId2);
-  const price3 = _getBatchTokenPrice(tokenId3);
-  const price4 = _getBatchTokenPrice(tokenId4);
-  const price5 = _getBatchTokenPrice(tokenId5);
-  const price6 = _getBatchTokenPrice(tokenId6);
-  const price7 = _getBatchTokenPrice(tokenId7);
-  const price8 = _getBatchTokenPrice(tokenId8);
-  const price9 = _getBatchTokenPrice(tokenId9);
-  const price10 = _getBatchTokenPrice(tokenId10);
-  const price11 = _getBatchTokenPrice(tokenId11);
-  const price12 = _getBatchTokenPrice(tokenId12);
-  const price13 = _getBatchTokenPrice(tokenId13);
-  const price14 = _getBatchTokenPrice(tokenId14);
-  const price15 = _getBatchTokenPrice(tokenId15);
-  const price16 = _getBatchTokenPrice(tokenId16);
-  const price17 = _getBatchTokenPrice(tokenId17);
-  const price18 = _getBatchTokenPrice(tokenId18);
-  const price19 = _getBatchTokenPrice(tokenId19);
-  const price20 = _getBatchTokenPrice(tokenId20);
+//   const price1 = _getBatchTokenPrice(tokenId1);
+//   const price2 = _getBatchTokenPrice(tokenId2);
+//   const price3 = _getBatchTokenPrice(tokenId3);
+//   const price4 = _getBatchTokenPrice(tokenId4);
+//   const price5 = _getBatchTokenPrice(tokenId5);
+//   const price6 = _getBatchTokenPrice(tokenId6);
+//   const price7 = _getBatchTokenPrice(tokenId7);
+//   const price8 = _getBatchTokenPrice(tokenId8);
+//   const price9 = _getBatchTokenPrice(tokenId9);
+//   const price10 = _getBatchTokenPrice(tokenId10);
+//   const price11 = _getBatchTokenPrice(tokenId11);
+//   const price12 = _getBatchTokenPrice(tokenId12);
+//   const price13 = _getBatchTokenPrice(tokenId13);
+//   const price14 = _getBatchTokenPrice(tokenId14);
+//   const price15 = _getBatchTokenPrice(tokenId15);
+//   const price16 = _getBatchTokenPrice(tokenId16);
+//   const price17 = _getBatchTokenPrice(tokenId17);
+//   const price18 = _getBatchTokenPrice(tokenId18);
+//   const price19 = _getBatchTokenPrice(tokenId19);
+//   const price20 = _getBatchTokenPrice(tokenId20);
 
-  const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
-                   + (price4 as Uint<128>) + (price5 as Uint<128>) + (price6 as Uint<128>)
-                   + (price7 as Uint<128>) + (price8 as Uint<128>) + (price9 as Uint<128>)
-                   + (price10 as Uint<128>) + (price11 as Uint<128>) + (price12 as Uint<128>)
-                   + (price13 as Uint<128>) + (price14 as Uint<128>) + (price15 as Uint<128>)
-                   + (price16 as Uint<128>) + (price17 as Uint<128>) + (price18 as Uint<128>)
-                   + (price19 as Uint<128>) + (price20 as Uint<128>);
+//   const totalPrice = (price1 as Uint<128>) + (price2 as Uint<128>) + (price3 as Uint<128>)
+//                    + (price4 as Uint<128>) + (price5 as Uint<128>) + (price6 as Uint<128>)
+//                    + (price7 as Uint<128>) + (price8 as Uint<128>) + (price9 as Uint<128>)
+//                    + (price10 as Uint<128>) + (price11 as Uint<128>) + (price12 as Uint<128>)
+//                    + (price13 as Uint<128>) + (price14 as Uint<128>) + (price15 as Uint<128>)
+//                    + (price16 as Uint<128>) + (price17 as Uint<128>) + (price18 as Uint<128>)
+//                    + (price19 as Uint<128>) + (price20 as Uint<128>);
 
-  assert(coin.value >= totalPrice, "Insufficient payment for batch");
-  assert(coin.color == nativeToken(), "Invalid coin provided");
+//   assert(coin.value >= totalPrice, "Insufficient payment for batch");
+//   assert(coin.color == nativeToken(), "Invalid coin provided");
 
-  receiveShielded(disclose(coin));
+//   receiveShielded(disclose(coin));
 
-  _storeBatchSellerPayment(tokenId1, coin, price1);
-  _storeBatchSellerPayment(tokenId2, coin, price2);
-  _storeBatchSellerPayment(tokenId3, coin, price3);
-  _storeBatchSellerPayment(tokenId4, coin, price4);
-  _storeBatchSellerPayment(tokenId5, coin, price5);
-  _storeBatchSellerPayment(tokenId6, coin, price6);
-  _storeBatchSellerPayment(tokenId7, coin, price7);
-  _storeBatchSellerPayment(tokenId8, coin, price8);
-  _storeBatchSellerPayment(tokenId9, coin, price9);
-  _storeBatchSellerPayment(tokenId10, coin, price10);
-  _storeBatchSellerPayment(tokenId11, coin, price11);
-  _storeBatchSellerPayment(tokenId12, coin, price12);
-  _storeBatchSellerPayment(tokenId13, coin, price13);
-  _storeBatchSellerPayment(tokenId14, coin, price14);
-  _storeBatchSellerPayment(tokenId15, coin, price15);
-  _storeBatchSellerPayment(tokenId16, coin, price16);
-  _storeBatchSellerPayment(tokenId17, coin, price17);
-  _storeBatchSellerPayment(tokenId18, coin, price18);
-  _storeBatchSellerPayment(tokenId19, coin, price19);
-  _storeBatchSellerPayment(tokenId20, coin, price20);
+//   _storeBatchSellerPayment(tokenId1, coin, price1);
+//   _storeBatchSellerPayment(tokenId2, coin, price2);
+//   _storeBatchSellerPayment(tokenId3, coin, price3);
+//   _storeBatchSellerPayment(tokenId4, coin, price4);
+//   _storeBatchSellerPayment(tokenId5, coin, price5);
+//   _storeBatchSellerPayment(tokenId6, coin, price6);
+//   _storeBatchSellerPayment(tokenId7, coin, price7);
+//   _storeBatchSellerPayment(tokenId8, coin, price8);
+//   _storeBatchSellerPayment(tokenId9, coin, price9);
+//   _storeBatchSellerPayment(tokenId10, coin, price10);
+//   _storeBatchSellerPayment(tokenId11, coin, price11);
+//   _storeBatchSellerPayment(tokenId12, coin, price12);
+//   _storeBatchSellerPayment(tokenId13, coin, price13);
+//   _storeBatchSellerPayment(tokenId14, coin, price14);
+//   _storeBatchSellerPayment(tokenId15, coin, price15);
+//   _storeBatchSellerPayment(tokenId16, coin, price16);
+//   _storeBatchSellerPayment(tokenId17, coin, price17);
+//   _storeBatchSellerPayment(tokenId18, coin, price18);
+//   _storeBatchSellerPayment(tokenId19, coin, price19);
+//   _storeBatchSellerPayment(tokenId20, coin, price20);
 
-  const ownerCommitment = NFTPool_computeBatchCommitment();
+//   const ownerCommitment = NFTPool_computeBatchCommitment();
 
-  _executeBatchPurchase(tokenId1, ownerCommitment);
-  _executeBatchPurchase(tokenId2, ownerCommitment);
-  _executeBatchPurchase(tokenId3, ownerCommitment);
-  _executeBatchPurchase(tokenId4, ownerCommitment);
-  _executeBatchPurchase(tokenId5, ownerCommitment);
-  _executeBatchPurchase(tokenId6, ownerCommitment);
-  _executeBatchPurchase(tokenId7, ownerCommitment);
-  _executeBatchPurchase(tokenId8, ownerCommitment);
-  _executeBatchPurchase(tokenId9, ownerCommitment);
-  _executeBatchPurchase(tokenId10, ownerCommitment);
-  _executeBatchPurchase(tokenId11, ownerCommitment);
-  _executeBatchPurchase(tokenId12, ownerCommitment);
-  _executeBatchPurchase(tokenId13, ownerCommitment);
-  _executeBatchPurchase(tokenId14, ownerCommitment);
-  _executeBatchPurchase(tokenId15, ownerCommitment);
-  _executeBatchPurchase(tokenId16, ownerCommitment);
-  _executeBatchPurchase(tokenId17, ownerCommitment);
-  _executeBatchPurchase(tokenId18, ownerCommitment);
-  _executeBatchPurchase(tokenId19, ownerCommitment);
-  _executeBatchPurchase(tokenId20, ownerCommitment);
+//   _executeBatchPurchase(tokenId1, ownerCommitment);
+//   _executeBatchPurchase(tokenId2, ownerCommitment);
+//   _executeBatchPurchase(tokenId3, ownerCommitment);
+//   _executeBatchPurchase(tokenId4, ownerCommitment);
+//   _executeBatchPurchase(tokenId5, ownerCommitment);
+//   _executeBatchPurchase(tokenId6, ownerCommitment);
+//   _executeBatchPurchase(tokenId7, ownerCommitment);
+//   _executeBatchPurchase(tokenId8, ownerCommitment);
+//   _executeBatchPurchase(tokenId9, ownerCommitment);
+//   _executeBatchPurchase(tokenId10, ownerCommitment);
+//   _executeBatchPurchase(tokenId11, ownerCommitment);
+//   _executeBatchPurchase(tokenId12, ownerCommitment);
+//   _executeBatchPurchase(tokenId13, ownerCommitment);
+//   _executeBatchPurchase(tokenId14, ownerCommitment);
+//   _executeBatchPurchase(tokenId15, ownerCommitment);
+//   _executeBatchPurchase(tokenId16, ownerCommitment);
+//   _executeBatchPurchase(tokenId17, ownerCommitment);
+//   _executeBatchPurchase(tokenId18, ownerCommitment);
+//   _executeBatchPurchase(tokenId19, ownerCommitment);
+//   _executeBatchPurchase(tokenId20, ownerCommitment);
 
-  return ownerCommitment;
-}
+//   return ownerCommitment;
+// }
 
-// ═══════════════════════════════════════════════════════════════
-// MAINTENANCE BATCH 4 — Batch Burn (4 circuits)
-// Insert via: submitInsertVerifierKeyTx after deploy
-// ═══════════════════════════════════════════════════════════════
+// // ═══════════════════════════════════════════════════════════════
+// // MAINTENANCE BATCH 4 — Batch Burn (4 circuits)
+// // Insert via: submitInsertVerifierKeyTx after deploy
+// // ═══════════════════════════════════════════════════════════════
 
-///////////////////////////////////////////////////////////////////////////////
-// BURN PURCHASED TOKENS (BOT-EXECUTED, BUYER-AUTHORIZED VIA CHALLENGE)
-///////////////////////////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////////////
+// // BURN PURCHASED TOKENS (BOT-EXECUTED, BUYER-AUTHORIZED VIA CHALLENGE)
+// ///////////////////////////////////////////////////////////////////////////////
 
-/**
-* @description: Burn a single purchased token after verifying it belongs to the commitment.
-*
-* @notice: Used by burnPurchasedBatch circuits. Skips when tokenId == 0 (mock).
-* Verifies the token's stored commitment matches, records lifecycle data, then burns the NFT.
-*
-* @param {Uint<128>} tokenId - The token ID (0 for mock)
-* @param {Bytes<32>} ownerCommitment - The buyer's commitment
-* @param {Bytes<32>} challenge - The challenge that was verified against _authVerifications
-* @return {[]} - Empty tuple.
-*/
-export circuit _burnPurchasedToken(tokenId: Uint<128>, ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
-  if (disclose(tokenId) != 0) {
-    // Verify this token was purchased and belongs to this commitment
-    assert(NFTPool__nftOwnerCommitment.member(disclose(tokenId)), "Token not purchased");
-    const storedCommitment = NFTPool__nftOwnerCommitment.lookup(disclose(tokenId));
-    assert(storedCommitment == disclose(ownerCommitment), "Token not owned by this commitment");
+// /**
+// * @description: Burn a single purchased token after verifying it belongs to the commitment.
+// *
+// * @notice: Used by burnPurchasedBatch circuits. Skips when tokenId == 0 (mock).
+// * Verifies the token's stored commitment matches, records lifecycle data, then burns the NFT.
+// *
+// * @param {Uint<128>} tokenId - The token ID (0 for mock)
+// * @param {Bytes<32>} ownerCommitment - The buyer's commitment
+// * @param {Bytes<32>} challenge - The challenge that was verified against _authVerifications
+// * @return {[]} - Empty tuple.
+// */
+// export circuit _burnPurchasedToken(tokenId: Uint<128>, ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
+//   if (disclose(tokenId) != 0) {
+//     // Verify this token was purchased and belongs to this commitment
+//     assert(NFTPool__nftOwnerCommitment.member(disclose(tokenId)), "Token not purchased");
+//     const storedCommitment = NFTPool__nftOwnerCommitment.lookup(disclose(tokenId));
+//     assert(storedCommitment == disclose(ownerCommitment), "Token not owned by this commitment");
 
-    // Read seller BEFORE burn (burn will change _owners to burn address)
-    const seller = NonFungibleToken__owners.lookup(disclose(tokenId));
+//     // Read seller BEFORE burn (burn will change _owners to burn address)
+//     const seller = NonFungibleToken__owners.lookup(disclose(tokenId));
 
-    // Record full lifecycle data (seller, commitment, challenge) and reset for next cycle
-    NFTPool_recordBurn(tokenId, seller, ownerCommitment, challenge);
+//     // Record full lifecycle data (seller, commitment, challenge) and reset for next cycle
+//     NFTPool_recordBurn(tokenId, seller, ownerCommitment, challenge);
 
-    // Burn the NFT
-    NonFungibleToken_burn(tokenId);
-  }
-}
+//     // Burn the NFT
+//     NonFungibleToken_burn(tokenId);
+//   }
+// }
 
-/**
-* @description: Burn up to 5 purchased tokens authorized by the commitment owner.
-*
-* @notice: Executed by the Minter/Burner bot (role 1) on behalf of the buyer.
-* The buyer must have previously called proofOwnership(commitment, challenge) to authorize.
-* The bot passes the same challenge, and the contract verifies it matches.
-* Mock tokens (tokenId == 0) are skipped.
-*
-* @requirements:
-* - Caller must have Minter role (role 1)
-* - Buyer must have called proofOwnership with this commitment and challenge
-* - Each real token must belong to this commitment
-* @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
-* @param {Uint<128>} tokenId1-5 - Token IDs (0 for mock/empty slot)
-* @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
-* @return {[]} - Empty tuple.
-*/
-export circuit burnPurchasedBatch5(
-  ownerCommitment: Bytes<32>,
-  tokenId1: Uint<128>,
-  tokenId2: Uint<128>,
-  tokenId3: Uint<128>,
-  tokenId4: Uint<128>,
-  tokenId5: Uint<128>,
-  challenge: Bytes<32>
-): [] {
-  // Only Minter/Burner role can execute burns
-  assertOnlyRole(1 as Field as Bytes<32>);
+// /**
+// * @description: Burn up to 5 purchased tokens authorized by the commitment owner.
+// *
+// * @notice: Executed by the Minter/Burner bot (role 1) on behalf of the buyer.
+// * The buyer must have previously called proofOwnership(commitment, challenge) to authorize.
+// * The bot passes the same challenge, and the contract verifies it matches.
+// * Mock tokens (tokenId == 0) are skipped.
+// *
+// * @requirements:
+// * - Caller must have Minter role (role 1)
+// * - Buyer must have called proofOwnership with this commitment and challenge
+// * - Each real token must belong to this commitment
+// * @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+// * @param {Uint<128>} tokenId1-5 - Token IDs (0 for mock/empty slot)
+// * @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
+// * @return {[]} - Empty tuple.
+// */
+// export circuit burnPurchasedBatch5(
+//   ownerCommitment: Bytes<32>,
+//   tokenId1: Uint<128>,
+//   tokenId2: Uint<128>,
+//   tokenId3: Uint<128>,
+//   tokenId4: Uint<128>,
+//   tokenId5: Uint<128>,
+//   challenge: Bytes<32>
+// ): [] {
+//   // Only Minter/Burner role can execute burns
+//   assertOnlyRole(1 as Field as Bytes<32>);
 
-  // Verify the challenge matches what the commitment owner stored via proofOwnership
-  assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
-  const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
-  assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
+//   // Verify the challenge matches what the commitment owner stored via proofOwnership
+//   assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
+//   const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
+//   assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
 
-  // Burn each real token
-  _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
-}
+//   // Burn each real token
+//   _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
+// }
 
-/**
-* @description: Burn up to 10 purchased tokens authorized by the commitment owner.
-*
-* @notice: Same as burnPurchasedBatch5 but for up to 10 tokens.
-*
-* @requirements:
-* - Caller must have Minter role (role 1)
-* - Buyer must have called proofOwnership with this commitment and challenge
-* @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
-* @param {Uint<128>} tokenId1-10 - Token IDs (0 for mock/empty slot)
-* @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
-* @return {[]} - Empty tuple.
-*/
-export circuit burnPurchasedBatch10(
-  ownerCommitment: Bytes<32>,
-  tokenId1: Uint<128>,
-  tokenId2: Uint<128>,
-  tokenId3: Uint<128>,
-  tokenId4: Uint<128>,
-  tokenId5: Uint<128>,
-  tokenId6: Uint<128>,
-  tokenId7: Uint<128>,
-  tokenId8: Uint<128>,
-  tokenId9: Uint<128>,
-  tokenId10: Uint<128>,
-  challenge: Bytes<32>
-): [] {
-  // Only Minter/Burner role can execute burns
-  assertOnlyRole(1 as Field as Bytes<32>);
+// /**
+// * @description: Burn up to 10 purchased tokens authorized by the commitment owner.
+// *
+// * @notice: Same as burnPurchasedBatch5 but for up to 10 tokens.
+// *
+// * @requirements:
+// * - Caller must have Minter role (role 1)
+// * - Buyer must have called proofOwnership with this commitment and challenge
+// * @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+// * @param {Uint<128>} tokenId1-10 - Token IDs (0 for mock/empty slot)
+// * @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
+// * @return {[]} - Empty tuple.
+// */
+// export circuit burnPurchasedBatch10(
+//   ownerCommitment: Bytes<32>,
+//   tokenId1: Uint<128>,
+//   tokenId2: Uint<128>,
+//   tokenId3: Uint<128>,
+//   tokenId4: Uint<128>,
+//   tokenId5: Uint<128>,
+//   tokenId6: Uint<128>,
+//   tokenId7: Uint<128>,
+//   tokenId8: Uint<128>,
+//   tokenId9: Uint<128>,
+//   tokenId10: Uint<128>,
+//   challenge: Bytes<32>
+// ): [] {
+//   // Only Minter/Burner role can execute burns
+//   assertOnlyRole(1 as Field as Bytes<32>);
 
-  // Verify the challenge matches what the commitment owner stored via proofOwnership
-  assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
-  const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
-  assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
+//   // Verify the challenge matches what the commitment owner stored via proofOwnership
+//   assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
+//   const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
+//   assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
 
-  _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId6, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId7, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId8, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId9, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId10, ownerCommitment, challenge);
-}
+//   _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId6, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId7, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId8, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId9, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId10, ownerCommitment, challenge);
+// }
 
-/**
-* @description: Burn up to 20 purchased tokens authorized by the commitment owner.
-*
-* @notice: Same as burnPurchasedBatch5 but for up to 20 tokens.
-*
-* @requirements:
-* - Caller must have Minter role (role 1)
-* - Buyer must have called proofOwnership with this commitment and challenge
-* @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
-* @param {Uint<128>} tokenId1-20 - Token IDs (0 for mock/empty slot)
-* @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
-* @return {[]} - Empty tuple.
-*/
-export circuit burnPurchasedBatch20(
-  ownerCommitment: Bytes<32>,
-  tokenId1: Uint<128>,
-  tokenId2: Uint<128>,
-  tokenId3: Uint<128>,
-  tokenId4: Uint<128>,
-  tokenId5: Uint<128>,
-  tokenId6: Uint<128>,
-  tokenId7: Uint<128>,
-  tokenId8: Uint<128>,
-  tokenId9: Uint<128>,
-  tokenId10: Uint<128>,
-  tokenId11: Uint<128>,
-  tokenId12: Uint<128>,
-  tokenId13: Uint<128>,
-  tokenId14: Uint<128>,
-  tokenId15: Uint<128>,
-  tokenId16: Uint<128>,
-  tokenId17: Uint<128>,
-  tokenId18: Uint<128>,
-  tokenId19: Uint<128>,
-  tokenId20: Uint<128>,
-  challenge: Bytes<32>
-): [] {
-  // Only Minter/Burner role can execute burns
-  assertOnlyRole(1 as Field as Bytes<32>);
+// /**
+// * @description: Burn up to 20 purchased tokens authorized by the commitment owner.
+// *
+// * @notice: Same as burnPurchasedBatch5 but for up to 20 tokens.
+// *
+// * @requirements:
+// * - Caller must have Minter role (role 1)
+// * - Buyer must have called proofOwnership with this commitment and challenge
+// * @param {Bytes<32>} ownerCommitment - The buyer's ownership commitment
+// * @param {Uint<128>} tokenId1-20 - Token IDs (0 for mock/empty slot)
+// * @param {Bytes<32>} challenge - Must match the challenge stored via proofOwnership
+// * @return {[]} - Empty tuple.
+// */
+// export circuit burnPurchasedBatch20(
+//   ownerCommitment: Bytes<32>,
+//   tokenId1: Uint<128>,
+//   tokenId2: Uint<128>,
+//   tokenId3: Uint<128>,
+//   tokenId4: Uint<128>,
+//   tokenId5: Uint<128>,
+//   tokenId6: Uint<128>,
+//   tokenId7: Uint<128>,
+//   tokenId8: Uint<128>,
+//   tokenId9: Uint<128>,
+//   tokenId10: Uint<128>,
+//   tokenId11: Uint<128>,
+//   tokenId12: Uint<128>,
+//   tokenId13: Uint<128>,
+//   tokenId14: Uint<128>,
+//   tokenId15: Uint<128>,
+//   tokenId16: Uint<128>,
+//   tokenId17: Uint<128>,
+//   tokenId18: Uint<128>,
+//   tokenId19: Uint<128>,
+//   tokenId20: Uint<128>,
+//   challenge: Bytes<32>
+// ): [] {
+//   // Only Minter/Burner role can execute burns
+//   assertOnlyRole(1 as Field as Bytes<32>);
 
-  // Verify the challenge matches what the commitment owner stored via proofOwnership
-  assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
-  const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
-  assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
+//   // Verify the challenge matches what the commitment owner stored via proofOwnership
+//   assert(NFTPool__authVerifications.member(disclose(ownerCommitment)), "No ownership proof found");
+//   const storedChallenge = NFTPool__authVerifications.lookup(disclose(ownerCommitment));
+//   assert(storedChallenge == disclose(challenge), "Challenge does not match ownership proof");
 
-  _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId6, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId7, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId8, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId9, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId10, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId11, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId12, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId13, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId14, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId15, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId16, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId17, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId18, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId19, ownerCommitment, challenge);
-  _burnPurchasedToken(tokenId20, ownerCommitment, challenge);
-}
+//   _burnPurchasedToken(tokenId1, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId2, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId3, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId4, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId5, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId6, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId7, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId8, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId9, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId10, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId11, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId12, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId13, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId14, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId15, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId16, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId17, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId18, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId19, ownerCommitment, challenge);
+//   _burnPurchasedToken(tokenId20, ownerCommitment, challenge);
+// }

@@ -285,29 +285,34 @@ export const withdrawSellerFunds = async (contract: DeployedPrivateBuyerContract
   return result.public;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- available after VK insert
+const callTxAny = (contract: DeployedPrivateBuyerContract) => contract.callTx as any;
+
 export const proofOwnership = async (
   contract: DeployedPrivateBuyerContract,
   ownerCommitment: Uint8Array,
   challenge: Uint8Array,
 ): Promise<FinalizedTxData> => {
   logger.info('Proving ownership...');
-  const result = await contract.callTx.proofOwnership(ownerCommitment, challenge);
+  const result = await callTxAny(contract).proofOwnership(ownerCommitment, challenge);
   return result.public;
 };
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const insertCircuitVerifierKey = async (
   providers: PrivateBuyerProviders,
   contractAddress: string,
-  circuitId: PrivateBuyerCircuits,
+  circuitId: string,
 ): Promise<FinalizedTxData> => {
   logger.info(`Inserting verifier key for circuit: ${circuitId}...`);
-  const zkConfigProvider = new NodeZkConfigProvider<PrivateBuyerCircuits>(contractConfig.zkConfigPath);
+  const zkConfigProvider = new NodeZkConfigProvider<string>(contractConfig.zkConfigPath);
   const vk = await zkConfigProvider.getVerifierKey(circuitId);
   return submitInsertVerifierKeyTx(
     providers,
     privateBuyerCompiledContract,
     contractAddress as ContractAddress,
-    circuitId,
+    circuitId as PrivateBuyerCircuits,
     vk,
   );
 };
@@ -327,49 +332,49 @@ export const burnPurchased = async (
 
 export const pauseAccessControl = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Pausing Access Control...');
-  const result = await contract.callTx.pauseAccessControl();
+  const result = await callTxAny(contract).pauseAccessControl();
   return result.public;
 };
 
 export const unpauseAccessControl = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Unpausing Access Control...');
-  const result = await contract.callTx.unpauseAccessControl();
+  const result = await callTxAny(contract).unpauseAccessControl();
   return result.public;
 };
 
 export const pauseIdentity = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Pausing Identity...');
-  const result = await contract.callTx.pauseIdentity();
+  const result = await callTxAny(contract).pauseIdentity();
   return result.public;
 };
 
 export const unpauseIdentity = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Unpausing Identity...');
-  const result = await contract.callTx.unpauseIdentity();
+  const result = await callTxAny(contract).unpauseIdentity();
   return result.public;
 };
 
 export const pauseToken = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Pausing Token...');
-  const result = await contract.callTx.pauseToken();
+  const result = await callTxAny(contract).pauseToken();
   return result.public;
 };
 
 export const unpauseToken = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Unpausing Token...');
-  const result = await contract.callTx.unpauseToken();
+  const result = await callTxAny(contract).unpauseToken();
   return result.public;
 };
 
 export const pauseNFTPool = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Pausing NFTPool...');
-  const result = await contract.callTx.pauseNFTPool();
+  const result = await callTxAny(contract).pauseNFTPool();
   return result.public;
 };
 
 export const unpauseNFTPool = async (contract: DeployedPrivateBuyerContract): Promise<FinalizedTxData> => {
   logger.info('Unpausing NFTPool...');
-  const result = await contract.callTx.unpauseNFTPool();
+  const result = await callTxAny(contract).unpauseNFTPool();
   return result.public;
 };
 
@@ -380,7 +385,7 @@ export const isUserVerified = async (
   user: PrivateBuyer.ZswapCoinPublicKey,
 ): Promise<FinalizedTxData> => {
   logger.info('Checking if user is verified...');
-  const result = await contract.callTx.isUserVerified(user);
+  const result = await callTxAny(contract).isUserVerified(user);
   return result.public;
 };
 
@@ -389,7 +394,7 @@ export const balanceOf = async (
   owner: PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress>,
 ): Promise<FinalizedTxData> => {
   logger.info('Querying balance...');
-  const result = await contract.callTx.balanceOf(owner);
+  const result = await callTxAny(contract).balanceOf(owner);
   return result.public;
 };
 
@@ -398,7 +403,7 @@ export const ownerOf = async (
   tokenId: bigint,
 ): Promise<FinalizedTxData> => {
   logger.info(`Querying owner of token ${tokenId}...`);
-  const result = await contract.callTx.ownerOf(tokenId);
+  const result = await callTxAny(contract).ownerOf(tokenId);
   return result.public;
 };
 
@@ -407,7 +412,7 @@ export const tokenCertificate = async (
   tokenId: bigint,
 ): Promise<FinalizedTxData> => {
   logger.info(`Querying certificate for token ${tokenId}...`);
-  const result = await contract.callTx.tokenCertificate(tokenId);
+  const result = await callTxAny(contract).tokenCertificate(tokenId);
   return result.public;
 };
 
@@ -416,7 +421,7 @@ export const tokenPrice = async (
   tokenId: bigint,
 ): Promise<FinalizedTxData> => {
   logger.info(`Querying price for token ${tokenId}...`);
-  const result = await contract.callTx.tokenPrice(tokenId);
+  const result = await callTxAny(contract).tokenPrice(tokenId);
   return result.public;
 };
 
@@ -429,7 +434,7 @@ export const purchaseBatch5 = async (
 ): Promise<FinalizedTxData> => {
   logger.info(`Batch purchasing 5 NFTs...`);
   const ids = [...tokenIds, ...Array(5 - tokenIds.length).fill(0n)].slice(0, 5);
-  const result = await contract.callTx.purchaseBatch5(ids[0], ids[1], ids[2], ids[3], ids[4], coin);
+  const result = await callTxAny(contract).purchaseBatch5(ids[0], ids[1], ids[2], ids[3], ids[4], coin);
   return result.public;
 };
 
@@ -440,7 +445,7 @@ export const purchaseBatch10 = async (
 ): Promise<FinalizedTxData> => {
   logger.info(`Batch purchasing 10 NFTs...`);
   const ids = [...tokenIds, ...Array(10 - tokenIds.length).fill(0n)].slice(0, 10);
-  const result = await contract.callTx.purchaseBatch10(
+  const result = await callTxAny(contract).purchaseBatch10(
     ids[0], ids[1], ids[2], ids[3], ids[4],
     ids[5], ids[6], ids[7], ids[8], ids[9], coin,
   );
@@ -454,7 +459,7 @@ export const purchaseBatch20 = async (
 ): Promise<FinalizedTxData> => {
   logger.info(`Batch purchasing 20 NFTs...`);
   const ids = [...tokenIds, ...Array(20 - tokenIds.length).fill(0n)].slice(0, 20);
-  const result = await contract.callTx.purchaseBatch20(
+  const result = await callTxAny(contract).purchaseBatch20(
     ids[0], ids[1], ids[2], ids[3], ids[4],
     ids[5], ids[6], ids[7], ids[8], ids[9],
     ids[10], ids[11], ids[12], ids[13], ids[14],
@@ -473,7 +478,7 @@ export const burnPurchasedBatch5 = async (
 ): Promise<FinalizedTxData> => {
   logger.info(`Batch burning 5 purchased tokens...`);
   const ids = [...tokenIds, ...Array(5 - tokenIds.length).fill(0n)].slice(0, 5);
-  const result = await contract.callTx.burnPurchasedBatch5(
+  const result = await callTxAny(contract).burnPurchasedBatch5(
     ownerCommitment, ids[0], ids[1], ids[2], ids[3], ids[4], challenge,
   );
   return result.public;
@@ -487,7 +492,7 @@ export const burnPurchasedBatch10 = async (
 ): Promise<FinalizedTxData> => {
   logger.info(`Batch burning 10 purchased tokens...`);
   const ids = [...tokenIds, ...Array(10 - tokenIds.length).fill(0n)].slice(0, 10);
-  const result = await contract.callTx.burnPurchasedBatch10(
+  const result = await callTxAny(contract).burnPurchasedBatch10(
     ownerCommitment,
     ids[0], ids[1], ids[2], ids[3], ids[4],
     ids[5], ids[6], ids[7], ids[8], ids[9], challenge,
@@ -503,7 +508,7 @@ export const burnPurchasedBatch20 = async (
 ): Promise<FinalizedTxData> => {
   logger.info(`Batch burning 20 purchased tokens...`);
   const ids = [...tokenIds, ...Array(20 - tokenIds.length).fill(0n)].slice(0, 20);
-  const result = await contract.callTx.burnPurchasedBatch20(
+  const result = await callTxAny(contract).burnPurchasedBatch20(
     ownerCommitment,
     ids[0], ids[1], ids[2], ids[3], ids[4],
     ids[5], ids[6], ids[7], ids[8], ids[9],
@@ -535,10 +540,15 @@ export const insertBatchVerifierKeys = async (
     throw new Error(`Invalid batch number: ${batchNumber}. Valid: 1-4`);
   }
   logger.info(`Inserting ${circuits.length} VKs for maintenance batch ${batchNumber}...`);
-  for (const circuitId of circuits) {
-    logger.info(`  Inserting VK for ${circuitId}...`);
+  for (let i = 0; i < circuits.length; i++) {
+    const circuitId = circuits[i];
+    logger.info(`  Inserting VK for ${circuitId} (${i + 1}/${circuits.length})...`);
     await insertCircuitVerifierKey(providers, contractAddress, circuitId as PrivateBuyerCircuits);
     logger.info(`  VK for ${circuitId} inserted.`);
+    if (i < circuits.length - 1) {
+      logger.info(`  Waiting 10s before next insert...`);
+      await sleep(10_000);
+    }
   }
   logger.info(`Batch ${batchNumber} complete (${circuits.length} VKs inserted).`);
 };

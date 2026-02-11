@@ -256,10 +256,16 @@ const deployOrJoin = async (
           if (['1', '2', '3', '4'].includes(trimmed)) {
             const circuits = api.MAINTENANCE_BATCHES[trimmed];
             console.log(`  Inserting ${circuits.length} VKs for batch ${trimmed}...`);
-            for (const circuitId of circuits) {
-              await api.withStatus(`Inserting VK for ${circuitId}`, () =>
+            for (let i = 0; i < circuits.length; i++) {
+              const circuitId = circuits[i];
+              await api.withStatus(`Inserting VK for ${circuitId} (${i + 1}/${circuits.length})`, () =>
                 api.insertCircuitVerifierKey(providers, addr.trim(), circuitId as any),
               );
+              if (i < circuits.length - 1) {
+                await api.withStatus('Waiting 10s before next VK insert', () =>
+                  new Promise((resolve) => setTimeout(resolve, 10_000)),
+                );
+              }
             }
             console.log(`  Batch ${trimmed} complete (${circuits.length} VKs inserted).\n`);
           } else {
@@ -543,10 +549,16 @@ const mainLoop = async (
           if (['1', '2', '3', '4'].includes(trimmed)) {
             const circuits = api.MAINTENANCE_BATCHES[trimmed];
             console.log(`  Inserting ${circuits.length} VKs for batch ${trimmed}...`);
-            for (const circuitId of circuits) {
-              await api.withStatus(`Inserting VK for ${circuitId}`, () =>
+            for (let i = 0; i < circuits.length; i++) {
+              const circuitId = circuits[i];
+              await api.withStatus(`Inserting VK for ${circuitId} (${i + 1}/${circuits.length})`, () =>
                 api.insertCircuitVerifierKey(providers, contractAddress, circuitId as any),
               );
+              if (i < circuits.length - 1) {
+                await api.withStatus('Waiting 10s before next VK insert', () =>
+                  new Promise((resolve) => setTimeout(resolve, 10_000)),
+                );
+              }
             }
             console.log(`  Batch ${trimmed} complete (${circuits.length} VKs inserted).\n`);
           } else {
