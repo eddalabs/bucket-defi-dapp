@@ -251,8 +251,7 @@ const deployOrJoin = async (
       case '3': {
         try {
           const addr = await rli.question('Enter contract address (hex): ');
-          const batchNum = await rli.question('Enter batch number (1-4): ');
-          await api.insertBatchVerifierKeys(providers, addr.trim(), batchNum.trim());
+          await api.insertRemainingVerifierKeys(providers, addr.trim());
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
           console.log(`  ✗ VK insert failed: ${msg}\n`);
@@ -523,8 +522,7 @@ const mainLoop = async (
         case '35': {
           const contractAddress = contract.deployTxData.public.contractAddress;
           console.log(`  Contract address: ${contractAddress}`);
-          const batchNum = await rli.question('Enter batch number (1-4): ');
-          await api.insertBatchVerifierKeys(providers, contractAddress, batchNum.trim());
+          await api.insertRemainingVerifierKeys(providers, contractAddress);
           break;
         }
         case '36':

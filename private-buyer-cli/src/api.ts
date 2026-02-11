@@ -298,8 +298,6 @@ export const proofOwnership = async (
   return result.public;
 };
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const insertCircuitVerifierKey = async (
   providers: PrivateBuyerProviders,
   contractAddress: string,
@@ -518,39 +516,35 @@ export const burnPurchasedBatch20 = async (
   return result.public;
 };
 
-// ─── Maintenance Batch VK Insertion ────────────────────────────────────────
+// ─── Post-Deploy VK Insertion ───────────────────────────────────────────────
 
-export const MAINTENANCE_BATCHES: Record<string, string[]> = {
-  '1': ['proofOwnership', 'pauseAccessControl', 'unpauseAccessControl',
-        'pauseIdentity', 'unpauseIdentity', 'pauseToken', 'unpauseToken',
-        'pauseNFTPool', 'unpauseNFTPool'],
-  '2': ['isUserVerified', 'balanceOf', 'ownerOf', 'tokenCertificate', 'tokenPrice'],
-  '3': ['_getBatchTokenPrice', '_storeBatchSellerPayment', '_executeBatchPurchase',
-        'purchaseBatch5', 'purchaseBatch10', 'purchaseBatch20'],
-  '4': ['_burnPurchasedToken', 'burnPurchasedBatch5', 'burnPurchasedBatch10', 'burnPurchasedBatch20'],
-};
+export const REMAINING_CIRCUITS: string[] = [
+  // Ownership & Emergency
+  'proofOwnership', 'pauseAccessControl', 'unpauseAccessControl',
+  'pauseIdentity', 'unpauseIdentity', 'pauseToken', 'unpauseToken',
+  'pauseNFTPool', 'unpauseNFTPool',
+  // Queries
+  'isUserVerified', 'balanceOf', 'ownerOf', 'tokenCertificate', 'tokenPrice',
+  // Batch Purchase
+  '_getBatchTokenPrice', '_storeBatchSellerPayment', '_executeBatchPurchase',
+  'purchaseBatch5', 'purchaseBatch10', 'purchaseBatch20',
+  // Batch Burn
+  '_burnPurchasedToken', 'burnPurchasedBatch5', 'burnPurchasedBatch10', 'burnPurchasedBatch20',
+];
 
-export const insertBatchVerifierKeys = async (
+export const insertRemainingVerifierKeys = async (
   providers: PrivateBuyerProviders,
   contractAddress: string,
-  batchNumber: string,
 ): Promise<void> => {
-  const circuits = MAINTENANCE_BATCHES[batchNumber];
-  if (!circuits) {
-    throw new Error(`Invalid batch number: ${batchNumber}. Valid: 1-4`);
-  }
-  logger.info(`Inserting ${circuits.length} VKs for maintenance batch ${batchNumber}...`);
+  const circuits = REMAINING_CIRCUITS;
+  logger.info(`Inserting ${circuits.length} remaining VKs...`);
   for (let i = 0; i < circuits.length; i++) {
     const circuitId = circuits[i];
     logger.info(`  Inserting VK for ${circuitId} (${i + 1}/${circuits.length})...`);
     await insertCircuitVerifierKey(providers, contractAddress, circuitId as PrivateBuyerCircuits);
     logger.info(`  VK for ${circuitId} inserted.`);
-    if (i < circuits.length - 1) {
-      logger.info(`  Waiting 10s before next insert...`);
-      await sleep(10_000);
-    }
   }
-  logger.info(`Batch ${batchNumber} complete (${circuits.length} VKs inserted).`);
+  logger.info(`All ${circuits.length} VKs inserted.`);
 };
 
 // ─── Wallet Functions ──────────────────────────────────────────────────────
