@@ -567,54 +567,38 @@ export const REMAINING_CIRCUITS: string[] = [
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/**
- * Wait until the wallet has at least one available DUST coin.
- * The indexer confirms a block before the wallet SDK processes it,
- * so after a tx is finalized we must wait for the wallet's DUST
- * tracker to catch up before submitting the next tx.
- */
-const waitForAvailableDust = async (wallet: WalletFacade, timeoutMs = 30_000): Promise<void> => {
-  await Rx.firstValueFrom(
-    wallet.state().pipe(
-      Rx.filter((s) => s.isSynced && s.dust.availableCoins.length > 0 && s.dust.walletBalance(new Date()) > 0n),
-      Rx.timeout(timeoutMs),
-    ),
-  ).catch(() => {
-    logger.warn('Timed out waiting for DUST availability, proceeding anyway');
-  });
-};
-
 export const insertRemainingVerifierKeys = async (
   providers: PrivateBuyerProviders,
   contractAddress: string,
-  wallet?: WalletFacade,
 ): Promise<void> => {
   const circuits = REMAINING_CIRCUITS;
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY_MS = 10_000;
+  const MAX_RETRIES = 5;
+  const SETTLE_MS = 10_000;
 
   logger.info(`Inserting ${circuits.length} remaining VKs...`);
   for (let i = 0; i < circuits.length; i++) {
     const circuitId = circuits[i];
+
+    // Wait before creating the tx so the node, indexer, and wallet
+    // all have time to fully process the previous block.
+    if (i > 0) {
+      logger.info(`  Waiting ${SETTLE_MS / 1000}s before next VK...`);
+      await delay(SETTLE_MS);
+    }
+
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         logger.info(`  Inserting VK for ${circuitId} (${i + 1}/${circuits.length})...`);
         await insertCircuitVerifierKey(providers, contractAddress, circuitId as PrivateBuyerCircuits);
         logger.info(`  VK for ${circuitId} inserted.`);
-        // Wait for the wallet's DUST tracker to process the block before
-        // the next tx, otherwise balanceTx picks an already-spent DUST coin.
-        if (wallet && i < circuits.length - 1) {
-          logger.info('  Waiting for wallet DUST sync...');
-          await waitForAvailableDust(wallet);
-        }
         break;
       } catch (e) {
         if (attempt === MAX_RETRIES) throw e;
         const msg = e instanceof Error ? e.message : String(e);
         logger.warn(`  VK insert for ${circuitId} failed (attempt ${attempt}/${MAX_RETRIES}): ${msg}`);
-        logger.info(`  Retrying in ${RETRY_DELAY_MS / 1000}s...`);
-        await delay(RETRY_DELAY_MS);
-        if (wallet) await waitForAvailableDust(wallet);
+        const retryDelay = SETTLE_MS * attempt;
+        logger.info(`  Retrying in ${retryDelay / 1000}s...`);
+        await delay(retryDelay);
       }
     }
   }
