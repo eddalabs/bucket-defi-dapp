@@ -14,40 +14,22 @@ import type { Logger } from 'pino';
 
 const GENESIS_MINT_WALLET_SEED = '0000000000000000000000000000000000000000000000000000000000000001';
 
-// Test mnemonic - DO NOT use in production
-const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
-
 export interface TestConfiguration {
-  seed: string;
-  mnemonic: string;
+  mnemonic?: string;
   dappConfig: Config;
   psMode: string;
 }
 
 export class LocalTestConfig implements TestConfiguration {
-  seed = GENESIS_MINT_WALLET_SEED;
-  mnemonic = TEST_MNEMONIC;
   psMode = 'undeployed';
   dappConfig = new UndeployedConfig();
 }
 
 export function parseArgs(required: string[]): TestConfiguration {
-  let seed = '';
-  let mnemonic = TEST_MNEMONIC;
-  if (required.includes('seed')) {
-    if (process.env.TEST_WALLET_SEED !== undefined) {
-      seed = process.env.TEST_WALLET_SEED;
-    } else {
-      throw new Error('TEST_WALLET_SEED environment variable is not defined.');
-    }
-  }
-
-  if (process.env.MY_PREVIEW_MNEMONIC !== undefined) {
-    mnemonic = process.env.MY_PREVIEW_MNEMONIC;
-  }
-
   let cfg: Config = new PreviewConfig();
   let psMode = 'undeployed';
+  let mnemonic: string | undefined;
+
   if (required.includes('env')) {
     const env = process.env.TEST_ENV;
     if (env === undefined) {
@@ -65,10 +47,11 @@ export function parseArgs(required: string[]): TestConfiguration {
       default:
         throw new Error(`Unknown env value=${env}`);
     }
+    mnemonic = process.env.MY_PREVIEW_MNEMONIC;
+    if (!mnemonic) throw new Error('MY_PREVIEW_MNEMONIC is required for preview/preprod');
   }
 
   return {
-    seed,
     mnemonic,
     dappConfig: cfg,
     psMode,
@@ -91,7 +74,6 @@ export class TestEnvironment {
   start = async (): Promise<TestConfiguration> => {
     if (process.env.RUN_ENV_TESTS === 'true') {
       this.testConfig = parseArgs(['env']);
-      this.logger.info(`Test wallet seed: ${this.testConfig.seed}`);
       this.logger.info('Proof server starting...');
       this.container = await TestEnvironment.getProofServerContainer(this.testConfig.psMode);
       this.testConfig.dappConfig = {
@@ -184,10 +166,10 @@ export class TestEnvironment {
   getWallet = async (): Promise<WalletContext> => {
     this.logger.info('Setting up wallet');
 
-    // Use hex seed for standalone (genesis wallet), mnemonic for preview/preprod
     if (this.testConfig.psMode === 'undeployed') {
-      this.walletContext = await api.buildWalletAndWaitForFunds(this.testConfig.dappConfig, this.testConfig.seed);
+      this.walletContext = await api.buildWalletAndWaitForFunds(this.testConfig.dappConfig, GENESIS_MINT_WALLET_SEED);
     } else {
+      if (!this.testConfig.mnemonic) throw new Error('MY_PREVIEW_MNEMONIC is required for preview/preprod');
       const seed = await api.mnemonicToSeed(this.testConfig.mnemonic);
       this.walletContext = await api.buildWalletAndWaitForFunds(this.testConfig.dappConfig, seed);
     }
