@@ -579,7 +579,9 @@ export const run = async (config: Config, _logger: Logger, dockerEnv?: DockerCom
   try {
     // Step 1: Start Docker environment if provided (e.g. local proof server)
     if (dockerEnv !== undefined) {
+      console.log('Starting Docker containers (this may take a while)...');
       env = await dockerEnv.up();
+      console.log('Docker containers started.');
 
       // In standalone mode, remap ports to the dynamically assigned container ports
       if (config instanceof UndeployedConfig) {
@@ -588,9 +590,11 @@ export const run = async (config: Config, _logger: Logger, dockerEnv?: DockerCom
         config.node = mapContainerPort(env, config.node, 'private-buyer-node');
         config.proofServer = mapContainerPort(env, config.proofServer, 'private-buyer-proof-server');
       }
+      console.log('Port remapping complete. Indexer:', config.indexer, 'Node:', config.node, 'ProofServer:', config.proofServer);
     }
 
     // Step 2: Build wallet (create new or restore from seed)
+    console.log('Building wallet...');
     const walletCtx = await buildWallet(config, rli);
     if (walletCtx === null) {
       return;

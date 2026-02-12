@@ -9,6 +9,7 @@ import {
 import path from 'path';
 import * as api from '../../api';
 import type { WalletContext } from '../../api';
+import type { PrivateBuyerProviders, DeployedPrivateBuyerContract } from '../../common-types';
 import type { Logger } from 'pino';
 
 const GENESIS_MINT_WALLET_SEED = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -127,7 +128,8 @@ export class TestEnvironment {
           'private-buyer-proof-server',
           Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1),
         )
-        .withWaitStrategy('private-buyer-indexer', Wait.forLogMessage('starting indexing', 1));
+        .withWaitStrategy('private-buyer-indexer', Wait.forLogMessage('starting indexing', 1))
+        .withWaitStrategy('private-buyer-node', Wait.forLogMessage('Running JSON-RPC server', 1));
       this.env = await this.dockerEnv.up();
 
       this.testConfig.dappConfig = {
@@ -147,6 +149,27 @@ export class TestEnvironment {
     return this.testConfig;
   };
 
+  /**
+   * Deploy contract using deployOnly (14 VKs) + insertRemainingVerifierKeys (24 VKs).
+   * Returns the deployed contract and its address.
+   */
+  deployContract = async (
+    providers: PrivateBuyerProviders,
+    name: string,
+    symbol: string,
+  ): Promise<{ contract: DeployedPrivateBuyerContract; contractAddress: string }> => {
+    this.logger.info('Deploying contract (deployOnly + VK insertion)...');
+    const contract = await api.deployOnly(providers, name, symbol);
+    const contractAddress = contract.deployTxData.public.contractAddress;
+    this.logger.info(`Contract deployed at: ${contractAddress}`);
+
+    this.logger.info('Inserting remaining verifier keys...');
+    await api.insertRemainingVerifierKeys(providers, contractAddress);
+    this.logger.info('All verifier keys inserted.');
+
+    return { contract, contractAddress };
+  };
+
   static mapContainerPort = (env: StartedDockerComposeEnvironment, url: string, containerName: string) => {
     const mappedUrl = new URL(url);
     const container = env.getContainer(containerName);
@@ -156,7 +179,7 @@ export class TestEnvironment {
     return mappedUrl.toString().replace(/\/+$/, '');
   };
 
-  static getProofServerContainer = async (env: string) =>
+  static getProofServerContainer = async (_env: string) =>
     await new GenericContainer('midnightntwrk/proof-server:7.0.0')
       .withExposedPorts(6300)
       .withCommand(['midnight-proof-server -v'])
