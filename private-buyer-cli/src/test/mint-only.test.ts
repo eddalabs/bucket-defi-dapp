@@ -4,7 +4,6 @@ import type { PrivateBuyerProviders, DeployedPrivateBuyerContract } from '../com
 import { currentDir, UndeployedConfig, PreviewConfig, PreprodConfig, type Config } from '../config';
 import { createLogger } from '../logger';
 import { createCertificate, createEitherAccount } from './utils/utils';
-import { convertFieldToBytes } from '@midnight-ntwrk/compact-runtime';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import 'dotenv/config';
 
@@ -16,7 +15,6 @@ const logDir = path.resolve(currentDir, '..', 'logs', `test-mint-only-${network}
 const logger = await createLogger(logDir);
 
 const timeout = 1000 * 60 * 15; // 15 minutes
-const MINTER_ROLE = convertFieldToBytes(32, 1n, '');
 const TOKEN_PRICE = 100n;
 const TOKEN_ID = BigInt(Math.floor(Math.random() * 900000) + 100000);
 

@@ -20,31 +20,18 @@ const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon a
 export interface TestConfiguration {
   seed: string;
   mnemonic: string;
-  entrypoint: string;
   dappConfig: Config;
   psMode: string;
-  cacheFileName: string;
 }
 
 export class LocalTestConfig implements TestConfiguration {
   seed = GENESIS_MINT_WALLET_SEED;
   mnemonic = TEST_MNEMONIC;
-  entrypoint = 'dist/standalone.js';
   psMode = 'undeployed';
-  cacheFileName = '';
   dappConfig = new UndeployedConfig();
 }
 
 export function parseArgs(required: string[]): TestConfiguration {
-  let entry = '';
-  if (required.includes('entry')) {
-    if (process.env.TEST_ENTRYPOINT !== undefined) {
-      entry = process.env.TEST_ENTRYPOINT;
-    } else {
-      throw new Error('TEST_ENTRYPOINT environment variable is not defined.');
-    }
-  }
-
   let seed = '';
   let mnemonic = TEST_MNEMONIC;
   if (required.includes('seed')) {
@@ -60,25 +47,20 @@ export function parseArgs(required: string[]): TestConfiguration {
   }
 
   let cfg: Config = new PreviewConfig();
-  let env = '';
   let psMode = 'undeployed';
-  let cacheFileName = '';
   if (required.includes('env')) {
-    if (process.env.TEST_ENV !== undefined) {
-      env = process.env.TEST_ENV;
-    } else {
+    const env = process.env.TEST_ENV;
+    if (env === undefined) {
       throw new Error('TEST_ENV environment variable is not defined.');
     }
     switch (env) {
       case 'preview':
         cfg = new PreviewConfig();
         psMode = 'preview';
-        cacheFileName = `${seed.substring(0, 7)}-${psMode}.state`;
         break;
-        case 'preprod':
+      case 'preprod':
         cfg = new PreprodConfig();
         psMode = 'preprod';
-        cacheFileName = `${seed.substring(0, 7)}-${psMode}.state`;
         break;
       default:
         throw new Error(`Unknown env value=${env}`);
@@ -88,10 +70,8 @@ export function parseArgs(required: string[]): TestConfiguration {
   return {
     seed,
     mnemonic,
-    entrypoint: entry,
     dappConfig: cfg,
     psMode,
-    cacheFileName,
   };
 }
 
