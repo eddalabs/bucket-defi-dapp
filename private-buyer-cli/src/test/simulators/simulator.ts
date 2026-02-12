@@ -128,7 +128,8 @@ export class TestEnvironment {
           'private-buyer-proof-server',
           Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1),
         )
-        .withWaitStrategy('private-buyer-indexer', Wait.forLogMessage('starting indexing', 1));
+        .withWaitStrategy('private-buyer-indexer', Wait.forLogMessage('starting indexing', 1))
+        .withWaitStrategy('private-buyer-node', Wait.forLogMessage('Running JSON-RPC server', 1));
       this.env = await this.dockerEnv.up();
 
       this.testConfig.dappConfig = {
