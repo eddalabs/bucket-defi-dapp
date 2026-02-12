@@ -36,7 +36,7 @@ services:
       node:
         condition: service_started
   node:
-    image: 'midnightntwrk/midnight-node:0.20.0'
+    image: 'midnightntwrk/midnight-node:0.20.1'
     container_name: 'private-buyer-node'
     ports:
       - "9944:9944"

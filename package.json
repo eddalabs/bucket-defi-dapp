@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "counter-cli",
-    "counter-contract",
+  "workspaces": [    
     "bucket-defi-contract",
     "private-buyer-contract",
     "private-buyer-cli",
@@ -72,6 +70,6 @@
   },
   "overrides": {
      "@midnight-ntwrk/compact-runtime": "0.14.0",
-    "@midnight-ntwrk/onchain-runtime-v1": "1.0.0-alpha.5"  
+    "@midnight-ntwrk/onchain-runtime-v2": "2.0.0"  
   }
 }
