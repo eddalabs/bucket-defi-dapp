@@ -126,7 +126,7 @@ export class TestEnvironment {
     this.logger.info(`Contract deployed at: ${contractAddress}`);
 
     this.logger.info('Inserting remaining verifier keys...');
-    await api.insertRemainingVerifierKeys(providers, contractAddress);
+    await api.insertRemainingVerifierKeys(providers, contractAddress, this.walletContext?.wallet);
     this.logger.info('All verifier keys inserted.');
 
     return { contract, contractAddress };
