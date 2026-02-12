@@ -1,0 +1,65 @@
+import path from 'path';
+import * as api from '../api';
+import type { PrivateBuyerProviders, DeployedPrivateBuyerContract } from '../common-types';
+import { currentDir } from '../config';
+import { createLogger } from '../logger';
+import { NoDockerTestEnvironment } from './simulators/simulator-no-docker';
+import { createCertificate, createEitherAccount } from './utils/utils';
+import { convertFieldToBytes } from '@midnight-ntwrk/compact-runtime';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import 'dotenv/config';
+
+const network = process.env.TEST_ENV || 'undeployed';
+const logDir = path.resolve(currentDir, '..', 'logs', `test-mint-only-${network}`, `${new Date().toISOString()}.log`);
+const logger = await createLogger(logDir);
+
+const timeout = 1000 * 60 * 15; // 15 minutes
+const MINTER_ROLE = convertFieldToBytes(32, 1n, '');
+const TOKEN_PRICE = 100n;
+const TOKEN_ID = BigInt(Math.floor(Math.random() * 900000) + 100000);
+
+describe('Mint-only test', () => {
+  let wallet: api.WalletContext;
+  let providers: PrivateBuyerProviders;
+  let contract: DeployedPrivateBuyerContract;
+  let coinPublicKey: string;
+
+  beforeAll(async () => {
+    api.setLogger(logger);
+
+    const sim = new NoDockerTestEnvironment(logger);
+    const { dappConfig } = await sim.start();
+    wallet = await sim.getWallet();
+    providers = await api.configureProviders(wallet, dappConfig);
+    const joined = await sim.joinContract(providers);
+    contract = joined.contract;
+
+    const walletProvider = await api.createWalletAndMidnightProvider(wallet);
+    coinPublicKey = walletProvider.getCoinPublicKey();
+    logger.info(`Wallet coin public key: ${coinPublicKey}`);
+
+    // Log dust state
+    const dust = await api.getDustBalance(wallet.wallet);
+    logger.info(`DUST: available=${dust.available}, coins=${dust.availableCoins}, pending=${dust.pending}, pendingCoins=${dust.pendingCoins}`);
+  }, timeout);
+
+  afterAll(async () => {
+    if (wallet) {
+      await api.closeWallet(wallet);
+    }
+  });
+
+  it('should mint a token directly', async () => {
+    const account = createEitherAccount(coinPublicKey);
+    const certificate = createCertificate(1);
+
+    logger.info(`Attempting mint: tokenId=${TOKEN_ID}, certificate.id=${certificate.id}`);
+    logger.info(`Account: is_left=${account.is_left}`);
+
+    const result = await api.mint(contract, account, TOKEN_ID, certificate, TOKEN_PRICE);
+    logger.info(`Mint result: txHash=${result.txHash}, blockHeight=${result.blockHeight}`);
+
+    expect(result.txHash).toMatch(/[0-9a-f]{64}/);
+    expect(result.blockHeight).toBeGreaterThan(0n);
+  }, timeout);
+});
