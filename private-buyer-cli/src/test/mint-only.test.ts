@@ -1,13 +1,15 @@
 import path from 'path';
 import * as api from '../api';
 import type { PrivateBuyerProviders, DeployedPrivateBuyerContract } from '../common-types';
-import { currentDir } from '../config';
+import { currentDir, UndeployedConfig, PreviewConfig, PreprodConfig, type Config } from '../config';
 import { createLogger } from '../logger';
-import { NoDockerTestEnvironment } from './simulators/simulator-no-docker';
 import { createCertificate, createEitherAccount } from './utils/utils';
 import { convertFieldToBytes } from '@midnight-ntwrk/compact-runtime';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import 'dotenv/config';
+
+const GENESIS_MINT_WALLET_SEED = '0000000000000000000000000000000000000000000000000000000000000001';
+const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 
 const network = process.env.TEST_ENV || 'undeployed';
 const logDir = path.resolve(currentDir, '..', 'logs', `test-mint-only-${network}`, `${new Date().toISOString()}.log`);
@@ -18,6 +20,13 @@ const MINTER_ROLE = convertFieldToBytes(32, 1n, '');
 const TOKEN_PRICE = 100n;
 const TOKEN_ID = BigInt(Math.floor(Math.random() * 900000) + 100000);
 
+function buildConfigFromEnv(): { config: Config; mode: string } {
+  const env = process.env.TEST_ENV;
+  if (env === 'preview') return { config: new PreviewConfig(), mode: 'preview' };
+  if (env === 'preprod') return { config: new PreprodConfig(), mode: 'preprod' };
+  return { config: new UndeployedConfig(), mode: 'undeployed' };
+}
+
 describe('Mint-only test', () => {
   let wallet: api.WalletContext;
   let providers: PrivateBuyerProviders;
@@ -27,12 +36,22 @@ describe('Mint-only test', () => {
   beforeAll(async () => {
     api.setLogger(logger);
 
-    const sim = new NoDockerTestEnvironment(logger);
-    const { dappConfig } = await sim.start();
-    wallet = await sim.getWallet();
-    providers = await api.configureProviders(wallet, dappConfig);
-    const joined = await sim.joinContract(providers);
-    contract = joined.contract;
+    const addr = process.env.TEST_CONTRACT_ADDRESS;
+    if (!addr) throw new Error('TEST_CONTRACT_ADDRESS is required for mint-only test');
+
+    const { config, mode } = buildConfigFromEnv();
+    logger.info(`Mint-only test (${mode}): joining contract at ${addr}`);
+
+    if (mode === 'undeployed') {
+      wallet = await api.buildWalletAndWaitForFunds(config, GENESIS_MINT_WALLET_SEED);
+    } else {
+      const mnemonic = process.env.MY_PREVIEW_MNEMONIC ?? TEST_MNEMONIC;
+      const seed = await api.mnemonicToSeed(mnemonic);
+      wallet = await api.buildWalletAndWaitForFunds(config, seed);
+    }
+
+    providers = await api.configureProviders(wallet, config);
+    contract = await api.joinContract(providers, addr);
 
     const walletProvider = await api.createWalletAndMidnightProvider(wallet);
     coinPublicKey = walletProvider.getCoinPublicKey();

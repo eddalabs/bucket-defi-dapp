@@ -1,10 +1,9 @@
 import path from 'path';
 import * as api from '../api';
 import type { PrivateBuyerProviders, DeployedPrivateBuyerContract } from '../common-types';
-import { currentDir } from '../config';
+import { currentDir, UndeployedConfig, PreviewConfig, PreprodConfig, type Config } from '../config';
 import { createLogger } from '../logger';
 import { TestEnvironment } from './simulators/simulator';
-import { NoDockerTestEnvironment } from './simulators/simulator-no-docker';
 import { createCertificate, createEitherAccount, createCoin, randomBytes } from './utils/utils';
 import { convertFieldToBytes } from '@midnight-ntwrk/compact-runtime';
 import * as Rx from 'rxjs';
@@ -110,8 +109,27 @@ async function retryTx<T>(name: string, walletFacade: api.WalletContext['wallet'
   throw new Error('unreachable');
 }
 
+const GENESIS_MINT_WALLET_SEED = '0000000000000000000000000000000000000000000000000000000000000001';
+const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+
+function buildConfigFromEnv(): { config: Config; mode: string } {
+  const env = process.env.TEST_ENV;
+  if (env === 'preview') return { config: new PreviewConfig(), mode: 'preview' };
+  if (env === 'preprod') return { config: new PreprodConfig(), mode: 'preprod' };
+  return { config: new UndeployedConfig(), mode: 'undeployed' };
+}
+
+async function buildWalletForMode(config: Config, mode: string): Promise<api.WalletContext> {
+  if (mode === 'undeployed') {
+    return await api.buildWalletAndWaitForFunds(config, GENESIS_MINT_WALLET_SEED);
+  }
+  const mnemonic = process.env.MY_PREVIEW_MNEMONIC ?? TEST_MNEMONIC;
+  const seed = await api.mnemonicToSeed(mnemonic);
+  return await api.buildWalletAndWaitForFunds(config, seed);
+}
+
 describe('Private Buyer Integration Tests', () => {
-  let simulator: TestEnvironment | NoDockerTestEnvironment;
+  let simulator: TestEnvironment | undefined;
   let wallet: api.WalletContext;
   let providers: PrivateBuyerProviders;
   let contract: DeployedPrivateBuyerContract;
@@ -128,31 +146,31 @@ describe('Private Buyer Integration Tests', () => {
   beforeAll(async () => {
     api.setLogger(logger);
 
-    const noDocker = process.env.NO_DOCKER === 'true';
+    const useExisting = process.env.NO_DOCKER === 'true';
 
-    if (noDocker) {
-      // No-docker mode: instances already running, contract already deployed.
-      logger.info('No-docker mode: joining existing contract');
-      const noDockerSim = new NoDockerTestEnvironment(logger);
-      const { dappConfig } = await noDockerSim.start();
-      wallet = await noDockerSim.getWallet();
-      providers = await api.configureProviders(wallet, dappConfig);
-      const joined = await noDockerSim.joinContract(providers);
-      contract = joined.contract;
-      contractAddress = joined.contractAddress;
-      simulator = noDockerSim;
+    if (useExisting) {
+      // Existing mode: infrastructure already running, contract already deployed.
+      const addr = process.env.TEST_CONTRACT_ADDRESS;
+      if (!addr) throw new Error('TEST_CONTRACT_ADDRESS is required when NO_DOCKER=true');
+
+      const { config, mode } = buildConfigFromEnv();
+      logger.info(`Existing infra mode (${mode}): joining contract at ${addr}`);
+
+      wallet = await buildWalletForMode(config, mode);
+      providers = await api.configureProviders(wallet, config);
+      contract = await api.joinContract(providers, addr);
+      contractAddress = addr;
       isFreshDeploy = false;
     } else {
-      // Docker mode: spin up containers, deploy fresh contract
-      logger.info('Using Docker simulator (deploying fresh contract)');
-      const dockerSim = new TestEnvironment(logger);
-      const testConfig = await dockerSim.start();
-      wallet = await dockerSim.getWallet();
+      // Full mode: spin up containers, deploy fresh contract
+      logger.info('Full mode: deploying fresh contract via testcontainers');
+      simulator = new TestEnvironment(logger);
+      const testConfig = await simulator.start();
+      wallet = await simulator.getWallet();
       providers = await api.configureProviders(wallet, testConfig.dappConfig);
-      const deployed = await dockerSim.deployContract(providers, CONTRACT_NAME, CONTRACT_SYMBOL);
+      const deployed = await simulator.deployContract(providers, CONTRACT_NAME, CONTRACT_SYMBOL);
       contract = deployed.contract;
       contractAddress = deployed.contractAddress;
-      simulator = dockerSim;
       isFreshDeploy = true;
     }
 
@@ -172,6 +190,8 @@ describe('Private Buyer Integration Tests', () => {
   afterAll(async () => {
     if (simulator) {
       await simulator.shutdown();
+    } else if (wallet) {
+      await api.closeWallet(wallet);
     }
   });
 
