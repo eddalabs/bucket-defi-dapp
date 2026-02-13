@@ -213,8 +213,16 @@ export const purchaseNFT = async (
   coin: MiniPrivateBuyer.ShieldedCoinInfo,
 ): Promise<FinalizedTxData> => {
   logger.info(`Purchasing NFT ${tokenId}...`);
-  const result = await contract.callTx.purchaseNFT(tokenId, coin);
-  return result.public;
+  logger.info(`Coin: nonce=${Buffer.from(coin.nonce).toString('hex').slice(0, 16)}..., color=${Buffer.from(coin.color).toString('hex')}, value=${coin.value}`);
+  try {
+    const result = await contract.callTx.purchaseNFT(tokenId, coin);
+    return result.public;
+  } catch (e: any) {
+    logger.error(`purchaseNFT error: ${e?.message}`);
+    logger.error(`Error stack: ${e?.stack}`);
+    if (e?.cause) logger.error(`Cause: ${e.cause}`);
+    throw e;
+  }
 };
 
 export const withdrawSellerFunds = async (contract: DeployedMiniPrivateBuyerContract): Promise<FinalizedTxData> => {
@@ -409,7 +417,7 @@ const buildUnshieldedConfig = ({ indexer, indexerWS }: Config) => ({
 const buildDustConfig = ({ indexer, indexerWS, node, proofServer }: Config) => ({
   networkId: getNetworkId(),
   costParameters: {
-    additionalFeeOverhead: 10_000_000_000n,
+    additionalFeeOverhead: 100_000_000_000_000n,
     feeBlocksMargin: 5,
   },
   indexerClientConnection: {
