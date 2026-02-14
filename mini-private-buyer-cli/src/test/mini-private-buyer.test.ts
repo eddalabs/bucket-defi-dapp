@@ -280,6 +280,10 @@ describe('Mini Private Buyer Integration Tests', () => {
     });
 
     it('should purchaseNFT to buy token', async () => {
+      // Diagnostic: verify token is in pool and has a price before purchasing
+      const ledgerBefore = await api.getLedgerState(providers, contractAddress as any);
+      logger.info(`Pre-purchase state: pool size=${ledgerBefore?.NFTPool__pool.size()}, price set=${ledgerBefore?.NonFungibleToken__tokenToPrice.member(tokenId1)}, sold=${ledgerBefore?.NFTPool__tokenSold?.member?.(tokenId1) ?? 'unknown'}`);
+
       const coin = createCoin(200n);
       const result = await retryTx('purchaseNFT', wallet.wallet, () =>
         api.purchaseNFT(contract, tokenId1, coin),

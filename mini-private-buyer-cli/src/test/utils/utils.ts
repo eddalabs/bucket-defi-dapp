@@ -63,6 +63,8 @@ export function createEitherAccount(
 
 /**
  * Create a ShieldedCoinInfo for use with purchaseNFT.
+ * Uses a random nonce because receiveShielded creates a NEW output coin
+ * (the wallet's balanceTx handles spending existing coins to fund it).
  */
 export function createCoin(value: bigint): MiniPrivateBuyer.ShieldedCoinInfo {
   return {
