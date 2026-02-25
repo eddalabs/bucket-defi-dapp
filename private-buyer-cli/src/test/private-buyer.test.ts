@@ -110,7 +110,6 @@ async function retryTx<T>(name: string, walletFacade: api.WalletContext['wallet'
 }
 
 const GENESIS_MINT_WALLET_SEED = '0000000000000000000000000000000000000000000000000000000000000001';
-const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 
 function buildConfigFromEnv(): { config: Config; mode: string } {
   const env = process.env.TEST_ENV;
@@ -123,7 +122,8 @@ async function buildWalletForMode(config: Config, mode: string): Promise<api.Wal
   if (mode === 'undeployed') {
     return await api.buildWalletAndWaitForFunds(config, GENESIS_MINT_WALLET_SEED);
   }
-  const mnemonic = process.env.MY_PREVIEW_MNEMONIC ?? TEST_MNEMONIC;
+  const mnemonic = process.env.MY_PREVIEW_MNEMONIC;
+  if (!mnemonic) throw new Error('MY_PREVIEW_MNEMONIC is required for preview/preprod');
   const seed = await api.mnemonicToSeed(mnemonic);
   return await api.buildWalletAndWaitForFunds(config, seed);
 }

@@ -572,12 +572,20 @@ export const insertRemainingVerifierKeys = async (
   contractAddress: string,
 ): Promise<void> => {
   const circuits = REMAINING_CIRCUITS;
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY_MS = 10_000;
+  const MAX_RETRIES = 5;
+  const SETTLE_MS = 10_000;
 
   logger.info(`Inserting ${circuits.length} remaining VKs...`);
   for (let i = 0; i < circuits.length; i++) {
     const circuitId = circuits[i];
+
+    // Wait before creating the tx so the node, indexer, and wallet
+    // all have time to fully process the previous block.
+    if (i > 0) {
+      logger.info(`  Waiting ${SETTLE_MS / 1000}s before next VK...`);
+      await delay(SETTLE_MS);
+    }
+
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
         logger.info(`  Inserting VK for ${circuitId} (${i + 1}/${circuits.length})...`);
@@ -588,8 +596,9 @@ export const insertRemainingVerifierKeys = async (
         if (attempt === MAX_RETRIES) throw e;
         const msg = e instanceof Error ? e.message : String(e);
         logger.warn(`  VK insert for ${circuitId} failed (attempt ${attempt}/${MAX_RETRIES}): ${msg}`);
-        logger.info(`  Retrying in ${RETRY_DELAY_MS / 1000}s...`);
-        await delay(RETRY_DELAY_MS);
+        const retryDelay = SETTLE_MS * attempt;
+        logger.info(`  Retrying in ${retryDelay / 1000}s...`);
+        await delay(retryDelay);
       }
     }
   }

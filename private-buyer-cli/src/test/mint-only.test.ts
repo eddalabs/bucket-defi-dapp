@@ -4,19 +4,16 @@ import type { PrivateBuyerProviders, DeployedPrivateBuyerContract } from '../com
 import { currentDir, UndeployedConfig, PreviewConfig, PreprodConfig, type Config } from '../config';
 import { createLogger } from '../logger';
 import { createCertificate, createEitherAccount } from './utils/utils';
-import { convertFieldToBytes } from '@midnight-ntwrk/compact-runtime';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import 'dotenv/config';
 
 const GENESIS_MINT_WALLET_SEED = '0000000000000000000000000000000000000000000000000000000000000001';
-const TEST_MNEMONIC = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 
 const network = process.env.TEST_ENV || 'undeployed';
 const logDir = path.resolve(currentDir, '..', 'logs', `test-mint-only-${network}`, `${new Date().toISOString()}.log`);
 const logger = await createLogger(logDir);
 
 const timeout = 1000 * 60 * 15; // 15 minutes
-const MINTER_ROLE = convertFieldToBytes(32, 1n, '');
 const TOKEN_PRICE = 100n;
 const TOKEN_ID = BigInt(Math.floor(Math.random() * 900000) + 100000);
 
@@ -45,7 +42,8 @@ describe('Mint-only test', () => {
     if (mode === 'undeployed') {
       wallet = await api.buildWalletAndWaitForFunds(config, GENESIS_MINT_WALLET_SEED);
     } else {
-      const mnemonic = process.env.MY_PREVIEW_MNEMONIC ?? TEST_MNEMONIC;
+      const mnemonic = process.env.MY_PREVIEW_MNEMONIC;
+      if (!mnemonic) throw new Error('MY_PREVIEW_MNEMONIC is required for preview/preprod');
       const seed = await api.mnemonicToSeed(mnemonic);
       wallet = await api.buildWalletAndWaitForFunds(config, seed);
     }

@@ -1,0 +1,195 @@
+// Edda Labs Compact Contracts v0.0.1
+pragma language_version >= 0.20.0;
+
+/**
+* @module: NonFungibleToken (Mini)
+*
+* @description: An unshielded Non-Fungible Token library with custom properties stored on-chain.
+* Simplified version without Pausable pattern.
+*
+* @notice: Uint<128> is used as the token balance because Uint<256> cannot be supported.
+*
+* @notice: This module does not include transfer or approval circuits. NFT ownership
+* post-purchase is tracked via hash commitments in the NFTPool module.
+*/
+
+module NonFungibleToken {
+  import CompactStandardLibrary;
+  import "./Initializable" prefix Initializable_;
+  import "../utils/Utils" prefix Utils_;
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // ENUMS
+  ///////////////////////////////////////////////////////////////////////////////
+
+  export enum Source {
+    Solar,
+    Wind,
+    Hydro,
+    Biomass,
+    Geothermal,
+    Nuclear
+  }
+
+  export enum Impact {
+    Minimal,
+    Low,
+    Medium,
+    High,
+    Extreme
+  }
+
+  export enum Location {
+    RJ,
+    SP,
+    MG,
+    RS
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // STRUCTS
+  ///////////////////////////////////////////////////////////////////////////////
+
+  // Struct holding all attributes for a Certificate.
+  export struct Certificate {
+    id: Opaque<"string">, // Certificate ID from web2 system
+    source: Source, // Type of the certificate
+    generation: Uint<64>, // kWh compensated
+    vintage: Uint<64>, // Expiration date
+    impact: Impact, // Impact of the certificate
+    location: Location // Location of the certificate
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // PUBLIC STATE
+  ///////////////////////////////////////////////////////////////////////////////
+
+  export sealed ledger _name: Opaque<"string">;
+  export sealed ledger _symbol: Opaque<"string">;
+
+  export ledger _certificatesCreatedCounter: Counter;
+
+  export ledger _owners: Map<Uint<128>, Either<ZswapCoinPublicKey, ContractAddress>>;
+
+  export ledger _balances: Map<Either<ZswapCoinPublicKey, ContractAddress>, Uint<128>>;
+
+  export ledger _tokenToCertificate: Map<Uint<128>, Certificate>;
+
+  export ledger _tokenToPrice: Map<Uint<128>, Uint<64>>;
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // CIRCUITS
+  ///////////////////////////////////////////////////////////////////////////////
+
+  export circuit initialize(name_: Opaque<"string">, symbol_: Opaque<"string">): [] {
+    Initializable_initialize();
+    _name = disclose(name_);
+    _symbol = disclose(symbol_);
+  }
+
+  export circuit balanceOf(owner: Either<ZswapCoinPublicKey, ContractAddress>): Uint<128> {
+    Initializable_assertInitialized();
+    if (!_balances.member(disclose(owner))) {
+      return 0;
+    }
+    return _balances.lookup(disclose(owner));
+  }
+
+  export circuit ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
+    Initializable_assertInitialized();
+    return _requireOwned(tokenId);
+  }
+
+  export circuit tokenCertificate(tokenId: Uint<128>): Certificate {
+    Initializable_assertInitialized();
+    _requireOwned(tokenId);
+    assert(_tokenToCertificate.member(disclose(tokenId)), "Token does not exist");
+    return _tokenToCertificate.lookup(disclose(tokenId));
+  }
+
+  export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
+    Initializable_assertInitialized();
+    _requireOwned(tokenId);
+    assert(_tokenToPrice.member(disclose(tokenId)), "Token does not exist");
+    return _tokenToPrice.lookup(disclose(tokenId));
+  }
+
+  export circuit mint(to: Either<ZswapCoinPublicKey, ContractAddress>,
+                      tokenId: Uint<128>,
+                      tokenCertificate: Certificate,
+                      price: Uint<64>
+                      ): [] {
+    Initializable_assertInitialized();
+    _certificatesCreatedCounter.increment(1);
+    _mint(to, tokenId, tokenCertificate);
+    _setTokenPrice(tokenId, price);
+  }
+
+  export circuit burn(tokenId: Uint<128>): [] {
+    Initializable_assertInitialized();
+    _burn(tokenId);
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // INTERNAL CIRCUITS
+  ///////////////////////////////////////////////////////////////////////////////
+
+  circuit _update(to: Either<ZswapCoinPublicKey, ContractAddress>,
+                  tokenId: Uint<128>
+                  ): Either<ZswapCoinPublicKey, ContractAddress> {
+    const from_ = _ownerOf(tokenId);
+
+    if (!Utils_isKeyOrAddressZero(disclose(from_))) {
+      const newBalance = _balances.lookup(disclose(from_)) - 1 as Uint<128>;
+      _balances.insert(disclose(from_), disclose(newBalance));
+    }
+
+    if (!Utils_isKeyOrAddressZero(disclose(to))) {
+      if (!_balances.member(disclose(to))) {
+        _balances.insert(disclose(to), 0);
+      }
+      const newBalance = _balances.lookup(disclose(to)) + 1 as Uint<128>;
+      _balances.insert(disclose(to), disclose(newBalance));
+    }
+
+    _owners.insert(disclose(tokenId), disclose(to));
+
+    return from_;
+  }
+
+  export circuit _mint(to: Either<ZswapCoinPublicKey, ContractAddress>,
+                       tokenId: Uint<128>,
+                       tokenCertificate: Certificate
+                       ): [] {
+    assert(!Utils_isKeyOrAddressZero(to), "NonFungibleToken: Invalid Receiver");
+    const previousOwner = _update(to, tokenId);
+    _setTokenCertificate(tokenId, tokenCertificate);
+    assert(Utils_isKeyOrAddressZero(previousOwner), "NonFungibleToken: Invalid Sender");
+  }
+
+  export circuit _burn(tokenId: Uint<128>): [] {
+    const previousOwner = _update(shieldedBurnAddress(), tokenId);
+    assert(!Utils_isKeyOrAddressZero(previousOwner), "NonFungibleToken: Invalid Sender");
+  }
+
+  export circuit _requireOwned(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
+    const owner = _ownerOf(tokenId);
+    assert(!Utils_isKeyOrAddressZero(owner), "NonFungibleToken: Nonexistent Token");
+    return owner;
+  }
+
+  export circuit _ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
+    if (!_owners.member(disclose(tokenId))) {
+      return shieldedBurnAddress();
+    }
+    return _owners.lookup(disclose(tokenId));
+  }
+
+  export circuit _setTokenCertificate(tokenId: Uint<128>, tokenCertificate: Certificate): [] {
+    _tokenToCertificate.insert(disclose(tokenId), disclose(tokenCertificate));
+  }
+
+  export circuit _setTokenPrice(tokenId: Uint<128>, price: Uint<64>): [] {
+    _tokenToPrice.insert(disclose(tokenId), disclose(price));
+  }
+}

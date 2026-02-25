@@ -1,0 +1,21 @@
+{
+  "name": "@eddalabs/mini-private-buyer-cli",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "test-undeployed": "vitest run src/test/mini-private-buyer.test.ts",
+    "tui-undeployed": "bun src/tui_standalone.ts",
+    "tui-preview": "bun src/tui_preview.ts",
+    "tui-preprod": "bun src/tui_preprod.ts",
+    "setup-undeployed": "bun src/setup/standalone.ts",
+    "instances-undeployed": "docker compose -f standalone.yml up",
+    "build": "rm -rf dist && tsc --project tsconfig.build.json",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@eddalabs/mini-private-buyer-contract": "*"
+  }
+}
