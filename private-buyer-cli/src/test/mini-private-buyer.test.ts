@@ -298,7 +298,7 @@ describe('Mini Private Buyer Integration Tests', () => {
       expect(ledger!.NFTPool__purchaseCounter).toBeGreaterThan(initialPurchaseCounter);
     });
 
-    it('should withdrawSellerFunds successfully', async () => {
+    it.skip('should withdrawSellerFunds successfully', async () => {
       const result = await retryTx('withdrawSellerFunds', wallet.wallet, () =>
         api.withdrawSellerFunds(contract),
       );

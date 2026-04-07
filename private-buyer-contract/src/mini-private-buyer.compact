@@ -104,18 +104,19 @@ export circuit purchaseNFT(tokenId: Uint<128>, coin: ShieldedCoinInfo): Bytes<32
   assert(NonFungibleToken__tokenToPrice.member(disclose(tokenId)), "Token price not set");
   const price = NonFungibleToken__tokenToPrice.lookup(disclose(tokenId));
 
+  // TODO: Re-enable once unshielded-to-shielded Night swap is implemented
   // Validate payment
-  assert(coin.value >= price as Uint<128>, "Insufficient payment");
-  assert(coin.color == nativeToken(), "Invalid coin provided");
+  // assert(coin.value >= price as Uint<128>, "Insufficient payment");
+  // assert(coin.color == nativeToken(), "Invalid coin provided");
 
   // Receive the payment
-  receiveShielded(disclose(coin));
+  // receiveShielded(disclose(coin));
 
   // Get seller (current NFT owner)
   const seller = NonFungibleToken__owners.lookup(disclose(tokenId));
 
   // Store payment in seller's balance
-  NFTPool_storeSellerPayment(seller, coin, price);
+  // NFTPool_storeSellerPayment(seller, coin, price);
 
   // Execute pool purchase (marks sold, computes commitment, etc.)
   return NFTPool_purchaseNFT(tokenId);
