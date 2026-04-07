@@ -3,11 +3,14 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   mode: "node",
   test: {
-    deps: { interopDefault: true },
+    deps: {
+      interopDefault: true
+    },
     globals: true,
     environment: "node",
     include: ["**/*.test.ts"],
     exclude: ["node_modules"],
+    root: ".",
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
@@ -19,5 +22,9 @@ export default defineConfig({
       }
     },
     reporters: ["default", ["junit", { outputFile: "reports/report.xml" }]]
+  },
+  resolve: {
+    extensions: [".ts", ".js"],
+    conditions: ["import", "node", "default"]
   }
 });

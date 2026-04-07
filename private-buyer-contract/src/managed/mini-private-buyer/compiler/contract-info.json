@@ -1,8 +1,12 @@
 {
+  "compiler-version": "0.30.0",
+  "language-version": "0.22.0",
+  "runtime-version": "0.15.0",
   "circuits": [
     {
       "name": "mint",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "to",
@@ -147,6 +151,7 @@
     {
       "name": "burn",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "tokenId",
@@ -165,6 +170,7 @@
     {
       "name": "addToPool",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "tokenId",
@@ -183,6 +189,7 @@
     {
       "name": "removeFromPool",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "tokenId",
@@ -201,6 +208,7 @@
     {
       "name": "purchaseNFT",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "tokenId",
@@ -248,6 +256,7 @@
     {
       "name": "withdrawSellerFunds",
       "pure": false,
+      "proof": true,
       "arguments": [
       ],
       "result-type": {
@@ -259,6 +268,7 @@
     {
       "name": "proofOwnership",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "ownerCommitment",
@@ -284,6 +294,7 @@
     {
       "name": "burnPurchased",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "ownerCommitment",
@@ -316,6 +327,7 @@
     {
       "name": "balanceOf",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "owner",
@@ -373,6 +385,7 @@
     {
       "name": "ownerOf",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "tokenId",
@@ -430,6 +443,7 @@
     {
       "name": "tokenCertificate",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "tokenId",
@@ -512,6 +526,7 @@
     {
       "name": "tokenPrice",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "tokenId",
@@ -529,6 +544,7 @@
     {
       "name": "setTokenPrice",
       "pure": false,
+      "proof": true,
       "arguments": [
         {
           "name": "tokenId",

@@ -1,6 +1,6 @@
 import { MiniPrivateBuyer } from '@eddalabs/mini-private-buyer-contract';
 import { encodeCoinPublicKey, encodeRawTokenType } from '@midnight-ntwrk/compact-runtime';
-import * as ledger from '@midnight-ntwrk/ledger-v7';
+import * as ledger from '@midnight-ntwrk/ledger-v8';
 
 export const tokenValue = (value: bigint): bigint => value * 10n ** 6n;
 

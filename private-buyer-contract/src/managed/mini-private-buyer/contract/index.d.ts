@@ -72,6 +72,38 @@ export type ImpureCircuits<PS> = {
                 price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
 }
 
+export type ProvableCircuits<PS> = {
+  mint(context: __compactRuntime.CircuitContext<PS>,
+       to_0: Either<ZswapCoinPublicKey, ContractAddress>,
+       tokenId_0: bigint,
+       tokenCertificate_0: NonFungibleToken_Certificate,
+       price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  burn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  purchaseNFT(context: __compactRuntime.CircuitContext<PS>,
+              tokenId_0: bigint,
+              coin_0: ShieldedCoinInfo): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  withdrawSellerFunds(context: __compactRuntime.CircuitContext<PS>): __compactRuntime.CircuitResults<PS, []>;
+  proofOwnership(context: __compactRuntime.CircuitContext<PS>,
+                 ownerCommitment_0: Uint8Array,
+                 challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  burnPurchased(context: __compactRuntime.CircuitContext<PS>,
+                ownerCommitment_0: Uint8Array,
+                tokenId_0: bigint,
+                challenge_0: Uint8Array): __compactRuntime.CircuitResults<PS, []>;
+  balanceOf(context: __compactRuntime.CircuitContext<PS>,
+            owner_0: Either<ZswapCoinPublicKey, ContractAddress>): __compactRuntime.CircuitResults<PS, bigint>;
+  ownerOf(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, Either<ZswapCoinPublicKey,
+                                                                                                                       ContractAddress>>;
+  tokenCertificate(context: __compactRuntime.CircuitContext<PS>,
+                   tokenId_0: bigint): __compactRuntime.CircuitResults<PS, NonFungibleToken_Certificate>;
+  tokenPrice(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, bigint>;
+  setTokenPrice(context: __compactRuntime.CircuitContext<PS>,
+                tokenId_0: bigint,
+                price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+}
+
 export type PureCircuits = {
 }
 
@@ -170,6 +202,7 @@ export declare class Contract<PS = any, W extends Witnesses<PS> = Witnesses<PS>>
   witnesses: W;
   circuits: Circuits<PS>;
   impureCircuits: ImpureCircuits<PS>;
+  provableCircuits: ProvableCircuits<PS>;
   constructor(witnesses: W);
   initialState(context: __compactRuntime.ConstructorContext<PS>,
                _name_0: string,

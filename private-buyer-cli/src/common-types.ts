@@ -1,9 +1,9 @@
 import { MiniPrivateBuyer, type PrivateState } from '@eddalabs/mini-private-buyer-contract';
 import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 import type { DeployedContract, FoundContract } from '@midnight-ntwrk/midnight-js-contracts';
-import type { ImpureCircuitId } from '@midnight-ntwrk/compact-js';
+import type { ProvableCircuitId } from '@midnight-ntwrk/compact-js';
 
-export type MiniPrivateBuyerCircuits = ImpureCircuitId<MiniPrivateBuyer.Contract<PrivateState>>;
+export type MiniPrivateBuyerCircuits = ProvableCircuitId<MiniPrivateBuyer.Contract<PrivateState>>;
 
 export const MiniPrivateBuyerPrivateStateId = 'miniPrivateBuyerPrivateState';
 

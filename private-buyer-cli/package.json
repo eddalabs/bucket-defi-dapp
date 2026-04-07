@@ -5,17 +5,57 @@
   "private": true,
   "type": "module",
   "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "test-undeployed": "vitest run src/test/mini-private-buyer.test.ts",
-    "tui-undeployed": "bun src/tui_standalone.ts",
-    "tui-preview": "bun src/tui_preview.ts",
-    "tui-preprod": "bun src/tui_preprod.ts",
-    "setup-undeployed": "bun src/setup/standalone.ts",
-    "instances-undeployed": "docker compose -f standalone.yml up",
+    "tui-undeployed": "tsx src/tui_standalone.ts",
+    "tui-preview": "tsx src/tui_preview.ts",
+    "tui-preprod": "tsx src/tui_preprod.ts",
+    "setup-undeployed": "tsx src/setup/standalone.ts",
+    "ps-all": "docker compose -f proof-server.yml up",
     "build": "rm -rf dist && tsc --project tsconfig.build.json",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@eddalabs/mini-private-buyer-contract": "*"
+    "@eddalabs/mini-private-buyer-contract": "workspace:*",
+    "@midnight-ntwrk/compact-js": "2.5.0",
+    "@midnight-ntwrk/compact-runtime": "0.15.0",
+    "@midnight-ntwrk/ledger-v8": "8.0.3",
+    "@midnight-ntwrk/midnight-js-contracts": "4.0.2",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "4.0.2",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "4.0.2",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "4.0.2",
+    "@midnight-ntwrk/midnight-js-network-id": "4.0.2",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "4.0.2",
+    "@midnight-ntwrk/midnight-js-types": "4.0.2",
+    "@midnight-ntwrk/midnight-js-utils": "4.0.2",
+    "@midnight-ntwrk/wallet-sdk-address-format": "3.1.0",
+    "@midnight-ntwrk/wallet-sdk-dust-wallet": "3.0.0",
+    "@midnight-ntwrk/wallet-sdk-facade": "3.0.0",
+    "@midnight-ntwrk/wallet-sdk-hd": "3.0.1",
+    "@midnight-ntwrk/wallet-sdk-shielded": "2.1.0",
+    "@midnight-ntwrk/wallet-sdk-unshielded-wallet": "2.1.0",
+    "@scure/bip39": "^2.0.1",
+    "dotenv": "^17.2.3",
+    "long": "5.3.2",
+    "pino": "10.3.0",
+    "pino-pretty": "13.1.3",
+    "protobufjs": "^7.3.2",
+    "rxjs": "^7.8.1",
+    "ws": "8.19.0"
+  },
+  "devDependencies": {
+    "testcontainers": "^11.11.0",
+    "vitest": "^4.0.18"
   }
 }

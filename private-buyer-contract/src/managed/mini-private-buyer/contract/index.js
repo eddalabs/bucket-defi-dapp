@@ -1,5 +1,5 @@
 import * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
-__compactRuntime.checkRuntimeVersion('0.14.0');
+__compactRuntime.checkRuntimeVersion('0.15.0');
 
 export var NonFungibleToken_Location;
 (function (NonFungibleToken_Location) {
@@ -154,6 +154,35 @@ const _descriptor_13 = new _QualifiedShieldedCoinInfo_0();
 
 const _descriptor_14 = new __compactRuntime.CompactTypeUnsignedInteger(65535n, 2);
 
+const _descriptor_15 = __compactRuntime.CompactTypeField;
+
+const _descriptor_16 = new __compactRuntime.CompactTypeVector(3, _descriptor_3);
+
+const _descriptor_17 = new __compactRuntime.CompactTypeBytes(21);
+
+class _CoinPreimage_0 {
+  alignment() {
+    return _descriptor_17.alignment().concat(_descriptor_12.alignment().concat(_descriptor_2.alignment().concat(_descriptor_3.alignment())));
+  }
+  fromValue(value_0) {
+    return {
+      domain_sep: _descriptor_17.fromValue(value_0),
+      info: _descriptor_12.fromValue(value_0),
+      dataType: _descriptor_2.fromValue(value_0),
+      data: _descriptor_3.fromValue(value_0)
+    }
+  }
+  toValue(value_0) {
+    return _descriptor_17.toValue(value_0.domain_sep).concat(_descriptor_12.toValue(value_0.info).concat(_descriptor_2.toValue(value_0.dataType).concat(_descriptor_3.toValue(value_0.data))));
+  }
+}
+
+const _descriptor_18 = new _CoinPreimage_0();
+
+const _descriptor_19 = new __compactRuntime.CompactTypeVector(2, _descriptor_3);
+
+const _descriptor_20 = new __compactRuntime.CompactTypeVector(2, _descriptor_15);
+
 class _Maybe_0 {
   alignment() {
     return _descriptor_2.alignment().concat(_descriptor_12.alignment());
@@ -169,53 +198,24 @@ class _Maybe_0 {
   }
 }
 
-const _descriptor_15 = new _Maybe_0();
+const _descriptor_21 = new _Maybe_0();
 
 class _ShieldedSendResult_0 {
   alignment() {
-    return _descriptor_15.alignment().concat(_descriptor_12.alignment());
+    return _descriptor_21.alignment().concat(_descriptor_12.alignment());
   }
   fromValue(value_0) {
     return {
-      change: _descriptor_15.fromValue(value_0),
+      change: _descriptor_21.fromValue(value_0),
       sent: _descriptor_12.fromValue(value_0)
     }
   }
   toValue(value_0) {
-    return _descriptor_15.toValue(value_0.change).concat(_descriptor_12.toValue(value_0.sent));
+    return _descriptor_21.toValue(value_0.change).concat(_descriptor_12.toValue(value_0.sent));
   }
 }
 
-const _descriptor_16 = new _ShieldedSendResult_0();
-
-const _descriptor_17 = __compactRuntime.CompactTypeField;
-
-const _descriptor_18 = new __compactRuntime.CompactTypeVector(2, _descriptor_3);
-
-const _descriptor_19 = new __compactRuntime.CompactTypeVector(3, _descriptor_3);
-
-const _descriptor_20 = new __compactRuntime.CompactTypeVector(2, _descriptor_17);
-
-const _descriptor_21 = new __compactRuntime.CompactTypeBytes(21);
-
-class _CoinPreimage_0 {
-  alignment() {
-    return _descriptor_21.alignment().concat(_descriptor_12.alignment().concat(_descriptor_2.alignment().concat(_descriptor_3.alignment())));
-  }
-  fromValue(value_0) {
-    return {
-      domain_sep: _descriptor_21.fromValue(value_0),
-      info: _descriptor_12.fromValue(value_0),
-      dataType: _descriptor_2.fromValue(value_0),
-      data: _descriptor_3.fromValue(value_0)
-    }
-  }
-  toValue(value_0) {
-    return _descriptor_21.toValue(value_0.domain_sep).concat(_descriptor_12.toValue(value_0.info).concat(_descriptor_2.toValue(value_0.dataType).concat(_descriptor_3.toValue(value_0.data))));
-  }
-}
-
-const _descriptor_22 = new _CoinPreimage_0();
+const _descriptor_22 = new _ShieldedSendResult_0();
 
 class _Either_1 {
   alignment() {
@@ -785,6 +785,21 @@ export class Contract {
       tokenPrice: this.circuits.tokenPrice,
       setTokenPrice: this.circuits.setTokenPrice
     };
+    this.provableCircuits = {
+      mint: this.circuits.mint,
+      burn: this.circuits.burn,
+      addToPool: this.circuits.addToPool,
+      removeFromPool: this.circuits.removeFromPool,
+      purchaseNFT: this.circuits.purchaseNFT,
+      withdrawSellerFunds: this.circuits.withdrawSellerFunds,
+      proofOwnership: this.circuits.proofOwnership,
+      burnPurchased: this.circuits.burnPurchased,
+      balanceOf: this.circuits.balanceOf,
+      ownerOf: this.circuits.ownerOf,
+      tokenCertificate: this.circuits.tokenCertificate,
+      tokenPrice: this.circuits.tokenPrice,
+      setTokenPrice: this.circuits.setTokenPrice
+    };
   }
   initialState(...args_0) {
     if (args_0.length !== 3) {
@@ -1170,58 +1185,8 @@ export class Contract {
   _right_0(value_0) {
     return { is_left: false, left: { bytes: new Uint8Array(32) }, right: value_0 };
   }
-  _transientHash_0(value_0) {
-    const result_0 = __compactRuntime.transientHash(_descriptor_20, value_0);
-    return result_0;
-  }
-  _persistentHash_0(value_0) {
-    const result_0 = __compactRuntime.persistentHash(_descriptor_22, value_0);
-    return result_0;
-  }
-  _persistentHash_1(value_0) {
-    const result_0 = __compactRuntime.persistentHash(_descriptor_18, value_0);
-    return result_0;
-  }
-  _persistentHash_2(value_0) {
-    const result_0 = __compactRuntime.persistentHash(_descriptor_19, value_0);
-    return result_0;
-  }
-  _degradeToTransient_0(x_0) {
-    const result_0 = __compactRuntime.degradeToTransient(x_0);
-    return result_0;
-  }
-  _upgradeFromTransient_0(x_0) {
-    const result_0 = __compactRuntime.upgradeFromTransient(x_0);
-    return result_0;
-  }
   _nativeToken_0() {
     return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-  }
-  _ownPublicKey_0(context, partialProofData) {
-    const result_0 = __compactRuntime.ownPublicKey(context);
-    partialProofData.privateTranscriptOutputs.push({
-      value: _descriptor_4.toValue(result_0),
-      alignment: _descriptor_4.alignment()
-    });
-    return result_0;
-  }
-  _createZswapInput_0(context, partialProofData, coin_0) {
-    const result_0 = __compactRuntime.createZswapInput(context, coin_0);
-    partialProofData.privateTranscriptOutputs.push({
-      value: [],
-      alignment: []
-    });
-    return result_0;
-  }
-  _createZswapOutput_0(context, partialProofData, coin_0, recipient_0) {
-    const result_0 = __compactRuntime.createZswapOutput(context,
-                                                        coin_0,
-                                                        recipient_0);
-    partialProofData.privateTranscriptOutputs.push({
-      value: [],
-      alignment: []
-    });
-    return result_0;
   }
   _shieldedBurnAddress_0() {
     return this._left_0({ bytes: new Uint8Array(32) });
@@ -1324,7 +1289,30 @@ export class Contract {
                                                  value: __compactRuntime.StateValue.newNull().encode() } },
                                        { ins: { cached: true, n: 2 } },
                                        { swap: { n: 0 } }]);
-    if (this._equal_0(change_0, 0n)) {
+    if (!recipient_0.is_left
+        &&
+        this._equal_0(recipient_0.right.bytes, selfAddr_0.bytes))
+    {
+      const tmp_2 = this._coinCommitment_0(output_0, recipient_0);
+      __compactRuntime.queryLedgerState(context,
+                                        partialProofData,
+                                        [
+                                         { swap: { n: 0 } },
+                                         { idx: { cached: true,
+                                                  pushPath: true,
+                                                  path: [
+                                                         { tag: 'value',
+                                                           value: { value: _descriptor_24.toValue(1n),
+                                                                    alignment: _descriptor_24.alignment() } }] } },
+                                         { push: { storage: false,
+                                                   value: __compactRuntime.StateValue.newCell({ value: _descriptor_3.toValue(tmp_2),
+                                                                                                alignment: _descriptor_3.alignment() }).encode() } },
+                                         { push: { storage: false,
+                                                   value: __compactRuntime.StateValue.newNull().encode() } },
+                                         { ins: { cached: true, n: 2 } },
+                                         { swap: { n: 0 } }]);
+    }
+    if (this._equal_1(change_0, 0n)) {
       return { change: this._none_0(), sent: output_0 };
     } else {
       const changeCoin_0 = { nonce:
@@ -1396,6 +1384,56 @@ export class Contract {
                                     info: coin_0,
                                     dataType: false,
                                     data: addr_0.bytes });
+  }
+  _transientHash_0(value_0) {
+    const result_0 = __compactRuntime.transientHash(_descriptor_20, value_0);
+    return result_0;
+  }
+  _persistentHash_0(value_0) {
+    const result_0 = __compactRuntime.persistentHash(_descriptor_18, value_0);
+    return result_0;
+  }
+  _persistentHash_1(value_0) {
+    const result_0 = __compactRuntime.persistentHash(_descriptor_19, value_0);
+    return result_0;
+  }
+  _persistentHash_2(value_0) {
+    const result_0 = __compactRuntime.persistentHash(_descriptor_16, value_0);
+    return result_0;
+  }
+  _degradeToTransient_0(x_0) {
+    const result_0 = __compactRuntime.degradeToTransient(x_0);
+    return result_0;
+  }
+  _upgradeFromTransient_0(x_0) {
+    const result_0 = __compactRuntime.upgradeFromTransient(x_0);
+    return result_0;
+  }
+  _ownPublicKey_0(context, partialProofData) {
+    const result_0 = __compactRuntime.ownPublicKey(context);
+    partialProofData.privateTranscriptOutputs.push({
+      value: _descriptor_4.toValue(result_0),
+      alignment: _descriptor_4.alignment()
+    });
+    return result_0;
+  }
+  _createZswapInput_0(context, partialProofData, coin_0) {
+    const result_0 = __compactRuntime.createZswapInput(context, coin_0);
+    partialProofData.privateTranscriptOutputs.push({
+      value: [],
+      alignment: []
+    });
+    return result_0;
+  }
+  _createZswapOutput_0(context, partialProofData, coin_0, recipient_0) {
+    const result_0 = __compactRuntime.createZswapOutput(context,
+                                                        coin_0,
+                                                        recipient_0);
+    partialProofData.privateTranscriptOutputs.push({
+      value: [],
+      alignment: []
+    });
+    return result_0;
   }
   _initialize_0(context, partialProofData, name__0, symbol__0) {
     this._initialize_1(context, partialProofData);
@@ -1962,9 +2000,9 @@ export class Contract {
   }
   _isKeyOrAddressZero_0(keyOrAddress_0) {
     if (this._isContractAddress_0(keyOrAddress_0)) {
-      return this._equal_1({ bytes: new Uint8Array(32) }, keyOrAddress_0.right);
+      return this._equal_2({ bytes: new Uint8Array(32) }, keyOrAddress_0.right);
     } else {
-      return this._equal_2({ bytes: new Uint8Array(32) }, keyOrAddress_0.left);
+      return this._equal_3({ bytes: new Uint8Array(32) }, keyOrAddress_0.left);
     }
   }
   _isContractAddress_0(keyOrAddress_0) { return !keyOrAddress_0.is_left; }
@@ -2473,14 +2511,14 @@ export class Contract {
                                                                                                            alignment: _descriptor_6.alignment() } }] } },
                                                                                 { popeq: { cached: false,
                                                                                            result: undefined } }]).value);
-    __compactRuntime.assert(!this._equal_3(amount_0, 0n),
+    __compactRuntime.assert(!this._equal_4(amount_0, 0n),
                             'NFTPool: Zero balance');
     const send_result_0 = this._sendShielded_0(context,
                                                partialProofData,
                                                balance_0,
                                                caller_0,
                                                amount_0);
-    if (!this._equal_4(send_result_0.change.value.value, 0n)) {
+    if (!this._equal_5(send_result_0.change.value.value, 0n)) {
       const tmp_0 = send_result_0.change.value;
       const tmp_1 = this._right_0(_descriptor_5.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                             partialProofData,
@@ -2743,7 +2781,7 @@ export class Contract {
                                                                                             result: undefined } }]).value);
     const ownerCommitmentCalculated_0 = this.__computeOwnerCommitment_0(id_0,
                                                                         counter_0);
-    const isOwner_0 = this._equal_5(ownerCommitmentCalculated_0,
+    const isOwner_0 = this._equal_6(ownerCommitmentCalculated_0,
                                     ownerCommitment_0);
     return isOwner_0;
   }
@@ -2955,8 +2993,10 @@ export class Contract {
                                                                                                           alignment: _descriptor_0.alignment() } }] } },
                                                                                { popeq: { cached: false,
                                                                                           result: undefined } }]).value);
-    __compactRuntime.assert(coin_0.value >= price_0, 'Insufficient payment');
-    __compactRuntime.assert(this._equal_6(coin_0.color, this._nativeToken_0()),
+    let t_0;
+    __compactRuntime.assert((t_0 = coin_0.value, t_0 >= price_0),
+                            'Insufficient payment');
+    __compactRuntime.assert(this._equal_7(coin_0.color, this._nativeToken_0()),
                             'Invalid coin provided');
     this._receiveShielded_0(context, partialProofData, coin_0);
     const seller_0 = _descriptor_6.fromValue(__compactRuntime.queryLedgerState(context,
@@ -3043,7 +3083,7 @@ export class Contract {
                                                                                                                     alignment: _descriptor_3.alignment() } }] } },
                                                                                          { popeq: { cached: false,
                                                                                                     result: undefined } }]).value);
-    __compactRuntime.assert(this._equal_7(storedChallenge_0, challenge_0),
+    __compactRuntime.assert(this._equal_8(storedChallenge_0, challenge_0),
                             'Challenge does not match ownership proof');
     __compactRuntime.assert(_descriptor_2.fromValue(__compactRuntime.queryLedgerState(context,
                                                                                       partialProofData,
@@ -3086,7 +3126,7 @@ export class Contract {
                                                                                                                      alignment: _descriptor_0.alignment() } }] } },
                                                                                           { popeq: { cached: false,
                                                                                                      result: undefined } }]).value);
-    __compactRuntime.assert(this._equal_8(storedCommitment_0, ownerCommitment_0),
+    __compactRuntime.assert(this._equal_9(storedCommitment_0, ownerCommitment_0),
                             'Token not owned by this commitment');
     this._recordBurn_0(context, partialProofData, tokenId_0);
     this._burn_0(context, partialProofData, tokenId_0);
@@ -3109,15 +3149,11 @@ export class Contract {
     return [];
   }
   _equal_0(x0, y0) {
-    if (x0 !== y0) { return false; }
+    if (!x0.every((x, i) => y0[i] === x)) { return false; }
     return true;
   }
   _equal_1(x0, y0) {
-    {
-      let x1 = x0.bytes;
-      let y1 = y0.bytes;
-      if (!x1.every((x, i) => y1[i] === x)) { return false; }
-    }
+    if (x0 !== y0) { return false; }
     return true;
   }
   _equal_2(x0, y0) {
@@ -3129,7 +3165,11 @@ export class Contract {
     return true;
   }
   _equal_3(x0, y0) {
-    if (x0 !== y0) { return false; }
+    {
+      let x1 = x0.bytes;
+      let y1 = y0.bytes;
+      if (!x1.every((x, i) => y1[i] === x)) { return false; }
+    }
     return true;
   }
   _equal_4(x0, y0) {
@@ -3137,7 +3177,7 @@ export class Contract {
     return true;
   }
   _equal_5(x0, y0) {
-    if (!x0.every((x, i) => y0[i] === x)) { return false; }
+    if (x0 !== y0) { return false; }
     return true;
   }
   _equal_6(x0, y0) {
@@ -3149,6 +3189,10 @@ export class Contract {
     return true;
   }
   _equal_8(x0, y0) {
+    if (!x0.every((x, i) => y0[i] === x)) { return false; }
+    return true;
+  }
+  _equal_9(x0, y0) {
     if (!x0.every((x, i) => y0[i] === x)) { return false; }
     return true;
   }
