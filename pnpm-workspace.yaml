@@ -1,3 +1,4 @@
 packages:
   - "private-buyer-cli"
   - "private-buyer-contract"
+  - "private-buyer-ui"

@@ -8,7 +8,7 @@
     "build": "turbo run build",
     "build-production": "git lfs pull && cd counter-contract && pnpm build && cd ../frontend-vite-react && pnpm build",
     "setup-standalone": "cd counter-cli && pnpm setup-undeployed",
-    "dev:frontend": "cd frontend-vite-react && pnpm dev",
+    "dev:frontend": "cd private-buyer-ui && pnpm dev",
     "lint": "turbo run lint"
   },
   "engines": {
