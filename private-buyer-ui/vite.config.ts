@@ -30,6 +30,13 @@ export default defineConfig(({ mode }) => ({
     fs: {
       allow: ['..'],
     },
+    proxy: {
+      '/prove-proxy': {
+        target: 'https://proof-server.preprod.midnight.network',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/prove-proxy/, ''),
+      },
+    },
   },
   optimizeDeps: {
     include: ['buffer'],

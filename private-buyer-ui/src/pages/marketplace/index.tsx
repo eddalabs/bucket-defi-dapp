@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useWallet } from '@/modules/midnight';
+import { fromHex } from '@midnight-ntwrk/compact-runtime';
 import { useProviders } from '@/modules/midnight/nft-sdk/hooks/use-providers';
 import { useDeployment } from '@/modules/midnight/nft-sdk/hooks/use-deployment';
 import { useLocalStorage } from '@/modules/midnight/nft-sdk/hooks/use-localStorage';
@@ -154,7 +155,23 @@ function DeploySection({ providers }: { providers: MiniPrivateBuyerProviders }) 
   );
 }
 
-function MintSection({ controller }: { controller: { mint: Function } }) {
+const SOURCE_LABELS = ['Solar', 'Wind', 'Hydro', 'Biomass', 'Geothermal', 'Nuclear'];
+const IMPACT_LABELS = ['Minimal', 'Low', 'Medium', 'High', 'Extreme'];
+const LOCATION_LABELS = ['RJ', 'SP', 'MG', 'RS'];
+
+interface MintedToken {
+  tokenId: string;
+  price: string;
+  source: number;
+  impact: number;
+  location: number;
+}
+
+function MintSection({ controller, coinPublicKey, onMinted }: {
+  controller: { mint: Function };
+  coinPublicKey: string;
+  onMinted: (token: MintedToken) => void;
+}) {
   const [tokenId, setTokenId] = useState('');
   const [price, setPrice] = useState('100');
   const [source, setSource] = useState(0);
@@ -162,15 +179,17 @@ function MintSection({ controller }: { controller: { mint: Function } }) {
   const [location, setLocation] = useState(0);
   const [generation, setGeneration] = useState('1000000');
   const [vintage, setVintage] = useState('2024');
+  const [lastMintedId, setLastMintedId] = useState<string | null>(null);
   const txProgress = useTransactionProgress();
 
   const handleMint = async () => {
     if (!tokenId) return;
+    const mintingId = tokenId;
 
     await txProgress.execute(async () => {
       const to = {
         is_left: true,
-        left: { bytes: new Uint8Array(32) },
+        left: { bytes: fromHex(coinPublicKey) },
         right: { bytes: new Uint8Array(32) },
       };
 
@@ -184,6 +203,8 @@ function MintSection({ controller }: { controller: { mint: Function } }) {
       };
 
       await controller.mint(to, BigInt(tokenId), certificate, BigInt(price));
+      setLastMintedId(mintingId);
+      onMinted({ tokenId: mintingId, price, source, impact, location });
     });
   };
 
@@ -284,6 +305,37 @@ function MintSection({ controller }: { controller: { mint: Function } }) {
           {txProgress.isProcessing ? 'Minting...' : 'Mint NFT'}
         </Button>
         <TransactionStatus {...txProgress} />
+        {lastMintedId && txProgress.stage === 'idle' && (
+          <p className="text-sm text-success font-medium">
+            Token #{lastMintedId} minted successfully
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function MintedTokensList({ tokens }: { tokens: MintedToken[] }) {
+  if (tokens.length === 0) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Minted Tokens</CardTitle>
+        <CardDescription>Tokens minted in this session</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {tokens.map((t) => (
+            <div key={t.tokenId} className="flex items-center justify-between border border-border rounded-lg px-4 py-2 text-sm">
+              <span className="font-mono font-semibold">#{t.tokenId}</span>
+              <span className="text-muted-foreground">{SOURCE_LABELS[t.source]}</span>
+              <span className="text-muted-foreground">{IMPACT_LABELS[t.impact]}</span>
+              <span className="text-muted-foreground">{LOCATION_LABELS[t.location]}</span>
+              <span className="font-medium">Price: {t.price}</span>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
@@ -448,10 +500,11 @@ function ContractStats({ name, symbol, certificatesCreatedCounter, purchaseCount
 }
 
 export function Marketplace() {
-  const { unshieldedAddress } = useWallet();
+  const { unshieldedAddress, shieldedAddresses } = useWallet();
   const providersState = useProviders();
   const { manager } = useDeployment();
   const [deployState, setDeployState] = useState<DeploymentState | null>(null);
+  const [mintedTokens, setMintedTokens] = useState<MintedToken[]>([]);
 
   useEffect(() => {
     const sub = manager.state$.subscribe(setDeployState);
@@ -497,8 +550,14 @@ export function Marketplace() {
         <>
           <ContractStats {...contractState} />
 
+          <MintedTokensList tokens={mintedTokens} />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <MintSection controller={controller} />
+            <MintSection
+              controller={controller}
+              coinPublicKey={shieldedAddresses?.shieldedCoinPublicKey ?? ''}
+              onMinted={(token) => setMintedTokens((prev) => [...prev, token])}
+            />
             <ListSection controller={controller} />
             <SetPriceSection controller={controller} />
             <BuySection controller={controller} />

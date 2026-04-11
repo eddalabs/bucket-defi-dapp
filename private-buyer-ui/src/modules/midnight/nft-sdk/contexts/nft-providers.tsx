@@ -10,7 +10,7 @@ import { useWallet } from '@/modules/midnight';
 import type { MiniPrivateBuyerCircuits, MiniPrivateBuyerProviders } from '../api/common-types';
 import { WrappedPublicDataProvider } from '../../wallet-widget/utils/providersWrappers/publicDataProvider';
 import { CachedFetchZkConfigProvider } from '../../wallet-widget/utils/providersWrappers/zkConfigProvider';
-import { noopProofClient, proofClient } from '../../wallet-widget/utils/providersWrappers/proofClient';
+import { proofClient, noopProofClient } from '../../wallet-widget/utils/providersWrappers/proofClient';
 import { createInMemoryPrivateStateProvider } from '../../wallet-widget/utils/customImplementations/in-memory-private-state-provider';
 import { type PrivateState } from '@eddalabs/mini-private-buyer-contract';
 import { fromHex, toHex } from '@midnight-ntwrk/compact-runtime';
