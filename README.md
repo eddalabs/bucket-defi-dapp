@@ -1,97 +1,174 @@
-# 🚀 EDDA - Midnight Starter Template
-- A starter template for building on Midnight Network with React frontend and smart contract integration.
-- **[Live Demo → counter.nebula.builders](https://counter.nebula.builders)**
+# Bucket DeFi DApp — Private Buyer NFT Marketplace
 
-## 📦 Prerequisites
+A privacy-preserving NFT marketplace built on **Midnight Network** with zero-knowledge proof ownership. Sellers publicly list tokenized certificates as NFTs, and buyers privately acquire them using Midnight's shielded transaction technology.
 
-- [Node.js](https://nodejs.org/) (v23+) & [npm](https://www.npmjs.com/) (v11+)
-- [Docker](https://docs.docker.com/get-docker/)
-- [Git LFS](https://git-lfs.com/) (for large files)
+The contract uses generic enums (`Category`, `Tier`, `Region`) so the same deployment can serve multiple use cases (e.g., renewable energy certificates, recycling credits) — each UI maps the generic values to domain-specific labels.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v22+)
+- [pnpm](https://pnpm.io/) (v10+)
+- [Docker](https://docs.docker.com/get-docker/) (for proof server)
 - [Compact](https://docs.midnight.network/relnotes/compact-tools) (Midnight developer tools)
-- [Lace](https://chromewebstore.google.com/detail/hgeekaiplokcnmakghbdfbgnlfheichg?utm_source=item-share-cb) (Browser wallet extension)
-- [Faucet](https://faucet.preview.midnight.network/) (Preview Network Faucet)
+- [Lace Wallet](https://chromewebstore.google.com/detail/hgeekaiplokcnmakghbdfbgnlfheichg) (browser extension)
 
-## Known Issues
+## Project Structure
 
-- There’s a not-yet-fixed bug in the arm64 Docker image of the proof server.
-- Workaround: Use Bricktower proof server. **bricktowers/proof-server:6.1.0-alpha.6**
-
-## 🛠️ Setup
-
-### 1️⃣ Install Git LFS
-
-```bash
-# Install and initialize Git LFS
-sudo dnf install git-lfs  # For Fedora/RHEL
-git lfs install
+```
+bucket-defi-dapp/
+├── private-buyer-contract/   # Compact smart contract (NFT + Pool modules)
+├── private-buyer-cli/        # CLI for contract interaction
+├── private-buyer-ui/         # React frontend (Vite + TailwindCSS)
+├── turbo.json                # Build pipeline
+└── pnpm-workspace.yaml       # Monorepo workspace
 ```
 
-### 2️⃣ Install Compact Tools
+## Setup
+
+### 1. Install Compact Tools
 
 ```bash
-# Install the latest Compact tools
 curl --proto '=https' --tlsv1.2 -LsSf \
   https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh
+
+compact update +0.30.0
 ```
+
+### 2. Install Dependencies
+
 ```bash
-# Install the latest compiler
-# Compact compiler version 0.27 should be downloaded manually. Compact tools does not support it currently. 
-compact update +0.27.0
+pnpm install
 ```
 
-### 3️⃣ Install Node.js and docker
-- [Node.js](https://nodejs.org/) & [npm](https://www.npmjs.com/)
-- [Docker](https://docs.docker.com/get-docker/)
+### 3. Compile Contract
 
-### 4️⃣ Verify Installation
 ```bash
-# Check versions
-node -v  
-npm -v   
-docker -v
-git lfs version
-compact check  # Should show latest version
+# Full compilation with ZK proof keys (required for deployment)
+pnpm compact
+
+# Fast compilation without ZK keys (for development iteration)
+cd private-buyer-contract && pnpm compact-fast
 ```
 
-## 📁 Project Structure.
+### 4. Build All Packages
 
-```
-├── counter-cli/         # CLI tools
-├── counter-contract/    # Smart contracts
-└── frontend-vite-react/ # React application
+```bash
+pnpm build
 ```
 
-## 🔗 Setup Instructions
+> **Note:** `pnpm build` runs `compact` (full compilation) automatically. This generates ZK proof keys and takes longer on first run.
 
-### Install Project Dependencies and compile contracts
-  ```bash
-   # In one terminal (from project root)
-   npm install
-   npm run build
-   ```
+## Running the UI
 
-### Setup Env variables
+### 1. Configure Environment
 
-1. **Create .env file from template under counter-cli folder**
-   - [`counter-cli/.env_template`](./counter-cli/.env_template)
+```bash
+cp private-buyer-ui/.env_template private-buyer-ui/.env
+```
 
-2. **Create .env file from template under frontend-vite-react folder**
-   - [`frontend-vite-react/.env_template`](./frontend-vite-react/.env_template)
+Set `VITE_CONTRACT_ADDRESS` in `.env` to your deployed contract address. Leave empty to deploy a new contract from the UI.
 
-### Start Development In Preview Network or
-   ```bash   
-   # In one terminal (from project root)
-   npm run dev:frontend
-   ```
+### 2. Start Proof Server
 
-### Start Development In Undeployed Network
-   ```bash   
-   # In one terminal (from project root)
-   npm run setup-standalone
-   
-   # In another terminal (from project root)
-   npm run dev:frontend
-   ```
+The proof server is required for ZK proof generation. Run it via Docker:
+
+```bash
+cd private-buyer-cli && pnpm ps-all
+```
+
+### 3. Start Development Server
+
+```bash
+pnpm dev:frontend
+```
+
+Open [http://localhost:5174](http://localhost:5174) in a browser with the Lace wallet extension installed.
+
+### 4. Connect Wallet
+
+1. Click **Connect Wallet** in the header
+2. Select your network (Preprod recommended)
+3. Choose Lace from the wallet dialog
+
+### 5. Deploy a Contract (if no contract address in .env)
+
+1. Click **Deploy New Contract** on the marketplace page
+2. Wait for the transaction to confirm
+3. Copy the deployed contract address
+4. Set it as `VITE_CONTRACT_ADDRESS` in `.env` and restart the dev server
+
+## Features
+
+| Action | Description |
+|--------|-------------|
+| **Mint & List** | Create an NFT certificate and list it for sale in one atomic transaction |
+| **Set Price** | Update the price of an existing NFT |
+| **Buy NFT** | Purchase a listed NFT with ZK commitment-based ownership |
+| **Certificates Table** | Real-time view of the first 10 certificates from the indexer |
+
+## Contract Architecture
+
+The contract uses 15 circuits:
+
+| Circuit | Function |
+|---------|----------|
+| Constructor | Initialize NFT + Pool modules |
+| `mint` | Mint NFT with certificate metadata + price |
+| `mintAndList` | Mint and list atomically |
+| `burn` | Burn unsold tokens |
+| `addToPool` | List NFT for sale |
+| `removeFromPool` | Delist NFT |
+| `purchaseNFT` | Buy with ZK commitment |
+| `withdrawSellerFunds` | Seller withdraws earnings |
+| `proofOwnership` | Buyer proves ownership via ZK |
+| `burnPurchased` | Burn a purchased token |
+| `balanceOf` | Query token balance |
+| `ownerOf` | Query token owner |
+| `tokenCertificate` | Query certificate metadata |
+| `tokenPrice` | Query token price |
+| `setTokenPrice` | Update token price |
+
+### Certificate Struct (Generic)
+
+```
+Certificate {
+  id: string          // External reference ID
+  category: Category  // Type1..Type6
+  quantity: Uint<64>  // Numeric value (kWh, tonnes, etc.)
+  period: Uint<64>    // Time period (year, month, etc.)
+  tier: Tier          // Level1..Level5
+  region: Region      // Region1..Region4
+}
+```
+
+Each UI maps these generic values to domain-specific labels.
+
+## Testing
+
+### Contract Tests (Simulator)
+
+```bash
+cd private-buyer-contract && pnpm test
+```
+
+### CLI Tests (Against Undeployed Network)
+
+```bash
+cd private-buyer-cli && pnpm test-undeployed
+```
+
+## Scripts Reference
+
+| Command | Description |
+|---------|-------------|
+| `pnpm install` | Install all dependencies |
+| `pnpm build` | Build all packages (runs compact + TypeScript + Vite) |
+| `pnpm compact` | Compile contract with full ZK keys |
+| `pnpm dev:frontend` | Start UI dev server |
+| `cd private-buyer-contract && pnpm compact-fast` | Compile contract without ZK keys (fast) |
+| `cd private-buyer-contract && pnpm test` | Run contract simulator tests |
+| `cd private-buyer-cli && pnpm ps-all` | Start proof server via Docker |
+
 ---
 
-<div align="center"><p>Built with ❤️ by <a href="https://eddalabs.io">Edda Labs</a></p></div>
+Built by [Edda Labs](https://eddalabs.io)
