@@ -1,15 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useWallet } from '@/modules/midnight';
 import { fromHex } from '@midnight-ntwrk/compact-runtime';
-import { useProviders } from '@/modules/midnight/nft-sdk/hooks/use-providers';
-import { useDeployment } from '@/modules/midnight/nft-sdk/hooks/use-deployment';
-import { useLocalStorage } from '@/modules/midnight/nft-sdk/hooks/use-localStorage';
 import { useContractSubscription } from '@/modules/midnight/nft-sdk/hooks/use-contract-subscription';
 import { useTransactionProgress } from '@/modules/midnight/nft-sdk/hooks/use-transaction-progress';
-import type { DeploymentState } from '@/modules/midnight/nft-sdk/contexts/nft-deployment-class';
-import type { MiniPrivateBuyerProviders } from '@/modules/midnight/nft-sdk/api/common-types';
+import { useProviders } from '@/modules/midnight/nft-sdk/hooks/use-providers';
+import type { ContractControllerInterface } from '@/modules/midnight/nft-sdk/api/contractController';
 
 function TransactionStatus({ stage, message, errorMessage, progress }: {
   stage: string;
@@ -45,116 +42,6 @@ function TransactionStatus({ stage, message, errorMessage, progress }: {
   );
 }
 
-function DeploySection({ providers }: { providers: MiniPrivateBuyerProviders }) {
-  const { manager } = useDeployment();
-  const { storage } = useLocalStorage();
-  const [deployName, setDeployName] = useState('EddaCerts');
-  const [deploySymbol, setDeploySymbol] = useState('ECRT');
-  const [joinAddress, setJoinAddress] = useState('');
-  const [deployState, setDeployState] = useState<DeploymentState | null>(null);
-  const txProgress = useTransactionProgress();
-
-  useEffect(() => {
-    const savedAddress = storage.getContractAddress();
-    if (savedAddress) setJoinAddress(savedAddress);
-  }, [storage]);
-
-  useEffect(() => {
-    const sub = manager.state$.subscribe(setDeployState);
-    return () => sub.unsubscribe();
-  }, [manager]);
-
-  const handleDeploy = async () => {
-    await txProgress.execute(async () => {
-      await manager.deploy(providers, deployName, deploySymbol);
-      const state = manager.state$.value;
-      if (state.contractAddress) {
-        storage.setContractAddress(state.contractAddress);
-      }
-    });
-  };
-
-  const handleJoin = async () => {
-    if (!joinAddress) return;
-    await txProgress.execute(async () => {
-      await manager.join(providers, joinAddress);
-      storage.setContractAddress(joinAddress);
-    });
-  };
-
-  if (deployState?.status === 'ready') {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Contract Connected</CardTitle>
-          <CardDescription className="font-mono text-xs break-all">
-            {deployState.contractAddress}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Contract Setup</CardTitle>
-        <CardDescription>Deploy a new contract or join an existing one</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-3 border-r border-border pr-4">
-            <h4 className="font-medium text-sm">Deploy New</h4>
-            <input
-              type="text"
-              placeholder="Name"
-              value={deployName}
-              onChange={(e) => setDeployName(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            />
-            <input
-              type="text"
-              placeholder="Symbol"
-              value={deploySymbol}
-              onChange={(e) => setDeploySymbol(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            />
-            <Button
-              onClick={handleDeploy}
-              disabled={txProgress.isProcessing || deployState?.status === 'deploying'}
-              className="w-full"
-            >
-              {deployState?.status === 'deploying' ? 'Deploying...' : 'Deploy Contract'}
-            </Button>
-          </div>
-          <div className="space-y-3 pl-4">
-            <h4 className="font-medium text-sm">Join Existing</h4>
-            <input
-              type="text"
-              placeholder="Contract address"
-              value={joinAddress}
-              onChange={(e) => setJoinAddress(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm bg-background font-mono"
-            />
-            <Button
-              variant="outline"
-              onClick={handleJoin}
-              disabled={!joinAddress || txProgress.isProcessing || deployState?.status === 'joining'}
-              className="w-full"
-            >
-              {deployState?.status === 'joining' ? 'Joining...' : 'Join Contract'}
-            </Button>
-          </div>
-        </div>
-        {deployState?.error && (
-          <p className="text-sm text-destructive">{deployState.error}</p>
-        )}
-        <TransactionStatus {...txProgress} />
-      </CardContent>
-    </Card>
-  );
-}
-
 const SOURCE_LABELS = ['Solar', 'Wind', 'Hydro', 'Biomass', 'Geothermal', 'Nuclear'];
 const IMPACT_LABELS = ['Minimal', 'Low', 'Medium', 'High', 'Extreme'];
 const LOCATION_LABELS = ['RJ', 'SP', 'MG', 'RS'];
@@ -168,7 +55,7 @@ interface MintedToken {
 }
 
 function MintSection({ controller, coinPublicKey, onMinted }: {
-  controller: { mint: Function };
+  controller: ContractControllerInterface;
   coinPublicKey: string;
   onMinted: (token: MintedToken) => void;
 }) {
@@ -181,6 +68,13 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
   const [vintage, setVintage] = useState('2024');
   const [lastMintedId, setLastMintedId] = useState<string | null>(null);
   const txProgress = useTransactionProgress();
+  const providersState = useProviders();
+
+  // Sync flow messages from providers
+  const flowMessage = providersState?.flowMessage;
+  useEffect(() => {
+    txProgress.updateFromFlowMessage(flowMessage);
+  }, [flowMessage]);
 
   const handleMint = async () => {
     if (!tokenId) return;
@@ -240,65 +134,33 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="text-xs text-muted-foreground">Source</label>
-            <select
-              value={source}
-              onChange={(e) => setSource(Number(e.target.value))}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            >
-              <option value={0}>Solar</option>
-              <option value={1}>Wind</option>
-              <option value={2}>Hydro</option>
-              <option value={3}>Biomass</option>
-              <option value={4}>Geothermal</option>
-              <option value={5}>Nuclear</option>
+            <select value={source} onChange={(e) => setSource(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
+              <option value={0}>Solar</option><option value={1}>Wind</option><option value={2}>Hydro</option>
+              <option value={3}>Biomass</option><option value={4}>Geothermal</option><option value={5}>Nuclear</option>
             </select>
           </div>
           <div>
             <label className="text-xs text-muted-foreground">Impact</label>
-            <select
-              value={impact}
-              onChange={(e) => setImpact(Number(e.target.value))}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            >
-              <option value={0}>Minimal</option>
-              <option value={1}>Low</option>
-              <option value={2}>Medium</option>
-              <option value={3}>High</option>
-              <option value={4}>Extreme</option>
+            <select value={impact} onChange={(e) => setImpact(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
+              <option value={0}>Minimal</option><option value={1}>Low</option><option value={2}>Medium</option>
+              <option value={3}>High</option><option value={4}>Extreme</option>
             </select>
           </div>
           <div>
             <label className="text-xs text-muted-foreground">Location</label>
-            <select
-              value={location}
-              onChange={(e) => setLocation(Number(e.target.value))}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            >
-              <option value={0}>RJ</option>
-              <option value={1}>SP</option>
-              <option value={2}>MG</option>
-              <option value={3}>RS</option>
+            <select value={location} onChange={(e) => setLocation(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
+              <option value={0}>RJ</option><option value={1}>SP</option><option value={2}>MG</option><option value={3}>RS</option>
             </select>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-muted-foreground">Generation (kWh)</label>
-            <input
-              type="number"
-              value={generation}
-              onChange={(e) => setGeneration(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            />
+            <input type="number" value={generation} onChange={(e) => setGeneration(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
           </div>
           <div>
             <label className="text-xs text-muted-foreground">Vintage (Year)</label>
-            <input
-              type="number"
-              value={vintage}
-              onChange={(e) => setVintage(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            />
+            <input type="number" value={vintage} onChange={(e) => setVintage(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
           </div>
         </div>
         <Button onClick={handleMint} disabled={!tokenId || txProgress.isProcessing} className="w-full">
@@ -306,9 +168,7 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
         </Button>
         <TransactionStatus {...txProgress} />
         {lastMintedId && txProgress.stage === 'idle' && (
-          <p className="text-sm text-success font-medium">
-            Token #{lastMintedId} minted successfully
-          </p>
+          <p className="text-sm text-success font-medium">Token #{lastMintedId} minted successfully</p>
         )}
       </CardContent>
     </Card>
@@ -317,7 +177,6 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
 
 function MintedTokensList({ tokens }: { tokens: MintedToken[] }) {
   if (tokens.length === 0) return null;
-
   return (
     <Card>
       <CardHeader>
@@ -341,7 +200,7 @@ function MintedTokensList({ tokens }: { tokens: MintedToken[] }) {
   );
 }
 
-function ListSection({ controller }: { controller: { addToPool: Function } }) {
+function ListSection({ controller }: { controller: ContractControllerInterface }) {
   const [tokenId, setTokenId] = useState('');
   const txProgress = useTransactionProgress();
 
@@ -361,13 +220,7 @@ function ListSection({ controller }: { controller: { addToPool: Function } }) {
       <CardContent className="space-y-3">
         <div>
           <label className="text-xs text-muted-foreground">Token ID</label>
-          <input
-            type="number"
-            placeholder="Token ID to list"
-            value={tokenId}
-            onChange={(e) => setTokenId(e.target.value)}
-            className="w-full border rounded px-3 py-2 text-sm bg-background"
-          />
+          <input type="number" placeholder="Token ID to list" value={tokenId} onChange={(e) => setTokenId(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
         </div>
         <Button onClick={handleList} disabled={!tokenId || txProgress.isProcessing} className="w-full">
           {txProgress.isProcessing ? 'Listing...' : 'List for Sale'}
@@ -378,7 +231,7 @@ function ListSection({ controller }: { controller: { addToPool: Function } }) {
   );
 }
 
-function SetPriceSection({ controller }: { controller: { setTokenPrice: Function } }) {
+function SetPriceSection({ controller }: { controller: ContractControllerInterface }) {
   const [tokenId, setTokenId] = useState('');
   const [price, setPrice] = useState('');
   const txProgress = useTransactionProgress();
@@ -400,23 +253,11 @@ function SetPriceSection({ controller }: { controller: { setTokenPrice: Function
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-muted-foreground">Token ID</label>
-            <input
-              type="number"
-              placeholder="Token ID"
-              value={tokenId}
-              onChange={(e) => setTokenId(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            />
+            <input type="number" placeholder="Token ID" value={tokenId} onChange={(e) => setTokenId(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
           </div>
           <div>
             <label className="text-xs text-muted-foreground">New Price</label>
-            <input
-              type="number"
-              placeholder="Price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm bg-background"
-            />
+            <input type="number" placeholder="Price" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
           </div>
         </div>
         <Button onClick={handleSetPrice} disabled={!tokenId || !price || txProgress.isProcessing} className="w-full">
@@ -428,19 +269,14 @@ function SetPriceSection({ controller }: { controller: { setTokenPrice: Function
   );
 }
 
-function BuySection({ controller }: { controller: { purchaseNFT: Function } }) {
+function BuySection({ controller }: { controller: ContractControllerInterface }) {
   const [tokenId, setTokenId] = useState('');
   const txProgress = useTransactionProgress();
 
   const handleBuy = async () => {
     if (!tokenId) return;
     await txProgress.execute(async () => {
-      // Dummy coin since shielded tokens are not available yet
-      const dummyCoin = {
-        nonce: new Uint8Array(32),
-        color: new Uint8Array(32),
-        value: 0n,
-      };
+      const dummyCoin = { nonce: new Uint8Array(32), color: new Uint8Array(32), value: 0n };
       await controller.purchaseNFT(BigInt(tokenId), dummyCoin);
     });
   };
@@ -454,13 +290,7 @@ function BuySection({ controller }: { controller: { purchaseNFT: Function } }) {
       <CardContent className="space-y-3">
         <div>
           <label className="text-xs text-muted-foreground">Token ID</label>
-          <input
-            type="number"
-            placeholder="Token ID to buy"
-            value={tokenId}
-            onChange={(e) => setTokenId(e.target.value)}
-            className="w-full border rounded px-3 py-2 text-sm bg-background"
-          />
+          <input type="number" placeholder="Token ID to buy" value={tokenId} onChange={(e) => setTokenId(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
         </div>
         <Button onClick={handleBuy} disabled={!tokenId || txProgress.isProcessing} className="w-full">
           {txProgress.isProcessing ? 'Purchasing...' : 'Buy NFT'}
@@ -472,10 +302,7 @@ function BuySection({ controller }: { controller: { purchaseNFT: Function } }) {
 }
 
 function ContractStats({ name, symbol, certificatesCreatedCounter, purchaseCounter }: {
-  name: string;
-  symbol: string;
-  certificatesCreatedCounter: bigint;
-  purchaseCounter: bigint;
+  name: string; symbol: string; certificatesCreatedCounter: bigint; purchaseCounter: bigint;
 }) {
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -501,41 +328,31 @@ function ContractStats({ name, symbol, certificatesCreatedCounter, purchaseCount
 
 export function Marketplace() {
   const { unshieldedAddress, shieldedAddresses } = useWallet();
-  const providersState = useProviders();
-  const { manager } = useDeployment();
-  const [deployState, setDeployState] = useState<DeploymentState | null>(null);
+  const { deployedContractAPI, derivedState, contractDeployment, onDeploy, providers } = useContractSubscription();
   const [mintedTokens, setMintedTokens] = useState<MintedToken[]>([]);
-
-  useEffect(() => {
-    const sub = manager.state$.subscribe(setDeployState);
-    return () => sub.unsubscribe();
-  }, [manager]);
-
-  const controller = deployState?.controller ?? null;
-  const contractState = useContractSubscription(controller);
+  const txProgress = useTransactionProgress();
 
   if (!unshieldedAddress) {
     return (
       <div className="text-center py-20 space-y-4">
         <h2 className="text-2xl font-bold">Connect Your Wallet</h2>
-        <p className="text-muted-foreground">
-          Please connect your Midnight wallet to access the marketplace.
-        </p>
+        <p className="text-muted-foreground">Please connect your Midnight wallet to access the marketplace.</p>
       </div>
     );
   }
 
-  if (!providersState) {
+  if (!providers) {
     return (
       <div className="text-center py-20 space-y-4">
         <h2 className="text-2xl font-bold">Initializing Providers</h2>
-        <p className="text-muted-foreground">
-          Setting up connection to Midnight network...
-        </p>
+        <p className="text-muted-foreground">Setting up connection to Midnight network...</p>
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-primary mx-auto" />
       </div>
     );
   }
+
+  const isDeploying = contractDeployment?.status === 'in-progress';
+  const deployError = contractDeployment?.status === 'failed' ? contractDeployment.error : null;
 
   return (
     <div className="space-y-6">
@@ -544,23 +361,48 @@ export function Marketplace() {
         <p className="text-muted-foreground">Mint, list, price, and trade NFT certificates</p>
       </div>
 
-      <DeploySection providers={providersState.providers} />
+      {!deployedContractAPI && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Contract Setup</CardTitle>
+            <CardDescription>
+              {isDeploying ? 'Deploying contract...' : 'Deploy a new contract to get started'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              onClick={() => txProgress.execute(() => onDeploy().then(() => {}))}
+              disabled={isDeploying || txProgress.isProcessing}
+              className="w-full"
+            >
+              {isDeploying ? 'Deploying...' : 'Deploy Contract'}
+            </Button>
+            {deployError && <p className="text-sm text-destructive">{deployError}</p>}
+            <TransactionStatus {...txProgress} />
+          </CardContent>
+        </Card>
+      )}
 
-      {controller && (
+      {deployedContractAPI && derivedState && (
         <>
-          <ContractStats {...contractState} />
+          <ContractStats
+            name={derivedState.name}
+            symbol={derivedState.symbol}
+            certificatesCreatedCounter={derivedState.certificatesCreatedCounter}
+            purchaseCounter={derivedState.purchaseCounter}
+          />
 
           <MintedTokensList tokens={mintedTokens} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <MintSection
-              controller={controller}
+              controller={deployedContractAPI}
               coinPublicKey={shieldedAddresses?.shieldedCoinPublicKey ?? ''}
               onMinted={(token) => setMintedTokens((prev) => [...prev, token])}
             />
-            <ListSection controller={controller} />
-            <SetPriceSection controller={controller} />
-            <BuySection controller={controller} />
+            <ListSection controller={deployedContractAPI} />
+            <SetPriceSection controller={deployedContractAPI} />
+            <BuySection controller={deployedContractAPI} />
           </div>
         </>
       )}

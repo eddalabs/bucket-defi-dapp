@@ -1,58 +1,100 @@
 import { type Logger } from 'pino';
-import { BehaviorSubject } from 'rxjs';
-import { ContractController } from '../api/contractController';
+import * as Rx from 'rxjs';
+import { ContractController, type ContractControllerInterface } from '../api/contractController';
 import type { MiniPrivateBuyerProviders } from '../api/common-types';
+import type { LocalStorageProps } from './nft-localStorage-class';
+import type { ContractAddress } from '@midnight-ntwrk/compact-runtime';
 
-export type DeploymentStatus = 'idle' | 'deploying' | 'joining' | 'ready' | 'error';
+export type ContractDeployment =
+  | { status: 'in-progress' }
+  | { status: 'failed'; error: string }
+  | { status: 'deployed'; api: ContractControllerInterface };
 
-export interface DeploymentState {
-  status: DeploymentStatus;
-  controller: ContractController | null;
-  error: string | null;
-  contractAddress: string | null;
+export type ContractFollow = {
+  observable: Rx.Observable<ContractDeployment>;
+};
+
+export interface DeployedAPIProvider {
+  deployContract: () => Promise<ContractFollow>;
+  joinContract: () => ContractFollow;
 }
 
-export class DeployedTemplateManager {
-  readonly state$ = new BehaviorSubject<DeploymentState>({
-    status: 'idle',
-    controller: null,
-    error: null,
-    contractAddress: null,
-  });
+export class DeployedTemplateManager implements DeployedAPIProvider {
+  constructor(
+    private readonly providers: MiniPrivateBuyerProviders | undefined,
+    private readonly logger: Logger,
+    private readonly localStorage: LocalStorageProps | undefined,
+    private readonly contractAddress: ContractAddress | undefined,
+  ) {}
 
-  constructor(private readonly logger: Logger) {}
+  async deployContract(): Promise<ContractFollow> {
+    return {
+      observable: new Rx.Observable((subscriber) => {
+        void this.deploy(subscriber);
+      }),
+    };
+  }
 
-  async deploy(providers: MiniPrivateBuyerProviders, name: string, symbol: string): Promise<void> {
-    this.state$.next({ ...this.state$.value, status: 'deploying', error: null });
+  joinContract(): ContractFollow {
+    return {
+      observable: new Rx.Observable((subscriber) => {
+        void this.join(subscriber);
+      }),
+    };
+  }
+
+  private async deploy(subscriber: Rx.Subscriber<ContractDeployment>): Promise<void> {
+    if (!this.providers) {
+      subscriber.next({ status: 'failed', error: 'Providers not ready' });
+      return;
+    }
+
+    subscriber.next({ status: 'in-progress' });
+
     try {
-      const controller = await ContractController.deploy(providers, this.logger, name, symbol);
-      this.state$.next({
-        status: 'ready',
-        controller,
-        error: null,
-        contractAddress: controller.deployedContractAddress,
-      });
+      const controller = await ContractController.deploy(
+        this.providers,
+        this.logger,
+        'EddaCerts',
+        'ECRT',
+      );
+
+      this.localStorage?.addContract(controller.deployedContractAddress);
+      subscriber.next({ status: 'deployed', api: controller });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Deploy failed';
       this.logger.error({ e }, msg);
-      this.state$.next({ ...this.state$.value, status: 'error', error: msg });
+      subscriber.next({ status: 'failed', error: msg });
     }
   }
 
-  async join(providers: MiniPrivateBuyerProviders, contractAddress: string): Promise<void> {
-    this.state$.next({ ...this.state$.value, status: 'joining', error: null });
+  private async join(subscriber: Rx.Subscriber<ContractDeployment>): Promise<void> {
+    if (!this.providers) {
+      subscriber.next({ status: 'failed', error: 'Providers not ready' });
+      return;
+    }
+
+    const address = this.contractAddress ?? this.localStorage?.getContracts()?.[0];
+    if (!address) {
+      subscriber.next({ status: 'failed', error: 'No contract address available' });
+      return;
+    }
+
+    subscriber.next({ status: 'in-progress' });
+
     try {
-      const controller = await ContractController.join(providers, this.logger, contractAddress);
-      this.state$.next({
-        status: 'ready',
-        controller,
-        error: null,
-        contractAddress: controller.deployedContractAddress,
-      });
+      const controller = await ContractController.join(
+        this.providers,
+        this.logger,
+        address,
+      );
+
+      this.localStorage?.addContract(controller.deployedContractAddress);
+      subscriber.next({ status: 'deployed', api: controller });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Join failed';
       this.logger.error({ e }, msg);
-      this.state$.next({ ...this.state$.value, status: 'error', error: msg });
+      subscriber.next({ status: 'failed', error: msg });
     }
   }
 }

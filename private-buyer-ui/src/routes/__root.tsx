@@ -6,13 +6,14 @@ import { NFTAppProvider } from '@/modules/midnight/nft-sdk/contexts';
 import { MainLayout } from '@/layouts/layout';
 
 const logger = pino({ level: 'trace', browser: { asObject: true } });
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS || '';
 
 export const Route = createRootRoute({
   component: () => {
     return (
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <MidnightMeshProvider>
-          <NFTAppProvider logger={logger}>
+        <MidnightMeshProvider logger={logger}>
+          <NFTAppProvider logger={logger} contractAddress={contractAddress}>
             <MainLayout>
               <Outlet />
             </MainLayout>

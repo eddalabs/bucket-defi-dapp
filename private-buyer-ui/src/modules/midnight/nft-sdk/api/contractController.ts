@@ -5,7 +5,9 @@ import {
   MiniPrivateBuyerPrivateStateId,
   MiniPrivateBuyerProviders,
   DeployedMiniPrivateBuyerContract,
+  emptyState,
   type DerivedState,
+  type UserAction,
 } from './common-types';
 import { MiniPrivateBuyer, type PrivateState, witnesses, createPrivateState } from '@eddalabs/mini-private-buyer-contract';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
@@ -33,13 +35,24 @@ export interface ContractControllerInterface {
 export class ContractController implements ContractControllerInterface {
   readonly deployedContractAddress: ContractAddress;
   readonly state$: Rx.Observable<DerivedState>;
+  readonly privateStates$: Rx.Subject<PrivateState>;
+  readonly actions$: Rx.Subject<UserAction>;
 
   private constructor(
+    public readonly contractPrivateStateId: typeof MiniPrivateBuyerPrivateStateId,
     public readonly deployedContract: DeployedMiniPrivateBuyerContract,
     public readonly providers: MiniPrivateBuyerProviders,
     private readonly logger: Logger,
   ) {
     this.deployedContractAddress = deployedContract.deployTxData.public.contractAddress;
+    this.privateStates$ = new Rx.Subject<PrivateState>();
+    this.actions$ = new Rx.Subject<UserAction>();
+
+    const combine = (_acc: DerivedState, val: Partial<DerivedState>): DerivedState => ({
+      ...emptyState,
+      ..._acc,
+      ...val,
+    });
 
     const contractState$ = providers.publicDataProvider
       .contractStateObservable(this.deployedContractAddress, { type: 'latest' })
@@ -53,6 +66,7 @@ export class ContractController implements ContractControllerInterface {
             purchaseCounter: ledgerState.NFTPool__purchaseCounter,
           };
         }),
+        Rx.retry({ delay: 5000 }),
         Rx.catchError((err) => {
           logger.error({ err }, 'Error in contract state observable');
           return Rx.of({
@@ -64,15 +78,12 @@ export class ContractController implements ContractControllerInterface {
         }),
       );
 
-    const privateState$ = new Rx.BehaviorSubject<PrivateState>(
-      createPrivateState(crypto.getRandomValues(new Uint8Array(32))),
-    );
-
-    this.state$ = Rx.combineLatest([contractState$, privateState$]).pipe(
-      Rx.map(([contractState, privateState]) => ({
-        ...contractState,
-        privateState,
-      })),
+    this.state$ = Rx.merge(
+      contractState$.pipe(Rx.map((s) => ({ ...s }))),
+      this.privateStates$.pipe(Rx.map((privateState) => ({ privateState }))),
+      this.actions$.pipe(Rx.map((actions) => ({ actions }))),
+    ).pipe(
+      Rx.scan(combine, emptyState),
       Rx.shareReplay(1),
     );
   }
@@ -91,7 +102,7 @@ export class ContractController implements ContractControllerInterface {
       args: [name, symbol],
     });
     logger.info(`Deployed at: ${contract.deployTxData.public.contractAddress}`);
-    return new ContractController(contract, providers, logger);
+    return new ContractController(MiniPrivateBuyerPrivateStateId, contract, providers, logger);
   }
 
   static async join(
@@ -107,7 +118,7 @@ export class ContractController implements ContractControllerInterface {
       initialPrivateState: createPrivateState(crypto.getRandomValues(new Uint8Array(32))),
     });
     logger.info('Joined successfully');
-    return new ContractController(contract, providers, logger);
+    return new ContractController(MiniPrivateBuyerPrivateStateId, contract, providers, logger);
   }
 
   async mint(
@@ -118,20 +129,24 @@ export class ContractController implements ContractControllerInterface {
   ): Promise<void> {
     this.logger.info(`Minting token ${tokenId}...`);
     await this.deployedContract.callTx.mint(to, tokenId, tokenCertificate, price);
+    this.actions$.next({ ...emptyState.actions, mint: `Token ${tokenId} minted` });
   }
 
   async addToPool(tokenId: bigint): Promise<void> {
     this.logger.info(`Adding token ${tokenId} to pool...`);
     await this.deployedContract.callTx.addToPool(tokenId);
+    this.actions$.next({ ...emptyState.actions, addToPool: `Token ${tokenId} listed` });
   }
 
   async setTokenPrice(tokenId: bigint, price: bigint): Promise<void> {
     this.logger.info(`Setting token ${tokenId} price to ${price}...`);
     await this.deployedContract.callTx.setTokenPrice(tokenId, price);
+    this.actions$.next({ ...emptyState.actions, setTokenPrice: `Token ${tokenId} price set to ${price}` });
   }
 
   async purchaseNFT(tokenId: bigint, coin: MiniPrivateBuyer.ShieldedCoinInfo): Promise<void> {
     this.logger.info(`Purchasing NFT ${tokenId}...`);
     await this.deployedContract.callTx.purchaseNFT(tokenId, coin);
+    this.actions$.next({ ...emptyState.actions, purchaseNFT: `Token ${tokenId} purchased` });
   }
 }

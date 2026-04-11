@@ -1,17 +1,33 @@
 import type { PublicDataProvider, ContractStateObservableConfig } from '@midnight-ntwrk/midnight-js-types';
 import type { ContractAddress, TransactionId } from '@midnight-ntwrk/ledger-v8';
-import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { retryWithBackoff } from './retryWithBackoff';
+import type { Logger } from 'pino';
+
+export type ProviderAction =
+  | 'proveTxStarted'
+  | 'proveTxDone'
+  | 'balanceTxStarted'
+  | 'balanceTxDone'
+  | 'downloadProverStarted'
+  | 'downloadProverDone'
+  | 'submitTxStarted'
+  | 'submitTxDone'
+  | 'watchForTxDataStarted'
+  | 'watchForTxDataDone';
+
+export type ActionMessages = {
+  [K in ProviderAction]: string | undefined;
+};
 
 export class WrappedPublicDataProvider implements PublicDataProvider {
-  private readonly provider: PublicDataProvider;
+  constructor(
+    private readonly provider: PublicDataProvider,
+    private readonly callback?: (action: ProviderAction) => void,
+    _logger?: Logger,
+  ) {}
 
-  constructor(indexerUrl: string, indexerWsUrl: string) {
-    this.provider = indexerPublicDataProvider(indexerUrl, indexerWsUrl);
-  }
-
-  queryContractState(contractAddress: ContractAddress, config?: Parameters<PublicDataProvider['queryContractState']>[1]) {
-    return retryWithBackoff(() => this.provider.queryContractState(contractAddress, config));
+  queryContractState(...args: Parameters<PublicDataProvider['queryContractState']>) {
+    return retryWithBackoff(() => this.provider.queryContractState(...args));
   }
 
   queryZSwapAndContractState(...args: Parameters<PublicDataProvider['queryZSwapAndContractState']>) {
@@ -35,11 +51,19 @@ export class WrappedPublicDataProvider implements PublicDataProvider {
   }
 
   watchForDeployTxData(contractAddress: ContractAddress) {
-    return this.provider.watchForDeployTxData(contractAddress);
+    this.callback?.('watchForTxDataStarted');
+    return this.provider.watchForDeployTxData(contractAddress).then((result) => {
+      this.callback?.('watchForTxDataDone');
+      return result;
+    });
   }
 
   watchForTxData(txId: TransactionId) {
-    return this.provider.watchForTxData(txId);
+    this.callback?.('watchForTxDataStarted');
+    return this.provider.watchForTxData(txId).then((result) => {
+      this.callback?.('watchForTxDataDone');
+      return result;
+    });
   }
 
   contractStateObservable(address: ContractAddress, config: ContractStateObservableConfig) {

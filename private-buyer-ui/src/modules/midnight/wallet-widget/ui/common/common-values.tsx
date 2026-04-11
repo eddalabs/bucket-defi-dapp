@@ -1,13 +1,17 @@
-export const walletsListFormat: Record<string, { key: string; name: string; icon: string }> = {
+import { JSX } from 'react';
+
+export const walletsListFormat: {
+  [key: string]: { key: string; displayName: string; icon: JSX.Element };
+} = {
   lace: {
     key: 'lace',
-    name: 'Lace',
-    icon: 'L',
+    displayName: 'LACE',
+    icon: <span className="text-lg font-bold">L</span>,
   },
   '1am': {
     key: '1am',
-    name: '1AM',
-    icon: '1',
+    displayName: '1AM',
+    icon: <span className="text-lg font-bold">1</span>,
   },
 };
 

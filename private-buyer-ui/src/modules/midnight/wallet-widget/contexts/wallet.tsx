@@ -1,10 +1,12 @@
-import { createContext, useCallback, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
+import { type Logger } from 'pino';
 import {
-  ConnectedAPI,
-  InitialAPI,
   Configuration,
+  ConnectedAPI,
   ConnectionStatus,
+  InitialAPI,
 } from '@midnight-ntwrk/dapp-connector-api';
+import { MidnightBrowserWallet } from '../api/walletController';
 import {
   DustAddress,
   DustBalance,
@@ -13,13 +15,17 @@ import {
   UnshieldedAddress,
   UnshieldedBalanceDappConnector,
 } from '../api/common-types';
-import { MidnightBrowserWallet } from '../api/walletController';
+
+interface MidnightMeshProviderProps {
+  children: React.ReactNode;
+  logger?: Logger;
+}
 
 export interface WalletContextState {
   connectingWallet: boolean;
   open: boolean;
-  setOpen: (open: boolean) => void;
-  error: string | undefined;
+  setOpen: (value: boolean) => void;
+  error?: unknown;
   initialAPI: InitialAPI | undefined;
   connectedAPI: ConnectedAPI | undefined;
   serviceUriConfig: Configuration | undefined;
@@ -30,13 +36,13 @@ export interface WalletContextState {
   shieldedBalances: ShieldedBalance | undefined;
   unshieldedAddress: UnshieldedAddress | undefined;
   unshieldedBalances: UnshieldedBalanceDappConnector | undefined;
-  proofServerOnline: boolean;
-  connectWallet: (walletKey: string, networkId: string) => Promise<void>;
-  disconnect: () => Promise<void>;
-  refresh: () => Promise<void>;
+  proofServerOnline: boolean | undefined;
+  connectWallet: ((rdns: string, networkID: string) => Promise<void>) | undefined;
+  disconnect: () => void;
+  refresh: () => void;
 }
 
-const initialContext: WalletContextState = {
+export const WalletContext = createContext<WalletContextState>({
   connectingWallet: false,
   open: false,
   setOpen: () => {},
@@ -51,71 +57,150 @@ const initialContext: WalletContextState = {
   shieldedBalances: undefined,
   unshieldedAddress: undefined,
   unshieldedBalances: undefined,
-  proofServerOnline: false,
-  connectWallet: async () => {},
-  disconnect: async () => {},
-  refresh: async () => {},
-};
+  proofServerOnline: undefined,
+  connectWallet: undefined,
+  disconnect: () => {},
+  refresh: () => {},
+});
 
-export const WalletContext = createContext<WalletContextState>(initialContext);
-
-export function MidnightMeshProvider({ children }: { children: React.ReactNode }) {
-  const [wallet, setWallet] = useState<MidnightBrowserWallet>(MidnightBrowserWallet.create());
-  const [connectingWallet, setConnectingWallet] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [open, setOpen] = useState(false);
-
-  const connectWallet = useCallback(async (walletKey: string, networkId: string) => {
-    setConnectingWallet(true);
-    setError(undefined);
-    try {
-      const connected = await MidnightBrowserWallet.create().connect(walletKey, networkId);
-      setWallet(connected);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to connect wallet');
-    } finally {
-      setConnectingWallet(false);
-    }
-  }, []);
-
-  const disconnect = useCallback(async () => {
-    const disconnected = await wallet.disconnect();
-    setWallet(disconnected);
-  }, [wallet]);
-
-  const refresh = useCallback(async () => {
-    try {
-      const refreshed = await wallet.refresh();
-      setWallet(refreshed);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to refresh wallet');
-    }
-  }, [wallet]);
-
+export const MidnightMeshProvider = ({ children, logger }: MidnightMeshProviderProps) => {
+  const store = useWalletStore(logger);
   return (
-    <WalletContext.Provider
-      value={{
-        connectingWallet,
-        open,
-        setOpen,
-        error,
-        initialAPI: wallet.initialAPI,
-        connectedAPI: wallet.connectedAPI,
-        serviceUriConfig: wallet.serviceUriConfig,
-        status: wallet.status,
-        dustAddress: wallet.dustAddress,
-        dustBalance: wallet.dustBalance,
-        shieldedAddresses: wallet.shieldedAddresses,
-        shieldedBalances: wallet.shieldedBalances,
-        unshieldedAddress: wallet.unshieldedAddress,
-        unshieldedBalances: wallet.unshieldedBalances,
-        proofServerOnline: wallet.proofServerOnline,
-        connectWallet,
-        disconnect,
-        refresh,
-      }}
-    >
-      {children}
+    <WalletContext.Provider value={store}>
+      <>{children}</>
     </WalletContext.Provider>
   );
-}
+};
+
+export const useWalletStore = (logger?: Logger): WalletContextState => {
+  const [connectingWallet, setConnectingWallet] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<unknown>(undefined);
+  const [initialAPI, setInitialAPI] = useState<InitialAPI | undefined>(undefined);
+  const [connectedAPI, setConnectedAPI] = useState<ConnectedAPI | undefined>(undefined);
+  const [serviceUriConfig, setServiceUriConfig] = useState<Configuration | undefined>(undefined);
+  const [status, setStatus] = useState<ConnectionStatus | undefined>(undefined);
+  const [dustAddress, setDustAddress] = useState<DustAddress | undefined>(undefined);
+  const [dustBalance, setDustBalance] = useState<DustBalance | undefined>(undefined);
+  const [shieldedAddresses, setShieldedAddresses] = useState<ShieldedAddress | undefined>(undefined);
+  const [shieldedBalances, setShieldedBalances] = useState<ShieldedBalance | undefined>(undefined);
+  const [unshieldedAddress, setUnshieldedAddress] = useState<UnshieldedAddress | undefined>(undefined);
+  const [unshieldedBalances, setUnshieldedBalances] = useState<UnshieldedBalanceDappConnector | undefined>(undefined);
+  const [proofServerOnline, setProofServerOnline] = useState<boolean | undefined>(false);
+  const [midnightBrowserWalletInstance, setMidnightBrowserWalletInstance] =
+    useState<MidnightBrowserWallet | undefined>(undefined);
+
+  const connectWallet = useCallback(
+    async (rdns: string, networkID: string) => {
+      setConnectingWallet(true);
+
+      try {
+        const wallet = await MidnightBrowserWallet.connectToWallet(rdns, networkID, logger);
+        setInitialAPI(wallet.initialAPI);
+        setConnectedAPI(wallet.connectedAPI);
+        setError(undefined);
+        setServiceUriConfig(wallet.serviceUriConfig);
+        setStatus(wallet.status);
+        setDustAddress(wallet.dustAddress);
+        setDustBalance(wallet.dustBalance);
+        setShieldedAddresses(wallet.shieldedAddresses);
+        setShieldedBalances(wallet.shieldedBalances);
+        setUnshieldedAddress(wallet.unshieldedAddress);
+        setUnshieldedBalances(wallet.unshieldedBalances);
+        setProofServerOnline(wallet.proofServerOnline);
+        setMidnightBrowserWalletInstance(wallet);
+      } catch (error) {
+        setError(error);
+      }
+      setConnectingWallet(false);
+    },
+    [logger],
+  );
+
+  const disconnect = useCallback(() => {
+    MidnightBrowserWallet.deleteMidnightWalletConnected(logger);
+    midnightBrowserWalletInstance?.disconnect();
+    setInitialAPI(undefined);
+    setConnectedAPI(undefined);
+    setError(undefined);
+    setServiceUriConfig(undefined);
+    setStatus(undefined);
+    setDustAddress(undefined);
+    setDustBalance(undefined);
+    setShieldedAddresses(undefined);
+    setShieldedBalances(undefined);
+    setUnshieldedAddress(undefined);
+    setUnshieldedBalances(undefined);
+    setProofServerOnline(undefined);
+    setMidnightBrowserWalletInstance(undefined);
+  }, [midnightBrowserWalletInstance, logger]);
+
+  const refresh = useCallback(() => {
+    if (midnightBrowserWalletInstance === undefined) return;
+    midnightBrowserWalletInstance.refresh();
+    setServiceUriConfig(midnightBrowserWalletInstance.serviceUriConfig);
+    setStatus(midnightBrowserWalletInstance.status);
+    setDustAddress(midnightBrowserWalletInstance.dustAddress);
+    setDustBalance(midnightBrowserWalletInstance.dustBalance);
+    setShieldedAddresses(midnightBrowserWalletInstance.shieldedAddresses);
+    setShieldedBalances(midnightBrowserWalletInstance.shieldedBalances);
+    setUnshieldedAddress(midnightBrowserWalletInstance.unshieldedAddress);
+    setUnshieldedBalances(midnightBrowserWalletInstance.unshieldedBalances);
+    setProofServerOnline(midnightBrowserWalletInstance.proofServerOnline);
+  }, [midnightBrowserWalletInstance]);
+
+  // Auto-connect on mount if wallet was previously connected
+  useEffect(() => {
+    const { rdns, networkID } = MidnightBrowserWallet.getMidnightWalletConnected();
+
+    if (rdns && networkID) {
+      const autoConnect = async () => {
+        setConnectingWallet(true);
+
+        try {
+          const wallet = await MidnightBrowserWallet.connectToWallet(rdns, networkID, logger);
+          setInitialAPI(wallet.initialAPI);
+          setConnectedAPI(wallet.connectedAPI);
+          setError(undefined);
+          setServiceUriConfig(wallet.serviceUriConfig);
+          setStatus(wallet.status);
+          setDustAddress(wallet.dustAddress);
+          setDustBalance(wallet.dustBalance);
+          setShieldedAddresses(wallet.shieldedAddresses);
+          setShieldedBalances(wallet.shieldedBalances);
+          setUnshieldedAddress(wallet.unshieldedAddress);
+          setUnshieldedBalances(wallet.unshieldedBalances);
+          setProofServerOnline(wallet.proofServerOnline);
+          setMidnightBrowserWalletInstance(wallet);
+        } catch (error) {
+          setError(error);
+        }
+        setConnectingWallet(false);
+      };
+
+      void autoConnect();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return {
+    connectingWallet,
+    open,
+    setOpen,
+    error,
+    initialAPI,
+    connectedAPI,
+    serviceUriConfig,
+    status,
+    dustAddress,
+    dustBalance,
+    shieldedAddresses,
+    shieldedBalances,
+    unshieldedAddress,
+    unshieldedBalances,
+    proofServerOnline,
+    connectWallet,
+    disconnect,
+    refresh,
+  };
+};

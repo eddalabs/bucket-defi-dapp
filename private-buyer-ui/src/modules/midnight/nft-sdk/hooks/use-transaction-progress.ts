@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type TxStage =
   | 'idle'
@@ -12,9 +12,9 @@ export type TxStage =
 
 const stageMessages: Record<TxStage, string> = {
   idle: '',
-  proving: 'Generating ZK proof...',
-  signing: 'Signing transaction...',
-  submitting: 'Submitting to network...',
+  proving: 'Proving transaction...',
+  signing: 'Signing the transaction with wallet...',
+  submitting: 'Submitting transaction...',
   finalizing: 'Waiting for finalization...',
   indexing: 'Indexing transaction...',
   confirmed: 'Transaction confirmed!',
@@ -32,9 +32,41 @@ const stageProgress: Record<TxStage, number> = {
   error: 0,
 };
 
+function parseStageFromFlowMessage(message: string | undefined): TxStage | null {
+  if (!message) return null;
+  if (message.includes('Proving')) return 'proving';
+  if (message.includes('Signing') || message.includes('wallet')) return 'signing';
+  if (message.includes('Submitting')) return 'submitting';
+  if (message.includes('finalization') || message.includes('Waiting')) return 'finalizing';
+  if (message.includes('Downloading')) return 'proving';
+  return null;
+}
+
 export function useTransactionProgress() {
   const [stage, setStage] = useState<TxStage>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Browser warning when transaction is active
+  useEffect(() => {
+    const isActive = !['idle', 'confirmed', 'error'].includes(stage);
+    if (isActive) {
+      const handler = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+      };
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  }, [stage]);
+
+  const updateFromFlowMessage = useCallback(
+    (flowMessage: string | undefined) => {
+      const parsed = parseStageFromFlowMessage(flowMessage);
+      if (parsed && stage !== 'idle' && stage !== 'confirmed' && stage !== 'error') {
+        setStage(parsed);
+      }
+    },
+    [stage],
+  );
 
   const reset = useCallback(() => {
     setStage('idle');
@@ -45,7 +77,6 @@ export function useTransactionProgress() {
     setStage('proving');
     setErrorMessage(null);
     try {
-      setStage('submitting');
       const result = await fn();
       setStage('confirmed');
       setTimeout(() => setStage('idle'), 3000);
@@ -65,6 +96,7 @@ export function useTransactionProgress() {
     errorMessage,
     execute,
     reset,
+    updateFromFlowMessage,
     isIdle: stage === 'idle',
     isProcessing: !['idle', 'confirmed', 'error'].includes(stage),
   };

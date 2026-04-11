@@ -19,12 +19,20 @@ export type DeployedMiniPrivateBuyerContract =
   | DeployedContract<MiniPrivateBuyerContract>
   | FoundContract<MiniPrivateBuyerContract>;
 
+export type UserAction = {
+  mint: string | undefined;
+  addToPool: string | undefined;
+  setTokenPrice: string | undefined;
+  purchaseNFT: string | undefined;
+};
+
 export type DerivedState = {
   readonly name: string;
   readonly symbol: string;
   readonly certificatesCreatedCounter: bigint;
   readonly purchaseCounter: bigint;
   readonly privateState: PrivateState;
+  readonly actions: UserAction;
 };
 
 export const emptyState: DerivedState = {
@@ -33,4 +41,5 @@ export const emptyState: DerivedState = {
   certificatesCreatedCounter: 0n,
   purchaseCounter: 0n,
   privateState: createPrivateState(new Uint8Array(32)),
+  actions: { mint: undefined, addToPool: undefined, setTokenPrice: undefined, purchaseNFT: undefined },
 };

@@ -1,22 +1,20 @@
 import { createContext, useMemo } from 'react';
-import { ContractLocalStorage } from './nft-localStorage-class';
+import { type Logger } from 'pino';
+import { LocalStorage, type LocalStorageProps } from './nft-localStorage-class';
 
-export interface LocalStorageContextState {
-  storage: ContractLocalStorage;
-}
+export const LocalStorageContext = createContext<LocalStorageProps | undefined>(undefined);
 
-export const LocalStorageContext = createContext<LocalStorageContextState | null>(null);
-
-interface LocalStorageProviderProps {
+export interface LocalStorageProviderProps {
   children: React.ReactNode;
+  logger: Logger;
 }
 
-export function LocalStorageProvider({ children }: LocalStorageProviderProps) {
-  const storage = useMemo(() => new ContractLocalStorage(), []);
+export const LocalStorageProvider = ({ children, logger }: LocalStorageProviderProps) => {
+  const localStorageInstance = useMemo(() => new LocalStorage(logger), [logger]);
 
   return (
-    <LocalStorageContext.Provider value={{ storage }}>
+    <LocalStorageContext.Provider value={localStorageInstance}>
       {children}
     </LocalStorageContext.Provider>
   );
-}
+};

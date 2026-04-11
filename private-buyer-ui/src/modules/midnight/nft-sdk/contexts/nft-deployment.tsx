@@ -1,24 +1,36 @@
 import { createContext, useMemo } from 'react';
 import { type Logger } from 'pino';
-import { DeployedTemplateManager } from './nft-deployment-class';
+import { type ContractAddress } from '@midnight-ntwrk/compact-runtime';
+import { DeployedTemplateManager, type DeployedAPIProvider } from './nft-deployment-class';
+import { useProviders } from '../hooks/use-providers';
+import { useLocalStorage } from '../hooks/use-localStorage';
 
-export interface DeployedAPIProvider {
-  manager: DeployedTemplateManager;
-}
+export const DeployedProviderContext = createContext<DeployedAPIProvider | undefined>(undefined);
 
-export const DeployedProviderContext = createContext<DeployedAPIProvider | null>(null);
-
-interface DeployedProviderProps {
+export interface DeployedProviderProps {
   children: React.ReactNode;
   logger: Logger;
+  contractAddress: ContractAddress;
 }
 
-export function DeployedProvider({ children, logger }: DeployedProviderProps) {
-  const manager = useMemo(() => new DeployedTemplateManager(logger), [logger]);
+export const DeployedProvider = ({ children, logger, contractAddress }: DeployedProviderProps) => {
+  const providersState = useProviders();
+  const localStorage = useLocalStorage();
+
+  const manager = useMemo(
+    () =>
+      new DeployedTemplateManager(
+        providersState?.providers,
+        logger,
+        localStorage,
+        contractAddress,
+      ),
+    [providersState, logger, localStorage, contractAddress],
+  );
 
   return (
-    <DeployedProviderContext.Provider value={{ manager }}>
+    <DeployedProviderContext.Provider value={manager}>
       {children}
     </DeployedProviderContext.Provider>
   );
-}
+};

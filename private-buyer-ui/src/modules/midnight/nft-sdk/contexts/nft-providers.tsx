@@ -2,47 +2,86 @@ import * as ledger from '@midnight-ntwrk/ledger-v8';
 import {
   type MidnightProvider,
   type WalletProvider,
+  type PrivateStateProvider,
+  type ZKConfigProvider,
+  type ProofProvider,
   type PublicDataProvider,
 } from '@midnight-ntwrk/midnight-js-types';
-import { createContext, useMemo } from 'react';
+import { createContext, useCallback, useMemo, useState } from 'react';
+import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { type Logger } from 'pino';
-import { useWallet } from '@/modules/midnight';
-import type { MiniPrivateBuyerCircuits, MiniPrivateBuyerProviders } from '../api/common-types';
-import { WrappedPublicDataProvider } from '../../wallet-widget/utils/providersWrappers/publicDataProvider';
+import type {
+  MiniPrivateBuyerCircuits,
+  MiniPrivateBuyerPrivateStateId,
+} from '../api/common-types';
+import { type MiniPrivateBuyerProviders } from '../api/common-types';
+import { useWallet } from '../../wallet-widget/hooks/useWallet';
+import {
+  type ActionMessages,
+  type ProviderAction,
+  WrappedPublicDataProvider,
+} from '../../wallet-widget/utils/providersWrappers/publicDataProvider';
 import { CachedFetchZkConfigProvider } from '../../wallet-widget/utils/providersWrappers/zkConfigProvider';
-import { proofClient, noopProofClient } from '../../wallet-widget/utils/providersWrappers/proofClient';
+import { noopProofClient, proofClient } from '../../wallet-widget/utils/providersWrappers/proofClient';
 import { createInMemoryPrivateStateProvider } from '../../wallet-widget/utils/customImplementations/in-memory-private-state-provider';
 import { type PrivateState } from '@eddalabs/mini-private-buyer-contract';
 import { fromHex, toHex } from '@midnight-ntwrk/compact-runtime';
 
 export interface ProvidersState {
-  providers: MiniPrivateBuyerProviders;
+  privateStateProvider: PrivateStateProvider<typeof MiniPrivateBuyerPrivateStateId>;
+  zkConfigProvider?: ZKConfigProvider<MiniPrivateBuyerCircuits>;
+  proofProvider: ProofProvider;
+  publicDataProvider?: PublicDataProvider;
+  walletProvider?: WalletProvider;
+  midnightProvider?: MidnightProvider;
+  providers?: MiniPrivateBuyerProviders;
+  flowMessage?: string;
 }
-
-export const ProvidersContext = createContext<ProvidersState | null>(null);
 
 interface ProviderProps {
   children: React.ReactNode;
   logger: Logger;
 }
 
-export function Provider({ children, logger }: ProviderProps) {
-  const { connectedAPI, serviceUriConfig, shieldedAddresses, status } = useWallet();
+export const ProvidersContext = createContext<ProvidersState | undefined>(undefined);
 
-  const privateStateProvider = useMemo(
+const ACTION_MESSAGES: Readonly<ActionMessages> = {
+  proveTxStarted: 'Proving transaction...',
+  proveTxDone: undefined,
+  balanceTxStarted: 'Signing the transaction with Midnight Lace wallet...',
+  balanceTxDone: undefined,
+  downloadProverStarted: 'Downloading prover key...',
+  downloadProverDone: undefined,
+  submitTxStarted: 'Submitting transaction...',
+  submitTxDone: undefined,
+  watchForTxDataStarted: 'Waiting for transaction finalization on blockchain...',
+  watchForTxDataDone: undefined,
+} as const;
+
+export const Provider = ({ children, logger }: ProviderProps) => {
+  const [flowMessage, setFlowMessage] = useState<string | undefined>(undefined);
+
+  const { serviceUriConfig, shieldedAddresses, connectedAPI, status } = useWallet();
+
+  const providerCallback = useCallback((action: ProviderAction): void => {
+    setFlowMessage(ACTION_MESSAGES[action]);
+  }, []);
+
+  const privateStateProvider: PrivateStateProvider<typeof MiniPrivateBuyerPrivateStateId> = useMemo(
     () => createInMemoryPrivateStateProvider<string, PrivateState>(),
-    [status],
+    [logger, status],
   );
 
   const publicDataProvider: PublicDataProvider | undefined = useMemo(
     () =>
       serviceUriConfig
         ? new WrappedPublicDataProvider(
-            serviceUriConfig.indexerUri,
-            serviceUriConfig.indexerWsUri,
+            indexerPublicDataProvider(serviceUriConfig.indexerUri, serviceUriConfig.indexerWsUri),
+            providerCallback,
+            logger,
           )
         : undefined,
-    [serviceUriConfig, status],
+    [serviceUriConfig, providerCallback, logger, status],
   );
 
   const zkConfigProvider = useMemo(() => {
@@ -57,9 +96,9 @@ export function Provider({ children, logger }: ProviderProps) {
   const proofProvider = useMemo(
     () =>
       serviceUriConfig?.proverServerUri && zkConfigProvider
-        ? proofClient(serviceUriConfig.proverServerUri, zkConfigProvider, () => {})
+        ? proofClient(serviceUriConfig.proverServerUri, zkConfigProvider, providerCallback)
         : noopProofClient(),
-    [serviceUriConfig, zkConfigProvider, status],
+    [serviceUriConfig, zkConfigProvider, providerCallback, status],
   );
 
   const walletProvider: WalletProvider = useMemo(
@@ -74,8 +113,10 @@ export function Provider({ children, logger }: ProviderProps) {
             },
             async balanceTx(
               tx: ledger.Transaction<ledger.SignatureEnabled, ledger.Proof, ledger.PreBinding>,
+              ttl?: Date,
             ): Promise<ledger.FinalizedTransaction> {
               try {
+                logger.info({ tx, ttl }, 'Balancing transaction via wallet');
                 const serializedTx = toHex(tx.serialize());
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const received = await (connectedAPI as any).balanceUnsealedTransaction(serializedTx, {});
@@ -97,9 +138,9 @@ export function Provider({ children, logger }: ProviderProps) {
             getEncryptionPublicKey(): ledger.EncPublicKey {
               return '';
             },
-            balanceTx: () => Promise.reject(new Error('Wallet not connected')),
+            balanceTx: () => Promise.reject(new Error('readonly')),
           },
-    [connectedAPI, shieldedAddresses, status],
+    [connectedAPI, providerCallback, status],
   );
 
   const midnightProvider: MidnightProvider = useMemo(
@@ -109,33 +150,51 @@ export function Provider({ children, logger }: ProviderProps) {
             submitTx: async (tx: ledger.FinalizedTransaction): Promise<ledger.TransactionId> => {
               await connectedAPI.submitTransaction(toHex(tx.serialize()));
               const txIdentifiers = tx.identifiers();
+              const txId = txIdentifiers[0];
               logger.info({ txIdentifiers }, 'Submitted transaction via wallet');
-              return txIdentifiers[0];
+              return txId;
             },
           }
         : {
-            submitTx: (): Promise<ledger.TransactionId> => Promise.reject(new Error('Wallet not connected')),
+            submitTx: (): Promise<ledger.TransactionId> => Promise.reject(new Error('readonly')),
           },
-    [connectedAPI, status, logger],
+    [connectedAPI, providerCallback, status],
   );
 
-  const combinedProviders: ProvidersState | null = useMemo(() => {
-    if (!publicDataProvider || !zkConfigProvider) return null;
+  const combinedProviders: ProvidersState = useMemo(() => {
     return {
-      providers: {
-        privateStateProvider,
-        publicDataProvider,
-        zkConfigProvider,
-        proofProvider,
-        walletProvider,
-        midnightProvider,
-      },
+      privateStateProvider,
+      publicDataProvider,
+      proofProvider,
+      zkConfigProvider,
+      walletProvider,
+      midnightProvider,
+      providers:
+        publicDataProvider && zkConfigProvider
+          ? {
+              privateStateProvider,
+              publicDataProvider,
+              zkConfigProvider,
+              proofProvider,
+              walletProvider,
+              midnightProvider,
+            }
+          : undefined,
+      flowMessage,
     };
-  }, [privateStateProvider, publicDataProvider, proofProvider, zkConfigProvider, walletProvider, midnightProvider]);
+  }, [
+    privateStateProvider,
+    publicDataProvider,
+    proofProvider,
+    zkConfigProvider,
+    walletProvider,
+    midnightProvider,
+    flowMessage,
+  ]);
 
   return (
     <ProvidersContext.Provider value={combinedProviders}>
       {children}
     </ProvidersContext.Provider>
   );
-}
+};

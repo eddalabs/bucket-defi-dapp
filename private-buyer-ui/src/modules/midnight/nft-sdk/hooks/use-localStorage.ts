@@ -1,10 +1,7 @@
 import { useContext } from 'react';
-import { LocalStorageContext, type LocalStorageContextState } from '../contexts';
+import { LocalStorageContext } from '../contexts';
+import type { LocalStorageProps } from '../contexts/nft-localStorage-class';
 
-export const useLocalStorage = (): LocalStorageContextState => {
-  const context = useContext(LocalStorageContext);
-  if (!context) {
-    throw new Error('useLocalStorage must be used within a LocalStorageProvider');
-  }
-  return context;
+export const useLocalStorage = (): LocalStorageProps | undefined => {
+  return useContext(LocalStorageContext);
 };

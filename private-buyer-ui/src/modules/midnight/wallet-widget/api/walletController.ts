@@ -4,13 +4,18 @@ import {
   Configuration,
   ConnectionStatus,
 } from '@midnight-ntwrk/dapp-connector-api';
+import { pipe as fnPipe } from 'fp-ts/lib/function.js';
+import { type Logger } from 'pino';
 import {
   catchError,
   concatMap,
   filter,
   firstValueFrom,
   interval,
+  map,
   take,
+  tap,
+  throwError,
   timeout,
 } from 'rxjs';
 
@@ -31,17 +36,6 @@ declare global {
   }
 }
 
-export interface DiscoveredWallet {
-  /** The actual key under window.midnight (typically a UUID) */
-  key: string;
-  /** Human-readable name from the wallet's InitialAPI */
-  name: string;
-  /** Icon URL from the wallet's InitialAPI */
-  icon: string;
-  /** Reverse-DNS identifier (e.g. "io.iohk.lace") */
-  rdns: string;
-}
-
 export class MidnightBrowserWallet {
   private constructor(
     public initialAPI: InitialAPI | undefined,
@@ -54,119 +48,182 @@ export class MidnightBrowserWallet {
     public shieldedBalances: ShieldedBalance | undefined,
     public unshieldedAddress: UnshieldedAddress | undefined,
     public unshieldedBalances: UnshieldedBalanceDappConnector | undefined,
-    public proofServerOnline: boolean,
+    public proofServerOnline: boolean = false,
+    public logger?: Logger,
   ) {}
 
-  /**
-   * Discover all wallets injected under window.midnight.
-   * Returns their actual keys (UUIDs) along with metadata (name, icon, rdns).
-   */
-  static async discoverWallets(): Promise<DiscoveredWallet[]> {
-    const keys = await MidnightBrowserWallet.getAvailableWalletKeys();
-    if (!window.midnight) return [];
+  static getAvailableWallets(): InitialAPI[] {
+    if (window === undefined) return [];
+    if (window.midnight === undefined) return [];
 
-    return keys.map((key) => {
-      const api = window.midnight![key];
-      return {
-        key,
-        name: api.name ?? key,
-        icon: api.icon ?? '',
-        rdns: api.rdns ?? '',
-      };
-    });
-  }
-
-  static async getAvailableWalletKeys(): Promise<string[]> {
-    const source$ = interval(100).pipe(
-      concatMap(() => {
-        const detectedWallets = window.midnight ? Object.keys(window.midnight) : [];
-        return [detectedWallets];
-      }),
-      filter((w) => w.length > 0),
-      take(1),
-      timeout({ first: 3_000 }),
-      catchError(() => [[] as string[]]),
-    );
-    return await firstValueFrom(source$);
-  }
-
-  static create(): MidnightBrowserWallet {
-    return new MidnightBrowserWallet(
-      undefined, undefined, undefined, undefined,
-      undefined, undefined, undefined, undefined,
-      undefined, undefined, false,
-    );
-  }
-
-  async connect(walletKey: string, networkId: string): Promise<MidnightBrowserWallet> {
-    setNetworkId(networkId);
-
-    const wallet = window.midnight?.[walletKey];
-    if (!wallet) {
-      throw new Error(`Wallet "${walletKey}" not found in window.midnight`);
+    const wallets: InitialAPI[] = [];
+    for (const key in window.midnight) {
+      try {
+        const _wallet = window.midnight[key];
+        if (_wallet === undefined) continue;
+        if (_wallet.name === undefined) continue;
+        if (_wallet.apiVersion === undefined) continue;
+        wallets.push({
+          name: _wallet.name,
+          apiVersion: _wallet.apiVersion,
+          connect: _wallet.connect,
+          icon: _wallet.icon,
+          rdns: _wallet.rdns,
+        });
+      } catch (e) {
+        console.log(e);
+      }
     }
+    return wallets;
+  }
 
-    const initialAPI = wallet;
-    const connectedAPI = await initialAPI.connect(networkId);
-    const serviceUriConfig = await connectedAPI.getConfiguration();
-    const status = await connectedAPI.getConnectionStatus();
-
-    const dustAddress = await connectedAPI.getDustAddress();
-    const dustBalance = await connectedAPI.getDustBalance();
-    const shieldedAddresses = await connectedAPI.getShieldedAddresses();
-    const shieldedBalances = await connectedAPI.getShieldedBalances();
-    const unshieldedAddress = await connectedAPI.getUnshieldedAddress();
-    const unshieldedBalances = await connectedAPI.getUnshieldedBalances();
-
-    let proofServerOnline = false;
-    try {
-      proofServerOnline = await checkProofServerStatus(serviceUriConfig.proverServerUri ?? '');
-    } catch {
-      proofServerOnline = false;
+  private static findWalletByNameOrRdns(identifier: string): InitialAPI | undefined {
+    if (!window.midnight) return undefined;
+    // First try direct key lookup (legacy support)
+    if (window.midnight[identifier]) return window.midnight[identifier];
+    // Scan by name or rdns (API v4+)
+    for (const key in window.midnight) {
+      const wallet = window.midnight[key];
+      if (wallet?.name === identifier || wallet?.rdns === identifier) {
+        return wallet;
+      }
     }
+    return undefined;
+  }
 
-    return new MidnightBrowserWallet(
-      initialAPI, connectedAPI, serviceUriConfig, status,
-      dustAddress as DustAddress,
-      dustBalance as DustBalance,
-      shieldedAddresses as ShieldedAddress,
-      shieldedBalances as ShieldedBalance,
-      unshieldedAddress as UnshieldedAddress,
-      unshieldedBalances as UnshieldedBalanceDappConnector,
-      proofServerOnline,
+  static getMidnightWalletConnected(): { rdns: string | null; networkID: string | null } {
+    const rdns = window.localStorage.getItem('rdns-connected');
+    const networkID = window.localStorage.getItem('network-id');
+    return { rdns, networkID };
+  }
+
+  static setMidnightWalletConnected(rdns: string, networkID: string, logger?: Logger): void {
+    if (logger) {
+      logger.trace(`Setting wallet auto connect to ${rdns}`);
+    }
+    window.localStorage.setItem('rdns-connected', rdns);
+    window.localStorage.setItem('network-id', networkID);
+  }
+
+  static deleteMidnightWalletConnected(logger?: Logger): void {
+    if (logger) {
+      logger.trace('Deleting wallet auto connect');
+    }
+    window.localStorage.removeItem('rdns-connected');
+    window.localStorage.removeItem('network-id');
+  }
+
+  static async connectToWallet(
+    rdns: string,
+    networkID: string,
+    logger?: Logger,
+  ): Promise<MidnightBrowserWallet> {
+    return firstValueFrom(
+      fnPipe(
+        interval(100),
+        map(() => MidnightBrowserWallet.findWalletByNameOrRdns(rdns)),
+        tap((initialAPI) => {
+          logger?.info(initialAPI, 'Check for wallet initial API');
+        }),
+        filter((initialAPI): initialAPI is InitialAPI => !!initialAPI),
+        tap((initialAPI) => {
+          logger?.info(initialAPI, 'Compatible wallet initial API found. Connecting.');
+        }),
+        take(1),
+        timeout({
+          first: 1_000,
+          with: () =>
+            throwError(() => {
+              logger?.error('Could not find wallet initial API');
+              return new Error('Could not find wallet initial API');
+            }),
+        }),
+        concatMap(async (initialAPI) => {
+          return {
+            connectedAPI: await initialAPI.connect(networkID),
+            initialAPI,
+          };
+        }),
+        catchError((error, apis) =>
+          error
+            ? throwError(() => {
+                logger?.error('Unable to enable connector API');
+                return new Error('Application is not authorized');
+              })
+            : apis,
+        ),
+        concatMap(async ({ connectedAPI, initialAPI }) => {
+          if (!connectedAPI) {
+            throw new Error('Connected API is undefined');
+          }
+          const serviceUriConfig = await connectedAPI.getConfiguration();
+          const status = await connectedAPI.getConnectionStatus();
+          const dustAddress = await connectedAPI.getDustAddress();
+          const dustBalance = await connectedAPI.getDustBalance();
+          const shieldedAddresses = await connectedAPI.getShieldedAddresses();
+          const shieldedBalances = await connectedAPI.getShieldedBalances();
+          const unshieldedAddress = await connectedAPI.getUnshieldedAddress();
+          const unshieldedBalances = await connectedAPI.getUnshieldedBalances();
+          const proofServerOnline = await checkProofServerStatus(
+            serviceUriConfig.proverServerUri ?? '',
+          );
+
+          logger?.info('Connected to wallet');
+
+          const wallet = new MidnightBrowserWallet(
+            initialAPI,
+            connectedAPI,
+            serviceUriConfig,
+            status,
+            dustAddress,
+            dustBalance,
+            shieldedAddresses,
+            shieldedBalances,
+            unshieldedAddress,
+            unshieldedBalances,
+            proofServerOnline,
+            logger,
+          );
+
+          const connectedNetworkID = status.status === 'connected' ? status.networkId : null;
+          if (connectedNetworkID === null) {
+            throw new Error('Network ID is null');
+          }
+          MidnightBrowserWallet.setMidnightWalletConnected(rdns, connectedNetworkID, logger);
+          setNetworkId(connectedNetworkID);
+
+          return wallet;
+        }),
+      ),
     );
   }
 
-  async disconnect(): Promise<MidnightBrowserWallet> {
-    return MidnightBrowserWallet.create();
+  disconnect(logger?: Logger): void {
+    MidnightBrowserWallet.deleteMidnightWalletConnected(logger);
+    this.initialAPI = undefined;
+    this.connectedAPI = undefined;
+    this.serviceUriConfig = undefined;
+    this.status = undefined;
+    this.dustAddress = undefined;
+    this.dustBalance = undefined;
+    this.shieldedAddresses = undefined;
+    this.shieldedBalances = undefined;
+    this.unshieldedAddress = undefined;
+    this.unshieldedBalances = undefined;
   }
 
-  async refresh(): Promise<MidnightBrowserWallet> {
-    if (!this.connectedAPI) return this;
-
-    const dustAddress = await this.connectedAPI.getDustAddress();
-    const dustBalance = await this.connectedAPI.getDustBalance();
-    const shieldedAddresses = await this.connectedAPI.getShieldedAddresses();
-    const shieldedBalances = await this.connectedAPI.getShieldedBalances();
-    const unshieldedAddress = await this.connectedAPI.getUnshieldedAddress();
-    const unshieldedBalances = await this.connectedAPI.getUnshieldedBalances();
-
-    let proofServerOnline = false;
-    try {
-      proofServerOnline = await checkProofServerStatus(this.serviceUriConfig?.proverServerUri ?? '');
-    } catch {
-      proofServerOnline = false;
-    }
-
-    return new MidnightBrowserWallet(
-      this.initialAPI, this.connectedAPI, this.serviceUriConfig, this.status,
-      dustAddress as DustAddress,
-      dustBalance as DustBalance,
-      shieldedAddresses as ShieldedAddress,
-      shieldedBalances as ShieldedBalance,
-      unshieldedAddress as UnshieldedAddress,
-      unshieldedBalances as UnshieldedBalanceDappConnector,
-      proofServerOnline,
+  async refresh(): Promise<void> {
+    if (this.connectedAPI === undefined) return;
+    this.serviceUriConfig = await this.connectedAPI.getConfiguration();
+    this.status = await this.connectedAPI.getConnectionStatus();
+    this.dustAddress = await this.connectedAPI.getDustAddress();
+    this.dustBalance = await this.connectedAPI.getDustBalance();
+    this.shieldedAddresses = await this.connectedAPI.getShieldedAddresses();
+    this.shieldedBalances = await this.connectedAPI.getShieldedBalances();
+    this.unshieldedAddress = await this.connectedAPI.getUnshieldedAddress();
+    this.unshieldedBalances = await this.connectedAPI.getUnshieldedBalances();
+    this.proofServerOnline = await checkProofServerStatus(
+      this.serviceUriConfig?.proverServerUri ?? '',
     );
   }
 }
