@@ -18,10 +18,10 @@ import {
   Either,
   ShieldedCoinInfo,
   type NonFungibleToken_Certificate,
-  NonFungibleToken_Source,
-  NonFungibleToken_Impact,
-  NonFungibleToken_Location
-} from "../../managed/private-buyer/contract/index.js";
+  NonFungibleToken_Category,
+  NonFungibleToken_Tier,
+  NonFungibleToken_Region
+} from "../../managed/mini-private-buyer/contract/index.js";
 import {
   type PrivateState,
   createPrivateState,
@@ -29,13 +29,13 @@ import {
 } from "../../witnesses.js";
 import { createLogger } from "../../logger.js";
 import { LogicTestingConfig } from "../../config.js";
-import { admin } from "../private-buyer.test.js";
+import { deployer } from "../mini-private-buyer.test.js";
 
 export {
   type NonFungibleToken_Certificate,
-  NonFungibleToken_Source,
-  NonFungibleToken_Impact,
-  NonFungibleToken_Location,
+  NonFungibleToken_Category,
+  NonFungibleToken_Tier,
+  NonFungibleToken_Region,
   type ShieldedCoinInfo
 };
 
@@ -59,7 +59,7 @@ export class Simulator {
     } = this.contract.initialState(
       createConstructorContext(
         { secretNonce: privateState.secretNonce },
-        admin
+        deployer
       ),
       name,
       symbol
@@ -73,7 +73,7 @@ export class Simulator {
       ),
       costModel: CostModel.initialCostModel()
     };
-    this.userPrivateStates = { ["admin"]: currentPrivateState };
+    this.userPrivateStates = { ["deployer"]: currentPrivateState };
     this.updateUserPrivateState = (newPrivateState: PrivateState) => {};
   }
 
@@ -130,121 +130,6 @@ export class Simulator {
     this.circuitContext = circuitResults.context;
     this.updateUserPrivateState(circuitResults.context.currentPrivateState);
     return this.getLedger();
-  }
-
-  // ///////////////////////////////////////////////////////////////////////////
-  // ACCESS CONTROL
-  // ///////////////////////////////////////////////////////////////////////////
-
-  public assertOnlyRole(roleId: Uint8Array, caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.assertOnlyRole(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      roleId
-    );
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public grantRole(
-    roleId: Uint8Array,
-    account: Either<ZswapCoinPublicKey_, ContractAddress_>,
-    caller?: CoinPublicKey
-  ): Ledger {
-    const circuitResults = this.contract.impureCircuits.grantRole(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      roleId,
-      account
-    );
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public pauseAccessControl(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.pauseAccessControl({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public unpauseAccessControl(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.unpauseAccessControl({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  // ///////////////////////////////////////////////////////////////////////////
-  // IDENTITY
-  // ///////////////////////////////////////////////////////////////////////////
-
-  public assertOwnVerification(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.assertOwnVerification({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public setUser(user: ZswapCoinPublicKey_, caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.setUser(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      user
-    );
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public removeUser(user: ZswapCoinPublicKey_, caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.removeUser(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      user
-    );
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public pauseIdentity(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.pauseIdentity({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public unpauseIdentity(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.unpauseIdentity({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
-    return this.updateStateAndGetLedger(circuitResults);
   }
 
   // ///////////////////////////////////////////////////////////////////////////
@@ -414,127 +299,6 @@ export class Simulator {
     return circuitResults.result;
   }
 
-  public purchaseBatch5(
-    tokenId1: bigint,
-    tokenId2: bigint,
-    tokenId3: bigint,
-    tokenId4: bigint,
-    tokenId5: bigint,
-    coin: ShieldedCoinInfo,
-    caller?: CoinPublicKey
-  ): Uint8Array {
-    const circuitResults = this.contract.impureCircuits.purchaseBatch5(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      tokenId1,
-      tokenId2,
-      tokenId3,
-      tokenId4,
-      tokenId5,
-      coin
-    );
-    this.updateStateAndGetLedger(circuitResults);
-    return circuitResults.result;
-  }
-
-  public purchaseBatch10(
-    tokenId1: bigint,
-    tokenId2: bigint,
-    tokenId3: bigint,
-    tokenId4: bigint,
-    tokenId5: bigint,
-    tokenId6: bigint,
-    tokenId7: bigint,
-    tokenId8: bigint,
-    tokenId9: bigint,
-    tokenId10: bigint,
-    coin: ShieldedCoinInfo,
-    caller?: CoinPublicKey
-  ): Uint8Array {
-    const circuitResults = this.contract.impureCircuits.purchaseBatch10(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      tokenId1,
-      tokenId2,
-      tokenId3,
-      tokenId4,
-      tokenId5,
-      tokenId6,
-      tokenId7,
-      tokenId8,
-      tokenId9,
-      tokenId10,
-      coin
-    );
-    this.updateStateAndGetLedger(circuitResults);
-    return circuitResults.result;
-  }
-
-  public purchaseBatch20(
-    tokenId1: bigint,
-    tokenId2: bigint,
-    tokenId3: bigint,
-    tokenId4: bigint,
-    tokenId5: bigint,
-    tokenId6: bigint,
-    tokenId7: bigint,
-    tokenId8: bigint,
-    tokenId9: bigint,
-    tokenId10: bigint,
-    tokenId11: bigint,
-    tokenId12: bigint,
-    tokenId13: bigint,
-    tokenId14: bigint,
-    tokenId15: bigint,
-    tokenId16: bigint,
-    tokenId17: bigint,
-    tokenId18: bigint,
-    tokenId19: bigint,
-    tokenId20: bigint,
-    coin: ShieldedCoinInfo,
-    caller?: CoinPublicKey
-  ): Uint8Array {
-    const circuitResults = this.contract.impureCircuits.purchaseBatch20(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      tokenId1,
-      tokenId2,
-      tokenId3,
-      tokenId4,
-      tokenId5,
-      tokenId6,
-      tokenId7,
-      tokenId8,
-      tokenId9,
-      tokenId10,
-      tokenId11,
-      tokenId12,
-      tokenId13,
-      tokenId14,
-      tokenId15,
-      tokenId16,
-      tokenId17,
-      tokenId18,
-      tokenId19,
-      tokenId20,
-      coin
-    );
-    this.updateStateAndGetLedger(circuitResults);
-    return circuitResults.result;
-  }
-
   public withdrawSellerFunds(caller?: CoinPublicKey): Ledger {
     const circuitResults = this.contract.impureCircuits.withdrawSellerFunds({
       ...this.circuitContext,
@@ -563,17 +327,13 @@ export class Simulator {
     return this.updateStateAndGetLedger(circuitResults);
   }
 
-  public burnPurchasedBatch5(
+  public burnPurchased(
     ownerCommitment: Uint8Array,
-    tokenId1: bigint,
-    tokenId2: bigint,
-    tokenId3: bigint,
-    tokenId4: bigint,
-    tokenId5: bigint,
+    tokenId: bigint,
     challenge: Uint8Array,
     caller?: CoinPublicKey
   ): Ledger {
-    const circuitResults = this.contract.impureCircuits.burnPurchasedBatch5(
+    const circuitResults = this.contract.impureCircuits.burnPurchased(
       {
         ...this.circuitContext,
         currentZswapLocalState: caller
@@ -581,149 +341,9 @@ export class Simulator {
           : this.circuitContext.currentZswapLocalState
       },
       ownerCommitment,
-      tokenId1,
-      tokenId2,
-      tokenId3,
-      tokenId4,
-      tokenId5,
+      tokenId,
       challenge
     );
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public burnPurchasedBatch10(
-    ownerCommitment: Uint8Array,
-    tokenId1: bigint,
-    tokenId2: bigint,
-    tokenId3: bigint,
-    tokenId4: bigint,
-    tokenId5: bigint,
-    tokenId6: bigint,
-    tokenId7: bigint,
-    tokenId8: bigint,
-    tokenId9: bigint,
-    tokenId10: bigint,
-    challenge: Uint8Array,
-    caller?: CoinPublicKey
-  ): Ledger {
-    const circuitResults = this.contract.impureCircuits.burnPurchasedBatch10(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      ownerCommitment,
-      tokenId1,
-      tokenId2,
-      tokenId3,
-      tokenId4,
-      tokenId5,
-      tokenId6,
-      tokenId7,
-      tokenId8,
-      tokenId9,
-      tokenId10,
-      challenge
-    );
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public burnPurchasedBatch20(
-    ownerCommitment: Uint8Array,
-    tokenId1: bigint,
-    tokenId2: bigint,
-    tokenId3: bigint,
-    tokenId4: bigint,
-    tokenId5: bigint,
-    tokenId6: bigint,
-    tokenId7: bigint,
-    tokenId8: bigint,
-    tokenId9: bigint,
-    tokenId10: bigint,
-    tokenId11: bigint,
-    tokenId12: bigint,
-    tokenId13: bigint,
-    tokenId14: bigint,
-    tokenId15: bigint,
-    tokenId16: bigint,
-    tokenId17: bigint,
-    tokenId18: bigint,
-    tokenId19: bigint,
-    tokenId20: bigint,
-    challenge: Uint8Array,
-    caller?: CoinPublicKey
-  ): Ledger {
-    const circuitResults = this.contract.impureCircuits.burnPurchasedBatch20(
-      {
-        ...this.circuitContext,
-        currentZswapLocalState: caller
-          ? emptyZswapLocalState(caller)
-          : this.circuitContext.currentZswapLocalState
-      },
-      ownerCommitment,
-      tokenId1,
-      tokenId2,
-      tokenId3,
-      tokenId4,
-      tokenId5,
-      tokenId6,
-      tokenId7,
-      tokenId8,
-      tokenId9,
-      tokenId10,
-      tokenId11,
-      tokenId12,
-      tokenId13,
-      tokenId14,
-      tokenId15,
-      tokenId16,
-      tokenId17,
-      tokenId18,
-      tokenId19,
-      tokenId20,
-      challenge
-    );
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public pauseNFTPool(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.pauseNFTPool({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public unpauseNFTPool(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.unpauseNFTPool({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public pauseToken(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.pauseToken({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
-    return this.updateStateAndGetLedger(circuitResults);
-  }
-
-  public unpauseToken(caller?: CoinPublicKey): Ledger {
-    const circuitResults = this.contract.impureCircuits.unpauseToken({
-      ...this.circuitContext,
-      currentZswapLocalState: caller
-        ? emptyZswapLocalState(caller)
-        : this.circuitContext.currentZswapLocalState
-    });
     return this.updateStateAndGetLedger(circuitResults);
   }
 }

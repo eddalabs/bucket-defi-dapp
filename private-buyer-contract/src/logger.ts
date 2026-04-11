@@ -13,12 +13,7 @@ export const createLogger = async (logPath: string): Promise<pino.Logger> => {
     ignore: "pid, time",
     singleLine: false
   });
-  const level =
-    process.env.DEBUG_LEVEL !== undefined &&
-    process.env.DEBUG_LEVEL !== null &&
-    process.env.DEBUG_LEVEL !== ""
-      ? process.env.DEBUG_LEVEL
-      : "info";
+  const level = process.env.DEBUG_LEVEL || "info";
   return pino(
     { level, depthLimit: 20 },
     pino.multistream([

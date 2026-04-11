@@ -1,6 +1,6 @@
-import { PrivateBuyer } from '@eddalabs/private-buyer-contract';
+import { MiniPrivateBuyer } from '@eddalabs/mini-private-buyer-contract';
 import { encodeCoinPublicKey, encodeRawTokenType } from '@midnight-ntwrk/compact-runtime';
-import * as ledger from '@midnight-ntwrk/ledger-v7';
+import * as ledger from '@midnight-ntwrk/ledger-v8';
 
 export const tokenValue = (value: bigint): bigint => value * 10n ** 6n;
 
@@ -15,47 +15,45 @@ export const randomBytes = (length: number): Uint8Array => {
 
 /**
  * Create a certificate for a given index, rotating through available enum values.
- * Replicates the contract-test helper for integration use.
  */
-export function createCertificate(index: number): PrivateBuyer.NonFungibleToken_Certificate {
-  const sources = [
-    PrivateBuyer.NonFungibleToken_Source.Biomass,
-    PrivateBuyer.NonFungibleToken_Source.Solar,
-    PrivateBuyer.NonFungibleToken_Source.Wind,
-    PrivateBuyer.NonFungibleToken_Source.Hydro,
-    PrivateBuyer.NonFungibleToken_Source.Geothermal,
+export function createCertificate(index: number): MiniPrivateBuyer.NonFungibleToken_Certificate {
+  const categories = [
+    MiniPrivateBuyer.NonFungibleToken_Category.Type1,
+    MiniPrivateBuyer.NonFungibleToken_Category.Type2,
+    MiniPrivateBuyer.NonFungibleToken_Category.Type3,
+    MiniPrivateBuyer.NonFungibleToken_Category.Type4,
+    MiniPrivateBuyer.NonFungibleToken_Category.Type5,
   ];
-  const impacts = [
-    PrivateBuyer.NonFungibleToken_Impact.High,
-    PrivateBuyer.NonFungibleToken_Impact.Medium,
-    PrivateBuyer.NonFungibleToken_Impact.Low,
-    PrivateBuyer.NonFungibleToken_Impact.Minimal,
-    PrivateBuyer.NonFungibleToken_Impact.Extreme,
+  const tiers = [
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level1,
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level2,
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level3,
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level4,
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level5,
   ];
-  const locations = [
-    PrivateBuyer.NonFungibleToken_Location.RJ,
-    PrivateBuyer.NonFungibleToken_Location.SP,
-    PrivateBuyer.NonFungibleToken_Location.MG,
-    PrivateBuyer.NonFungibleToken_Location.RS,
+  const regions = [
+    MiniPrivateBuyer.NonFungibleToken_Region.Region1,
+    MiniPrivateBuyer.NonFungibleToken_Region.Region2,
+    MiniPrivateBuyer.NonFungibleToken_Region.Region3,
+    MiniPrivateBuyer.NonFungibleToken_Region.Region4,
   ];
 
   return {
     id: `Certificate_${index}`,
-    source: sources[index % sources.length],
-    generation: BigInt(1000000 * index),
-    vintage: BigInt(10 + index),
-    impact: impacts[index % impacts.length],
-    location: locations[index % locations.length],
+    category: categories[index % categories.length],
+    quantity: BigInt(1000000 * index),
+    period: BigInt(10 + index),
+    tier: tiers[index % tiers.length],
+    region: regions[index % regions.length],
   };
 }
 
 /**
  * Build an Either<ZswapCoinPublicKey, ContractAddress> from a wallet's coin public key hex string.
- * Used to construct the `account` / `to` argument for role-gating and minting.
  */
 export function createEitherAccount(
   coinPublicKeyHex: string,
-): PrivateBuyer.Either<PrivateBuyer.ZswapCoinPublicKey, PrivateBuyer.ContractAddress> {
+): MiniPrivateBuyer.Either<MiniPrivateBuyer.ZswapCoinPublicKey, MiniPrivateBuyer.ContractAddress> {
   return {
     is_left: true,
     left: { bytes: encodeCoinPublicKey(coinPublicKeyHex) },
@@ -65,8 +63,10 @@ export function createEitherAccount(
 
 /**
  * Create a ShieldedCoinInfo for use with purchaseNFT.
+ * Uses a random nonce because receiveShielded creates a NEW output coin
+ * (the wallet's balanceTx handles spending existing coins to fund it).
  */
-export function createCoin(value: bigint): PrivateBuyer.ShieldedCoinInfo {
+export function createCoin(value: bigint): MiniPrivateBuyer.ShieldedCoinInfo {
   return {
     nonce: randomBytes(32),
     color: encodeRawTokenType(ledger.shieldedToken().raw),

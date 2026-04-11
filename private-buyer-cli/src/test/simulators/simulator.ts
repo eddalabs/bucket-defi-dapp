@@ -9,7 +9,7 @@ import {
 import path from 'path';
 import * as api from '../../api';
 import type { WalletContext } from '../../api';
-import type { PrivateBuyerProviders, DeployedPrivateBuyerContract } from '../../common-types';
+import type { MiniPrivateBuyerProviders, DeployedMiniPrivateBuyerContract } from '../../common-types';
 import type { Logger } from 'pino';
 
 const GENESIS_MINT_WALLET_SEED = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -87,22 +87,22 @@ export class TestEnvironment {
       this.logger.info(`Using compose file: ${composeFile}`);
       this.dockerEnv = new DockerComposeEnvironment(path.resolve(currentDir, '..'), composeFile)
         .withWaitStrategy(
-          'private-buyer-proof-server',
+          'mini-private-buyer-proof-server',
           Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1),
         )
-        .withWaitStrategy('private-buyer-indexer', Wait.forLogMessage('starting indexing', 1))
-        .withWaitStrategy('private-buyer-node', Wait.forLogMessage('Running JSON-RPC server', 1));
+        .withWaitStrategy('mini-private-buyer-indexer', Wait.forLogMessage('starting indexing', 1))
+        .withWaitStrategy('mini-private-buyer-node', Wait.forLogMessage('Running JSON-RPC server', 1));
       this.env = await this.dockerEnv.up();
 
       this.testConfig.dappConfig = {
         ...this.testConfig.dappConfig,
-        indexer: TestEnvironment.mapContainerPort(this.env, this.testConfig.dappConfig.indexer, 'private-buyer-indexer'),
-        indexerWS: TestEnvironment.mapContainerPort(this.env, this.testConfig.dappConfig.indexerWS, 'private-buyer-indexer'),
-        node: TestEnvironment.mapContainerPort(this.env, this.testConfig.dappConfig.node, 'private-buyer-node'),
+        indexer: TestEnvironment.mapContainerPort(this.env, this.testConfig.dappConfig.indexer, 'mini-private-buyer-indexer'),
+        indexerWS: TestEnvironment.mapContainerPort(this.env, this.testConfig.dappConfig.indexerWS, 'mini-private-buyer-indexer'),
+        node: TestEnvironment.mapContainerPort(this.env, this.testConfig.dappConfig.node, 'mini-private-buyer-node'),
         proofServer: TestEnvironment.mapContainerPort(
           this.env,
           this.testConfig.dappConfig.proofServer,
-          'private-buyer-proof-server',
+          'mini-private-buyer-proof-server',
         ),
       };
     }
@@ -112,23 +112,18 @@ export class TestEnvironment {
   };
 
   /**
-   * Deploy contract using deployOnly (14 VKs) + insertRemainingVerifierKeys (24 VKs).
-   * Returns the deployed contract and its address.
+   * Deploy contract using single-transaction deploy (14 circuits).
+   * No VK insertion needed.
    */
   deployContract = async (
-    providers: PrivateBuyerProviders,
+    providers: MiniPrivateBuyerProviders,
     name: string,
     symbol: string,
-  ): Promise<{ contract: DeployedPrivateBuyerContract; contractAddress: string }> => {
-    this.logger.info('Deploying contract (deployOnly + VK insertion)...');
-    const contract = await api.deployOnly(providers, name, symbol);
+  ): Promise<{ contract: DeployedMiniPrivateBuyerContract; contractAddress: string }> => {
+    this.logger.info('Deploying contract (single tx, 14 circuits)...');
+    const contract = await api.deploy(providers, name, symbol);
     const contractAddress = contract.deployTxData.public.contractAddress;
     this.logger.info(`Contract deployed at: ${contractAddress}`);
-
-    this.logger.info('Inserting remaining verifier keys...');
-    await api.insertRemainingVerifierKeys(providers, contractAddress);
-    this.logger.info('All verifier keys inserted.');
-
     return { contract, contractAddress };
   };
 
@@ -142,7 +137,7 @@ export class TestEnvironment {
   };
 
   static getProofServerContainer = async (_env: string) =>
-    await new GenericContainer('midnightntwrk/proof-server:7.0.0')
+    await new GenericContainer('midnightntwrk/proof-server:8.0.3')
       .withExposedPorts(6300)
       .withCommand(['midnight-proof-server -v'])
       .withEnvironment({ RUST_BACKTRACE: 'full' })

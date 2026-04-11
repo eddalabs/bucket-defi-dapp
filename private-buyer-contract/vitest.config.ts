@@ -3,7 +3,9 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   mode: "node",
   test: {
-    deps: { interopDefault: true },
+    deps: {
+      interopDefault: true
+    },
     globals: true,
     environment: "node",
     include: ["**/*.test.ts"],

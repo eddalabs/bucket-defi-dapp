@@ -17,9 +17,9 @@ const logger = await createLogger(config.logDir);
 const useDocker = choice.trim().toLowerCase() !== 'n';
 const dockerEnv = useDocker
   ? new DockerComposeEnvironment(path.resolve(currentDir, '..'), 'standalone.yml')
-      .withWaitStrategy('private-buyer-proof-server', Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1))
-      .withWaitStrategy('private-buyer-indexer', Wait.forLogMessage('starting indexing', 1))
-      .withWaitStrategy('private-buyer-node', Wait.forLogMessage('Running JSON-RPC server', 1))
+      .withWaitStrategy('mini-private-buyer-proof-server', Wait.forLogMessage('Actix runtime found; starting in Actix runtime', 1))
+      .withWaitStrategy('mini-private-buyer-indexer', Wait.forLogMessage('starting indexing', 1))
+      .withWaitStrategy('mini-private-buyer-node', Wait.forLogMessage('Running JSON-RPC server', 1))
   : undefined;
 
 await run(config, logger, dockerEnv);

@@ -1,4 +1,4 @@
-import { Ledger } from "./managed/private-buyer/contract/index.js";
+import { Ledger } from "./managed/mini-private-buyer/contract/index.js";
 import { WitnessContext } from "@midnight-ntwrk/compact-runtime";
 
 export type PrivateState = {
@@ -6,16 +6,14 @@ export type PrivateState = {
 };
 
 export const createPrivateState = (secretNonce: Uint8Array): PrivateState => {
-  return {
-    secretNonce
-  };
+  return { secretNonce };
 };
 
 export const witnesses = {
   wit_secretNonce: ({
     privateState,
-  }: WitnessContext<Ledger, PrivateState>): [
-    PrivateState,
-    Uint8Array,
-  ] => [privateState, privateState.secretNonce],
+  }: WitnessContext<Ledger, PrivateState>): [PrivateState, Uint8Array] => [
+    privateState,
+    privateState.secretNonce,
+  ],
 };

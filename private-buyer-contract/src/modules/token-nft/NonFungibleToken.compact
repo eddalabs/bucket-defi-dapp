@@ -2,65 +2,51 @@
 pragma language_version >= 0.20.0;
 
 /**
-* @module: NonFungibleToken
+* @module: NonFungibleToken (Mini)
 *
 * @description: An unshielded Non-Fungible Token library with custom properties stored on-chain.
-
-* @notice: Uint<128> is used as the token balance because Uint<256>
-* cannot be supported. This is due to encoding limits on the midnight circuit backend:
-* https://github.com/midnightntwrk/compactc/issues/929
+* Simplified version without Pausable pattern.
 *
-* @notice: Initialization logic is all handled within the module. All callable circuits (not with prefix _) are protected by `Initializable_assertInitialized()`.
+* @notice: Uint<128> is used as the token balance because Uint<256> cannot be supported.
 *
-* @notice: This module does not include transfer or approval circuits. In the Private Buyer
-* contract, NFT ownership post-purchase is tracked via hash commitments in the NFTPool module,
-* not through account-based transfers. The `_owners` map serves as a record of the public
-* seller/minter, while buyer ownership is represented by ZK commitments.
+* @notice: This module does not include transfer or approval circuits. NFT ownership
+* post-purchase is tracked via hash commitments in the NFTPool module.
 *
-* @notice Missing Features and Improvements:
-* - Events
-* - Contract-to-Contract Communication
-*
-* @notice: Design patterns
-* - Initializable
-* - Pausable
-* - Concurrency-safe: use of simple, granular and critical ADTs
-* - Low fees: optimized circuits & minimal ADTs interactions
-* - High performance: use events to build complex queries offchain
+* @notice: Enums and struct are generic to support multiple use cases (e.g., energy
+* certificates, recycling credits). Each UI maps the generic values to domain labels.
 */
 
 module NonFungibleToken {
   import CompactStandardLibrary;
   import "./Initializable" prefix Initializable_;
-  import "./Pausable" prefix Pausable_;
   import "../utils/Utils" prefix Utils_;
 
   ///////////////////////////////////////////////////////////////////////////////
   // ENUMS
   ///////////////////////////////////////////////////////////////////////////////
 
-  export enum Source {
-    Solar,
-    Wind,
-    Hydro,
-    Biomass,
-    Geothermal,
-    Nuclear
+  export enum Category {
+    Type1,
+    Type2,
+    Type3,
+    Type4,
+    Type5,
+    Type6
   }
 
-  export enum Impact {
-    Minimal,
-    Low,
-    Medium,
-    High,
-    Extreme
+  export enum Tier {
+    Level1,
+    Level2,
+    Level3,
+    Level4,
+    Level5
   }
 
-  export enum Location {
-    RJ,
-    SP,
-    MG,
-    RS
+  export enum Region {
+    Region1,
+    Region2,
+    Region3,
+    Region4
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -69,12 +55,12 @@ module NonFungibleToken {
 
   // Struct holding all attributes for a Certificate.
   export struct Certificate {
-    id: Opaque<"string">, // Certificate ID from web2 system
-    source: Source, // Type of the certificate
-    generation: Uint<64>, // kWh compensated
-    vintage: Uint<64>, // Expiration date
-    impact: Impact, // Impact of the certificate
-    location: Location // Location of the certificate
+    id: Opaque<"string">,     // External reference ID
+    category: Category,        // E.g., energy source type or material type
+    quantity: Uint<64>,        // E.g., kWh generated or tonnes collected
+    period: Uint<64>,          // E.g., vintage year or verification period
+    tier: Tier,                // E.g., impact level or material grade
+    region: Region             // Geographic region
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -84,241 +70,73 @@ module NonFungibleToken {
   export sealed ledger _name: Opaque<"string">;
   export sealed ledger _symbol: Opaque<"string">;
 
-  /**
-    * @description: Total Number of certificates created.
-    *
-    * @notice: none
-    *
-    * @type: {Counter}
-    */
   export ledger _certificatesCreatedCounter: Counter;
 
-  /**
-  * @description: Mapping from token IDs to their owner addresses(accounts).
-  *
-  * @notice: In the Private Buyer contract, this maps to the original minter/seller.
-  * Buyer ownership post-purchase is tracked via hash commitments in NFTPool.
-  *
-  * @type {Uint<128>} tokenId - The unique identifier for a token.
-  * @type {Either<ZswapCoinPublicKey, ContractAddress>} owner - The owner address (public key or contract).
-  * @type {Map<tokenId, owner>}
-  */
   export ledger _owners: Map<Uint<128>, Either<ZswapCoinPublicKey, ContractAddress>>;
 
-  /**
-   * @description: Mapping from account addresses to their token balances.
-   *
-   * @notice: Owner addresses can be Zswap Coin public keys or contract addresses.
-   *
-   * @type {Either<ZswapCoinPublicKey, ContractAddress>} owner - The owner address.
-   * @type {Uint<128>} balance - The balance of the owner.
-   * @type {Map<owner, balance>}
-   */
   export ledger _balances: Map<Either<ZswapCoinPublicKey, ContractAddress>, Uint<128>>;
 
-  /**
-  * @description: Mapping from token IDs to their metadata.
-  *
-  * @notice: none
-  *
-  * @type {Uint<128>} tokenId - The unique identifier for a token.
-  * @type {Certificate} metadata - Declared as a struct
-  * @type {Map<tokenId, metadata>}
-  */
   export ledger _tokenToCertificate: Map<Uint<128>, Certificate>;
 
-  /**
-   * @description: Mapping from token IDs to their price.
-   *
-   * @notice: none
-   *
-   * @type {Uint<128>} tokenId - The unique identifier for a token.
-   * @type {Uint<64>} price - The price of the token. Uint<64> is being used so after summation with other values, it respects max Uint<128>
-   * @type {Map<tokenId, price>}
-   */
   export ledger _tokenToPrice: Map<Uint<128>, Uint<64>>;
 
   ///////////////////////////////////////////////////////////////////////////////
   // CIRCUITS
   ///////////////////////////////////////////////////////////////////////////////
 
-  /**
-   * @description: Initializes the contract by setting the name and symbol.
-   *
-   * @notice: This MUST be called in the implementing contract's constructor. Failure to do so can lead to an irreparable contract.
-   *
-   * @requirements:
-   * - Contract is initialized.
-   * - Name and symbol are assigned.
-   * @param {Opaque<"string">} name_ - The name of the token.
-   * @param {Opaque<"string">} symbol_ - The symbol of the token.
-   * @return {[]} - Empty tuple.
-   */
   export circuit initialize(name_: Opaque<"string">, symbol_: Opaque<"string">): [] {
     Initializable_initialize();
     _name = disclose(name_);
     _symbol = disclose(symbol_);
   }
 
-  /**
-   * @description Returns the number of tokens in `owner`'s account.
-   *
-   * Requirements:
-   * - The contract is initialized.
-   * - Check if not paused
-   * @param {Either<ZswapCoinPublicKey, ContractAddress>)} owner - The account to query.
-   * @return {Uint<128>} - The number of tokens in `owner`'s account.
-   */
   export circuit balanceOf(owner: Either<ZswapCoinPublicKey, ContractAddress>): Uint<128> {
     Initializable_assertInitialized();
-    Pausable_assertNotPaused();
     if (!_balances.member(disclose(owner))) {
       return 0;
     }
-
     return _balances.lookup(disclose(owner));
   }
 
-  /**
-   * @description Returns the owner of the `tokenId` token.
-   *
-   * Requirements:
-   * - The contract is initialized.
-   * - Check if not paused
-   * - The `tokenId` must exist and returns the owner
-   * @param {Uint<128>} tokenId - The identifier for a token.
-   * @return {Either<ZswapCoinPublicKey, ContractAddress>} - The account that owns the token.
-   */
   export circuit ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
     Initializable_assertInitialized();
-    Pausable_assertNotPaused();
     return _requireOwned(tokenId);
   }
 
-  /**
-   * @description Returns the token Certificate for the given `tokenId`. Reverts if the tokenCertificate does not exist.
-   *
-   * Requirements:
-   * - The contract is initialized.
-   * - Check if not paused
-   * - The `tokenId` must exist.
-   * - The token metadata must exist
-   * @param {Uint<128>} tokenId - The identifier for a token.
-   * @return {Certificate} - the token metadata
-   */
   export circuit tokenCertificate(tokenId: Uint<128>): Certificate {
     Initializable_assertInitialized();
-    Pausable_assertNotPaused();
     _requireOwned(tokenId);
-
     assert(_tokenToCertificate.member(disclose(tokenId)), "Token does not exist");
     return _tokenToCertificate.lookup(disclose(tokenId));
   }
 
-  /**
-  * @description Returns the token Price for the given `tokenId`. Reverts if the tokenPrice does not exist.
-  *
-  * Requirements:
-  * - The contract is initialized.
-  * - Check if not paused
-  * - The `tokenId` must exist.
-  * - The token price must be set
-  * @param {Uint<128>} tokenId - The identifier for a token.
-  * @return {Uint<64>} - the price of the token
-  */
   export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
     Initializable_assertInitialized();
-    Pausable_assertNotPaused();
     _requireOwned(tokenId);
-
     assert(_tokenToPrice.member(disclose(tokenId)), "Token does not exist");
     return _tokenToPrice.lookup(disclose(tokenId));
   }
 
-  /**
-  * @description Mints `tokenId` and transfers it to `to`.
-  *
-  * Requirements:
-  * - The contract is initialized.
-  * - Check if not paused
-  * - Increment by one the counter value
-  * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The account receiving `tokenId`
-  * @param {Uint<128>} tokenId - The token identifier
-  * @param {Certificate} tokenCertificate - The token metadata
-  * @param {Uint<64>} price - The token price
-  * @return {[]} - Empty tuple.
-  */
   export circuit mint(to: Either<ZswapCoinPublicKey, ContractAddress>,
                       tokenId: Uint<128>,
                       tokenCertificate: Certificate,
                       price: Uint<64>
                       ): [] {
     Initializable_assertInitialized();
-    Pausable_assertNotPaused();
     _certificatesCreatedCounter.increment(1);
     _mint(to, tokenId, tokenCertificate);
     _setTokenPrice(tokenId, price);
   }
 
-  /**
-  * @description Destroys `tokenId`. This circuit does not check if the sender is authorized to operate on the token.
-  *
-  * Requirements:
-  * - The contract is initialized.
-  * - Check if not paused
-  * - `tokenId` must exist.
-  * @param {Uint<128>} tokenId - The token to burn
-  * @return {[]} - Empty tuple.
-  */
   export circuit burn(tokenId: Uint<128>): [] {
     Initializable_assertInitialized();
-    Pausable_assertNotPaused();
     _burn(tokenId);
-  }
-
-  /**
-   * @description: Pause Token calls.
-   *
-   * Requirements:
-   * - Check if initialized
-   * - Check if not paused
-   * - Pause Token calls.
-   * @return {[]} - Empty tuple.
-   */
-  export circuit pauseToken(): [] {
-    Initializable_assertInitialized();
-    Pausable_assertNotPaused();
-    Pausable__pause();
-  }
-
-  /**
-    * @description: Unpause Token calls.
-    *
-    * Requirements:
-    * - Check if initialized
-    * - Check if paused
-    * - Unpause Token calls.
-    * @return {[]} - Empty tuple.
-    */
-  export circuit unpauseToken(): [] {
-    Initializable_assertInitialized();
-    Pausable_assertPaused();
-    Pausable__unpause();
   }
 
   ///////////////////////////////////////////////////////////////////////////////
   // INTERNAL CIRCUITS
   ///////////////////////////////////////////////////////////////////////////////
 
-  /**
-    * @description Updates token ownership: transfers `tokenId` from its current owner to `to`,
-    * or alternatively mints (or burns) if the current owner (or `to`) is the zero address.
-    * Returns the owner of the `tokenId` before the update.
-    *
-    * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The intended recipient of the token
-    * @param {Uint<128>} tokenId - The token being updated
-    * @return {Either<ZswapCoinPublicKey, ContractAddress>} - Owner of the token before it was updated
-    */
   circuit _update(to: Either<ZswapCoinPublicKey, ContractAddress>,
                   tokenId: Uint<128>
                   ): Either<ZswapCoinPublicKey, ContractAddress> {
@@ -342,97 +160,38 @@ module NonFungibleToken {
     return from_;
   }
 
-  /**
-    * @description Mints `tokenId` and assigns it to `to`.
-    *
-    * Requirements:
-    * - `to` is not the zero address.
-    * - update balance and owner of the token
-    * - confirm that the token did not have a previous owner
-    * @param {Either<ZswapCoinPublicKey, ContractAddress>} to - The account receiving `tokenId`
-    * @param {Uint<128>} tokenId - The token to create
-    * @return {[]} - Empty tuple.
-    */
   export circuit _mint(to: Either<ZswapCoinPublicKey, ContractAddress>,
                        tokenId: Uint<128>,
                        tokenCertificate: Certificate
                        ): [] {
     assert(!Utils_isKeyOrAddressZero(to), "NonFungibleToken: Invalid Receiver");
-
     const previousOwner = _update(to, tokenId);
-
     _setTokenCertificate(tokenId, tokenCertificate);
-
     assert(Utils_isKeyOrAddressZero(previousOwner), "NonFungibleToken: Invalid Sender");
   }
 
-  /**
-   * @description Destroys `tokenId`. This circuit does not check if the sender is authorized to operate on the token.
-   *
-   * Requirements:
-   * - `tokenId` must exist.
-   *
-   * @param {Uint<128>} tokenId - The token to burn
-   * @return {[]} - Empty tuple.
-   */
   export circuit _burn(tokenId: Uint<128>): [] {
     const previousOwner = _update(shieldedBurnAddress(), tokenId);
     assert(!Utils_isKeyOrAddressZero(previousOwner), "NonFungibleToken: Invalid Sender");
   }
 
-  /**
-   * @description Reverts if the `tokenId` doesn't have a current owner (it hasn't been minted, or it has been burned).
-   * Returns the owner.
-   *
-   * Requirements:
-   * - `tokenId` must exist.
-   *
-   * @param {Uint<128>} tokenId - The token that should be owned
-   * @return {Either<ZswapCoinPublicKey, ContractAddress>} - The owner of `tokenId`
-   */
   export circuit _requireOwned(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
     const owner = _ownerOf(tokenId);
-
     assert(!Utils_isKeyOrAddressZero(owner), "NonFungibleToken: Nonexistent Token");
     return owner;
   }
 
-  /**
-   * @description Returns the owner of the `tokenId`. Does NOT revert if token doesn't exist
-   *
-   * @param {Uint<128>} tokenId - The target token of the owner query
-   * @return {Either<ZswapCoinPublicKey, ContractAddress>} - The owner of the token
-   */
   export circuit _ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
     if (!_owners.member(disclose(tokenId))) {
       return shieldedBurnAddress();
     }
-
     return _owners.lookup(disclose(tokenId));
   }
 
-  /**
-  * @description Sets the the metadata as `Certificate` for the given `tokenId`.
-  *
-  * @notice Normally this is set during minting
-  *
-  * @param {Uint<128>} tokenId - The identifier of the token.
-  * @param {Certificate} metadata - The metadata of the token.
-  * @return {[]} - Empty tuple.
-  */
   export circuit _setTokenCertificate(tokenId: Uint<128>, tokenCertificate: Certificate): [] {
     _tokenToCertificate.insert(disclose(tokenId), disclose(tokenCertificate));
   }
 
-  /**
-   * @description Sets the price for the given `tokenId`.
-   *
-   * @notice Normally this is set during minting, but can be changed afterward to adjust market conditions
-   *
-   * @param {Uint<128>} tokenId - The identifier of the token.
-   * @param {Uint<64>} price - The price of the token.
-   * @return {[]} - Empty tuple.
-   */
   export circuit _setTokenPrice(tokenId: Uint<128>, price: Uint<64>): [] {
     _tokenToPrice.insert(disclose(tokenId), disclose(price));
   }

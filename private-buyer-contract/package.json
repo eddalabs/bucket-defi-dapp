@@ -1,5 +1,5 @@
 {
-  "name": "@eddalabs/private-buyer-contract",
+  "name": "@eddalabs/mini-private-buyer-contract",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
@@ -15,15 +15,17 @@
       "default": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.15.0",
+    "@midnight-ntwrk/ledger-v8": "8.0.3"
+  },
   "scripts": {
-    "compact-fast": "compact compile --skip-zk +0.28.0 src/private-buyer.compact src/managed/private-buyer",
-    "compact": "compact compile +0.28.0 src/private-buyer.compact src/managed/private-buyer",
-    "compact-deploy": "compact compile +0.28.0 src/private-buyer-deploy.compact src/managed/private-buyer-deploy",
+    "compact": "compact compile +0.30.0 src/mini-private-buyer.compact src/managed/mini-private-buyer",
+    "compact-fast": "compact compile --skip-zk +0.30.0 src/mini-private-buyer.compact src/managed/mini-private-buyer",
     "test": "vitest run",
-    "test:compile": "npm run compact && vitest run",
-    "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/managed ./dist/managed && cp ./src/private-buyer.compact ./dist",
+    "test:compile": "pnpm compact && vitest run",
+    "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/managed ./dist/managed && cp ./src/mini-private-buyer.compact ./dist",
     "lint": "eslint src",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "toolkit-version": "bash src/toolkit/version.sh"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

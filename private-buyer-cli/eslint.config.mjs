@@ -19,11 +19,6 @@ export default [
         Buffer: 'readonly',
         URL: 'readonly',
         setTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        console: 'readonly',
-        crypto: 'readonly',
-        globalThis: 'readonly',
       },
     },
     plugins: {

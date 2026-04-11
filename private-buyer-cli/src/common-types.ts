@@ -1,31 +1,31 @@
-import { PrivateBuyer, type PrivateState } from '@eddalabs/private-buyer-contract';
+import { MiniPrivateBuyer, type PrivateState } from '@eddalabs/mini-private-buyer-contract';
 import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
 import type { DeployedContract, FoundContract } from '@midnight-ntwrk/midnight-js-contracts';
-import type { ImpureCircuitId } from '@midnight-ntwrk/compact-js';
+import type { ProvableCircuitId } from '@midnight-ntwrk/compact-js';
 
-export type PrivateBuyerCircuits = ImpureCircuitId<PrivateBuyer.Contract<PrivateState>>;
+export type MiniPrivateBuyerCircuits = ProvableCircuitId<MiniPrivateBuyer.Contract<PrivateState>>;
 
-export const PrivateBuyerPrivateStateId = 'privateBuyerPrivateState';
+export const MiniPrivateBuyerPrivateStateId = 'miniPrivateBuyerPrivateState';
 
-export type PrivateBuyerProviders = MidnightProviders<
-  PrivateBuyerCircuits,
-  typeof PrivateBuyerPrivateStateId,
+export type MiniPrivateBuyerProviders = MidnightProviders<
+  MiniPrivateBuyerCircuits,
+  typeof MiniPrivateBuyerPrivateStateId,
   PrivateState
 >;
 
-export type PrivateBuyerContract = PrivateBuyer.Contract<PrivateState>;
+export type MiniPrivateBuyerContract = MiniPrivateBuyer.Contract<PrivateState>;
 
-export type DeployedPrivateBuyerContract = DeployedContract<PrivateBuyerContract> | FoundContract<PrivateBuyerContract>;
+export type DeployedMiniPrivateBuyerContract = DeployedContract<MiniPrivateBuyerContract> | FoundContract<MiniPrivateBuyerContract>;
 
 export type UserAction = {
   action: string | undefined;
 };
 
 export type DerivedState = {
-  readonly name: PrivateBuyer.Ledger['NonFungibleToken__name'];
-  readonly symbol: PrivateBuyer.Ledger['NonFungibleToken__symbol'];
-  readonly certificatesCreatedCounter: PrivateBuyer.Ledger['NonFungibleToken__certificatesCreatedCounter'];
-  readonly purchaseCounter: PrivateBuyer.Ledger['NFTPool__purchaseCounter'];
+  readonly name: MiniPrivateBuyer.Ledger['NonFungibleToken__name'];
+  readonly symbol: MiniPrivateBuyer.Ledger['NonFungibleToken__symbol'];
+  readonly certificatesCreatedCounter: MiniPrivateBuyer.Ledger['NonFungibleToken__certificatesCreatedCounter'];
+  readonly purchaseCounter: MiniPrivateBuyer.Ledger['NFTPool__purchaseCounter'];
 };
 
 export const emptyState: DerivedState = {

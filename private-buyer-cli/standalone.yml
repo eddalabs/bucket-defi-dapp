@@ -1,7 +1,7 @@
 services:
   proof-server:
-    container_name: 'private-buyer-proof-server'
-    image: "midnightntwrk/proof-server:7.0.0"
+    container_name: 'mini-private-buyer-proof-server'
+    image: "midnightntwrk/proof-server:8.0.3"
     command: ["midnight-proof-server -v"]
     ports:
       - "6300:6300"
@@ -14,8 +14,8 @@ services:
       retries: 20
       start_period: 10s
   indexer:
-    container_name: 'private-buyer-indexer'
-    image: 'midnightntwrk/indexer-standalone:3.0.0'
+    container_name: 'mini-private-buyer-indexer'
+    image: 'midnightntwrk/indexer-standalone:4.1.0-alpha.0.3'
     ports:
       - '8088:8088'
     environment:
@@ -36,8 +36,8 @@ services:
       node:
         condition: service_started
   node:
-    image: 'midnightntwrk/midnight-node:0.20.1'
-    container_name: 'private-buyer-node'
+    image: 'midnightntwrk/midnight-node:0.22.3'
+    container_name: 'mini-private-buyer-node'
     ports:
       - "9944:9944"
     healthcheck:
