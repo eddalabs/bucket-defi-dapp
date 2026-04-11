@@ -43,7 +43,7 @@ export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__n
 export { ZswapCoinPublicKey, ContractAddress, Either, ShieldedCoinInfo };
 
 ///////////////////////////////////////////////////////////////////////////////
-// CIRCUITS (14 total)
+// CIRCUITS (15 total)
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -66,7 +66,19 @@ export circuit mint(to: Either<ZswapCoinPublicKey, ContractAddress>,
 }
 
 /**
-* Circuit 3: Burn unsold tokens
+* Circuit 3: Mint NFT and list for sale atomically
+*/
+export circuit mintAndList(to: Either<ZswapCoinPublicKey, ContractAddress>,
+                           tokenId: Uint<128>,
+                           tokenCertificate: NonFungibleToken_Certificate,
+                           price: Uint<64>
+                           ): [] {
+  NonFungibleToken_mint(to, tokenId, tokenCertificate, price);
+  NFTPool_addToPool(tokenId);
+}
+
+/**
+* Circuit 4: Burn unsold tokens
 */
 export circuit burn(tokenId: Uint<128>): [] {
   // Token must not be listed in pool (unlist before burning)
@@ -81,7 +93,7 @@ export circuit burn(tokenId: Uint<128>): [] {
 }
 
 /**
-* Circuit 4: List NFT for sale
+* Circuit 5: List NFT for sale
 */
 export circuit addToPool(tokenId: Uint<128>): [] {
   // Cross-check: token must exist in NFT module
@@ -90,14 +102,14 @@ export circuit addToPool(tokenId: Uint<128>): [] {
 }
 
 /**
-* Circuit 5: Delist NFT
+* Circuit 6: Delist NFT
 */
 export circuit removeFromPool(tokenId: Uint<128>): [] {
   NFTPool_removeFromPool(tokenId);
 }
 
 /**
-* Circuit 6: Buy with ZK commitment + payment
+* Circuit 7: Buy with ZK commitment + payment
 */
 export circuit purchaseNFT(tokenId: Uint<128>, coin: ShieldedCoinInfo): Bytes<32> {
   // Get token price
@@ -123,21 +135,21 @@ export circuit purchaseNFT(tokenId: Uint<128>, coin: ShieldedCoinInfo): Bytes<32
 }
 
 /**
-* Circuit 7: Seller withdraws earnings
+* Circuit 8: Seller withdraws earnings
 */
 export circuit withdrawSellerFunds(): [] {
   NFTPool_withdrawSellerFunds();
 }
 
 /**
-* Circuit 8: Buyer proves ownership via ZK
+* Circuit 9: Buyer proves ownership via ZK
 */
 export circuit proofOwnership(ownerCommitment: Bytes<32>, challenge: Bytes<32>): [] {
   return NFTPool_proofOwnership(ownerCommitment, challenge);
 }
 
 /**
-* Circuit 9: Burn a purchased token (single)
+* Circuit 10: Burn a purchased token (single)
 */
 export circuit burnPurchased(
   ownerCommitment: Bytes<32>,
@@ -155,35 +167,35 @@ export circuit burnPurchased(
 }
 
 /**
-* Circuit 10: Query token balance
+* Circuit 11: Query token balance
 */
 export circuit balanceOf(owner: Either<ZswapCoinPublicKey, ContractAddress>): Uint<128> {
   return NonFungibleToken_balanceOf(owner);
 }
 
 /**
-* Circuit 11: Query token owner
+* Circuit 12: Query token owner
 */
 export circuit ownerOf(tokenId: Uint<128>): Either<ZswapCoinPublicKey, ContractAddress> {
   return NonFungibleToken_ownerOf(tokenId);
 }
 
 /**
-* Circuit 12: Query certificate metadata
+* Circuit 13: Query certificate metadata
 */
 export circuit tokenCertificate(tokenId: Uint<128>): NonFungibleToken_Certificate {
   return NonFungibleToken_tokenCertificate(tokenId);
 }
 
 /**
-* Circuit 13: Query token price
+* Circuit 14: Query token price
 */
 export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
   return NonFungibleToken_tokenPrice(tokenId);
 }
 
 /**
-* Circuit 14: Update token price
+* Circuit 15: Update token price
 */
 export circuit setTokenPrice(tokenId: Uint<128>, price: Uint<64>): [] {
   NonFungibleToken__setTokenPrice(tokenId, price);

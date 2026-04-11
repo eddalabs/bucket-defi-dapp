@@ -27,6 +27,12 @@ export interface ContractControllerInterface {
     tokenCertificate: MiniPrivateBuyer.NonFungibleToken_Certificate,
     price: bigint,
   ) => Promise<void>;
+  mintAndList: (
+    to: MiniPrivateBuyer.Either<MiniPrivateBuyer.ZswapCoinPublicKey, MiniPrivateBuyer.ContractAddress>,
+    tokenId: bigint,
+    tokenCertificate: MiniPrivateBuyer.NonFungibleToken_Certificate,
+    price: bigint,
+  ) => Promise<void>;
   addToPool: (tokenId: bigint) => Promise<void>;
   setTokenPrice: (tokenId: bigint, price: bigint) => Promise<void>;
   purchaseNFT: (tokenId: bigint, coin: MiniPrivateBuyer.ShieldedCoinInfo) => Promise<void>;
@@ -130,6 +136,17 @@ export class ContractController implements ContractControllerInterface {
     this.logger.info(`Minting token ${tokenId}...`);
     await this.deployedContract.callTx.mint(to, tokenId, tokenCertificate, price);
     this.actions$.next({ ...emptyState.actions, mint: `Token ${tokenId} minted` });
+  }
+
+  async mintAndList(
+    to: MiniPrivateBuyer.Either<MiniPrivateBuyer.ZswapCoinPublicKey, MiniPrivateBuyer.ContractAddress>,
+    tokenId: bigint,
+    tokenCertificate: MiniPrivateBuyer.NonFungibleToken_Certificate,
+    price: bigint,
+  ): Promise<void> {
+    this.logger.info(`Minting and listing token ${tokenId}...`);
+    await this.deployedContract.callTx.mintAndList(to, tokenId, tokenCertificate, price);
+    this.actions$.next({ ...emptyState.actions, mint: `Token ${tokenId} minted & listed` });
   }
 
   async addToPool(tokenId: bigint): Promise<void> {

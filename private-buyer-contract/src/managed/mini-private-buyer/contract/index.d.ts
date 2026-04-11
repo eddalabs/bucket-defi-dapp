@@ -46,6 +46,11 @@ export type ImpureCircuits<PS> = {
        tokenId_0: bigint,
        tokenCertificate_0: NonFungibleToken_Certificate,
        price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  mintAndList(context: __compactRuntime.CircuitContext<PS>,
+              to_0: Either<ZswapCoinPublicKey, ContractAddress>,
+              tokenId_0: bigint,
+              tokenCertificate_0: NonFungibleToken_Certificate,
+              price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   burn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
@@ -78,6 +83,11 @@ export type ProvableCircuits<PS> = {
        tokenId_0: bigint,
        tokenCertificate_0: NonFungibleToken_Certificate,
        price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  mintAndList(context: __compactRuntime.CircuitContext<PS>,
+              to_0: Either<ZswapCoinPublicKey, ContractAddress>,
+              tokenId_0: bigint,
+              tokenCertificate_0: NonFungibleToken_Certificate,
+              price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   burn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
@@ -113,6 +123,11 @@ export type Circuits<PS> = {
        tokenId_0: bigint,
        tokenCertificate_0: NonFungibleToken_Certificate,
        price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  mintAndList(context: __compactRuntime.CircuitContext<PS>,
+              to_0: Either<ZswapCoinPublicKey, ContractAddress>,
+              tokenId_0: bigint,
+              tokenCertificate_0: NonFungibleToken_Certificate,
+              price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   burn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;

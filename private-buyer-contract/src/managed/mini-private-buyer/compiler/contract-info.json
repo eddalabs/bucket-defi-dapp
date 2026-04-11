@@ -149,6 +149,151 @@
       }
     },
     {
+      "name": "mintAndList",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "to",
+          "type": {
+            "type-name": "Struct",
+            "name": "Either",
+            "elements": [
+              {
+                "name": "is_left",
+                "type": {
+                  "type-name": "Boolean"
+                }
+              },
+              {
+                "name": "left",
+                "type": {
+                  "type-name": "Struct",
+                  "name": "ZswapCoinPublicKey",
+                  "elements": [
+                    {
+                      "name": "bytes",
+                      "type": {
+                        "type-name": "Bytes",
+                        "length": 32
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "right",
+                "type": {
+                  "type-name": "Struct",
+                  "name": "ContractAddress",
+                  "elements": [
+                    {
+                      "name": "bytes",
+                      "type": {
+                        "type-name": "Bytes",
+                        "length": 32
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        },
+        {
+          "name": "tokenCertificate",
+          "type": {
+            "type-name": "Struct",
+            "name": "Certificate",
+            "elements": [
+              {
+                "name": "id",
+                "type": {
+                  "type-name": "Opaque",
+                  "tsType": "string"
+                }
+              },
+              {
+                "name": "source",
+                "type": {
+                  "type-name": "Enum",
+                  "name": "Source",
+                  "elements": [
+                    "Solar",
+                    "Wind",
+                    "Hydro",
+                    "Biomass",
+                    "Geothermal",
+                    "Nuclear"
+                  ]
+                }
+              },
+              {
+                "name": "generation",
+                "type": {
+                  "type-name": "Uint",
+                  "maxval": 18446744073709551615
+                }
+              },
+              {
+                "name": "vintage",
+                "type": {
+                  "type-name": "Uint",
+                  "maxval": 18446744073709551615
+                }
+              },
+              {
+                "name": "impact",
+                "type": {
+                  "type-name": "Enum",
+                  "name": "Impact",
+                  "elements": [
+                    "Minimal",
+                    "Low",
+                    "Medium",
+                    "High",
+                    "Extreme"
+                  ]
+                }
+              },
+              {
+                "name": "location",
+                "type": {
+                  "type-name": "Enum",
+                  "name": "Location",
+                  "elements": [
+                    "RJ",
+                    "SP",
+                    "MG",
+                    "RS"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "price",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 18446744073709551615
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
       "name": "burn",
       "pure": false,
       "proof": true,

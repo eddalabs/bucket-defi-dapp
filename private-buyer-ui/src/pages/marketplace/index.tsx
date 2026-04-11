@@ -11,7 +11,6 @@ import { useContractSubscription } from '@/modules/midnight/nft-sdk/hooks/use-co
 import { useTransactionProgress, type TxStage } from '@/modules/midnight/nft-sdk/hooks/use-transaction-progress';
 import { useProviders } from '@/modules/midnight/nft-sdk/hooks/use-providers';
 import type { ContractControllerInterface } from '@/modules/midnight/nft-sdk/api/contractController';
-import { Loading } from '@/components/loading';
 
 // ─── Transaction Progress UI ──────────────────────────────────────────────
 
@@ -164,7 +163,7 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
   const txProgress = useTransactionProgress();
   useFlowMessageSync(txProgress);
 
-  const handleMint = async () => {
+  const handleMintAndList = async () => {
     if (!tokenId) return;
     const mintingId = tokenId;
 
@@ -182,7 +181,7 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
         impact,
         location,
       };
-      await controller.mint(to, BigInt(tokenId), certificate, BigInt(price));
+      await controller.mintAndList(to, BigInt(tokenId), certificate, BigInt(price));
       setLastMintedId(mintingId);
       onMinted({ tokenId: mintingId, price, source, impact, location });
     });
@@ -193,9 +192,9 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
       <CardHeader>
         <div className="flex items-center gap-2">
           <PlusCircle className="h-5 w-5 text-primary" />
-          <CardTitle className="text-base">Mint NFT</CardTitle>
+          <CardTitle className="text-base">Mint & List NFT</CardTitle>
         </div>
-        <CardDescription>Create a new NFT certificate with metadata</CardDescription>
+        <CardDescription>Create a new NFT certificate and list it for sale in one transaction</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
@@ -240,9 +239,9 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
             <input type="number" value={vintage} onChange={(e) => setVintage(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
           </div>
         </div>
-        <Button onClick={handleMint} disabled={!tokenId || txProgress.isProcessing} className="w-full gap-2">
+        <Button onClick={handleMintAndList} disabled={!tokenId || txProgress.isProcessing} className="w-full gap-2">
           <PlusCircle className="h-4 w-4" />
-          {txProgress.isProcessing ? 'Minting...' : 'Mint NFT'}
+          {txProgress.isProcessing ? 'Minting & Listing...' : 'Mint & List NFT'}
         </Button>
         <TransactionProgress {...txProgress} />
         {lastMintedId && txProgress.stage === 'idle' && (
@@ -279,35 +278,6 @@ function MintedTokensList({ tokens }: { tokens: MintedToken[] }) {
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ListSection({ controller }: { controller: ContractControllerInterface }) {
-  const [tokenId, setTokenId] = useState('');
-  const txProgress = useTransactionProgress();
-  useFlowMessageSync(txProgress);
-
-  return (
-    <Card className="border-border/60">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <ShoppingBag className="h-5 w-5 text-primary" />
-          <CardTitle className="text-base">List NFT for Sale</CardTitle>
-        </div>
-        <CardDescription>Add an NFT to the marketplace pool</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div>
-          <label className="text-xs text-muted-foreground">Token ID</label>
-          <input type="number" placeholder="Token ID to list" value={tokenId} onChange={(e) => setTokenId(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
-        </div>
-        <Button onClick={async () => { if (!tokenId) return; await txProgress.execute(() => controller.addToPool(BigInt(tokenId))); }} disabled={!tokenId || txProgress.isProcessing} className="w-full gap-2">
-          <ShoppingBag className="h-4 w-4" />
-          {txProgress.isProcessing ? 'Listing...' : 'List for Sale'}
-        </Button>
-        <TransactionProgress {...txProgress} />
       </CardContent>
     </Card>
   );
@@ -507,8 +477,6 @@ export function Marketplace() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      {appLoading && !deployedContractAPI && <Loading text="Connecting to contract..." />}
-
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-foreground mb-1">NFT Marketplace</h1>
@@ -560,6 +528,14 @@ export function Marketplace() {
           </CardContent>
         </Card>
 
+        {/* Loading contract */}
+        {appLoading && !deployedContractAPI && (
+          <div className="text-center py-12 space-y-3">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-primary mx-auto" />
+            <p className="text-sm text-muted-foreground">Connecting to contract...</p>
+          </div>
+        )}
+
         {/* Connected to contract */}
         {deployedContractAPI && derivedState && (
           <div className="space-y-6">
@@ -579,7 +555,6 @@ export function Marketplace() {
                 coinPublicKey={shieldedAddresses?.shieldedCoinPublicKey ?? ''}
                 onMinted={(token) => setMintedTokens((prev) => [...prev, token])}
               />
-              <ListSection controller={deployedContractAPI} />
               <SetPriceSection controller={deployedContractAPI} />
               <BuySection controller={deployedContractAPI} />
             </div>
