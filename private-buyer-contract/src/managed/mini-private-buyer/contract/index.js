@@ -1,32 +1,32 @@
 import * as __compactRuntime from '@midnight-ntwrk/compact-runtime';
 __compactRuntime.checkRuntimeVersion('0.15.0');
 
-export var NonFungibleToken_Location;
-(function (NonFungibleToken_Location) {
-  NonFungibleToken_Location[NonFungibleToken_Location['RJ'] = 0] = 'RJ';
-  NonFungibleToken_Location[NonFungibleToken_Location['SP'] = 1] = 'SP';
-  NonFungibleToken_Location[NonFungibleToken_Location['MG'] = 2] = 'MG';
-  NonFungibleToken_Location[NonFungibleToken_Location['RS'] = 3] = 'RS';
-})(NonFungibleToken_Location || (NonFungibleToken_Location = {}));
+export var NonFungibleToken_Category;
+(function (NonFungibleToken_Category) {
+  NonFungibleToken_Category[NonFungibleToken_Category['Type1'] = 0] = 'Type1';
+  NonFungibleToken_Category[NonFungibleToken_Category['Type2'] = 1] = 'Type2';
+  NonFungibleToken_Category[NonFungibleToken_Category['Type3'] = 2] = 'Type3';
+  NonFungibleToken_Category[NonFungibleToken_Category['Type4'] = 3] = 'Type4';
+  NonFungibleToken_Category[NonFungibleToken_Category['Type5'] = 4] = 'Type5';
+  NonFungibleToken_Category[NonFungibleToken_Category['Type6'] = 5] = 'Type6';
+})(NonFungibleToken_Category || (NonFungibleToken_Category = {}));
 
-export var NonFungibleToken_Impact;
-(function (NonFungibleToken_Impact) {
-  NonFungibleToken_Impact[NonFungibleToken_Impact['Minimal'] = 0] = 'Minimal';
-  NonFungibleToken_Impact[NonFungibleToken_Impact['Low'] = 1] = 'Low';
-  NonFungibleToken_Impact[NonFungibleToken_Impact['Medium'] = 2] = 'Medium';
-  NonFungibleToken_Impact[NonFungibleToken_Impact['High'] = 3] = 'High';
-  NonFungibleToken_Impact[NonFungibleToken_Impact['Extreme'] = 4] = 'Extreme';
-})(NonFungibleToken_Impact || (NonFungibleToken_Impact = {}));
+export var NonFungibleToken_Tier;
+(function (NonFungibleToken_Tier) {
+  NonFungibleToken_Tier[NonFungibleToken_Tier['Level1'] = 0] = 'Level1';
+  NonFungibleToken_Tier[NonFungibleToken_Tier['Level2'] = 1] = 'Level2';
+  NonFungibleToken_Tier[NonFungibleToken_Tier['Level3'] = 2] = 'Level3';
+  NonFungibleToken_Tier[NonFungibleToken_Tier['Level4'] = 3] = 'Level4';
+  NonFungibleToken_Tier[NonFungibleToken_Tier['Level5'] = 4] = 'Level5';
+})(NonFungibleToken_Tier || (NonFungibleToken_Tier = {}));
 
-export var NonFungibleToken_Source;
-(function (NonFungibleToken_Source) {
-  NonFungibleToken_Source[NonFungibleToken_Source['Solar'] = 0] = 'Solar';
-  NonFungibleToken_Source[NonFungibleToken_Source['Wind'] = 1] = 'Wind';
-  NonFungibleToken_Source[NonFungibleToken_Source['Hydro'] = 2] = 'Hydro';
-  NonFungibleToken_Source[NonFungibleToken_Source['Biomass'] = 3] = 'Biomass';
-  NonFungibleToken_Source[NonFungibleToken_Source['Geothermal'] = 4] = 'Geothermal';
-  NonFungibleToken_Source[NonFungibleToken_Source['Nuclear'] = 5] = 'Nuclear';
-})(NonFungibleToken_Source || (NonFungibleToken_Source = {}));
+export var NonFungibleToken_Region;
+(function (NonFungibleToken_Region) {
+  NonFungibleToken_Region[NonFungibleToken_Region['Region1'] = 0] = 'Region1';
+  NonFungibleToken_Region[NonFungibleToken_Region['Region2'] = 1] = 'Region2';
+  NonFungibleToken_Region[NonFungibleToken_Region['Region3'] = 2] = 'Region3';
+  NonFungibleToken_Region[NonFungibleToken_Region['Region4'] = 3] = 'Region4';
+})(NonFungibleToken_Region || (NonFungibleToken_Region = {}));
 
 const _descriptor_0 = new __compactRuntime.CompactTypeUnsignedInteger(340282366920938463463374607431768211455n, 16);
 
@@ -101,15 +101,15 @@ class _Certificate_0 {
   fromValue(value_0) {
     return {
       id: _descriptor_7.fromValue(value_0),
-      source: _descriptor_8.fromValue(value_0),
-      generation: _descriptor_1.fromValue(value_0),
-      vintage: _descriptor_1.fromValue(value_0),
-      impact: _descriptor_9.fromValue(value_0),
-      location: _descriptor_10.fromValue(value_0)
+      category: _descriptor_8.fromValue(value_0),
+      quantity: _descriptor_1.fromValue(value_0),
+      period: _descriptor_1.fromValue(value_0),
+      tier: _descriptor_9.fromValue(value_0),
+      region: _descriptor_10.fromValue(value_0)
     }
   }
   toValue(value_0) {
-    return _descriptor_7.toValue(value_0.id).concat(_descriptor_8.toValue(value_0.source).concat(_descriptor_1.toValue(value_0.generation).concat(_descriptor_1.toValue(value_0.vintage).concat(_descriptor_9.toValue(value_0.impact).concat(_descriptor_10.toValue(value_0.location))))));
+    return _descriptor_7.toValue(value_0.id).concat(_descriptor_8.toValue(value_0.category).concat(_descriptor_1.toValue(value_0.quantity).concat(_descriptor_1.toValue(value_0.period).concat(_descriptor_9.toValue(value_0.tier).concat(_descriptor_10.toValue(value_0.region))))));
   }
 }
 
@@ -282,11 +282,11 @@ export class Contract {
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
-        if (!(typeof(tokenCertificate_0) === 'object' && true && typeof(tokenCertificate_0.source) === 'number' && tokenCertificate_0.source >= 0 && tokenCertificate_0.source <= 5 && typeof(tokenCertificate_0.generation) === 'bigint' && tokenCertificate_0.generation >= 0n && tokenCertificate_0.generation <= 18446744073709551615n && typeof(tokenCertificate_0.vintage) === 'bigint' && tokenCertificate_0.vintage >= 0n && tokenCertificate_0.vintage <= 18446744073709551615n && typeof(tokenCertificate_0.impact) === 'number' && tokenCertificate_0.impact >= 0 && tokenCertificate_0.impact <= 4 && typeof(tokenCertificate_0.location) === 'number' && tokenCertificate_0.location >= 0 && tokenCertificate_0.location <= 3)) {
+        if (!(typeof(tokenCertificate_0) === 'object' && true && typeof(tokenCertificate_0.category) === 'number' && tokenCertificate_0.category >= 0 && tokenCertificate_0.category <= 5 && typeof(tokenCertificate_0.quantity) === 'bigint' && tokenCertificate_0.quantity >= 0n && tokenCertificate_0.quantity <= 18446744073709551615n && typeof(tokenCertificate_0.period) === 'bigint' && tokenCertificate_0.period >= 0n && tokenCertificate_0.period <= 18446744073709551615n && typeof(tokenCertificate_0.tier) === 'number' && tokenCertificate_0.tier >= 0 && tokenCertificate_0.tier <= 4 && typeof(tokenCertificate_0.region) === 'number' && tokenCertificate_0.region >= 0 && tokenCertificate_0.region <= 3)) {
           __compactRuntime.typeError('mint',
                                      'argument 3 (argument 4 as invoked from Typescript)',
                                      'mini-private-buyer.compact line 60 char 1',
-                                     'struct Certificate<id: Opaque<"string">, source: Enum<Source, Solar, Wind, Hydro, Biomass, Geothermal, Nuclear>, generation: Uint<0..18446744073709551616>, vintage: Uint<0..18446744073709551616>, impact: Enum<Impact, Minimal, Low, Medium, High, Extreme>, location: Enum<Location, RJ, SP, MG, RS>>',
+                                     'struct Certificate<id: Opaque<"string">, category: Enum<Category, Type1, Type2, Type3, Type4, Type5, Type6>, quantity: Uint<0..18446744073709551616>, period: Uint<0..18446744073709551616>, tier: Enum<Tier, Level1, Level2, Level3, Level4, Level5>, region: Enum<Region, Region1, Region2, Region3, Region4>>',
                                      tokenCertificate_0)
         }
         if (!(typeof(price_0) === 'bigint' && price_0 >= 0n && price_0 <= 18446744073709551615n)) {
@@ -345,11 +345,11 @@ export class Contract {
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      tokenId_0)
         }
-        if (!(typeof(tokenCertificate_0) === 'object' && true && typeof(tokenCertificate_0.source) === 'number' && tokenCertificate_0.source >= 0 && tokenCertificate_0.source <= 5 && typeof(tokenCertificate_0.generation) === 'bigint' && tokenCertificate_0.generation >= 0n && tokenCertificate_0.generation <= 18446744073709551615n && typeof(tokenCertificate_0.vintage) === 'bigint' && tokenCertificate_0.vintage >= 0n && tokenCertificate_0.vintage <= 18446744073709551615n && typeof(tokenCertificate_0.impact) === 'number' && tokenCertificate_0.impact >= 0 && tokenCertificate_0.impact <= 4 && typeof(tokenCertificate_0.location) === 'number' && tokenCertificate_0.location >= 0 && tokenCertificate_0.location <= 3)) {
+        if (!(typeof(tokenCertificate_0) === 'object' && true && typeof(tokenCertificate_0.category) === 'number' && tokenCertificate_0.category >= 0 && tokenCertificate_0.category <= 5 && typeof(tokenCertificate_0.quantity) === 'bigint' && tokenCertificate_0.quantity >= 0n && tokenCertificate_0.quantity <= 18446744073709551615n && typeof(tokenCertificate_0.period) === 'bigint' && tokenCertificate_0.period >= 0n && tokenCertificate_0.period <= 18446744073709551615n && typeof(tokenCertificate_0.tier) === 'number' && tokenCertificate_0.tier >= 0 && tokenCertificate_0.tier <= 4 && typeof(tokenCertificate_0.region) === 'number' && tokenCertificate_0.region >= 0 && tokenCertificate_0.region <= 3)) {
           __compactRuntime.typeError('mintAndList',
                                      'argument 3 (argument 4 as invoked from Typescript)',
                                      'mini-private-buyer.compact line 71 char 1',
-                                     'struct Certificate<id: Opaque<"string">, source: Enum<Source, Solar, Wind, Hydro, Biomass, Geothermal, Nuclear>, generation: Uint<0..18446744073709551616>, vintage: Uint<0..18446744073709551616>, impact: Enum<Impact, Minimal, Low, Medium, High, Extreme>, location: Enum<Location, RJ, SP, MG, RS>>',
+                                     'struct Certificate<id: Opaque<"string">, category: Enum<Category, Type1, Type2, Type3, Type4, Type5, Type6>, quantity: Uint<0..18446744073709551616>, period: Uint<0..18446744073709551616>, tier: Enum<Tier, Level1, Level2, Level3, Level4, Level5>, region: Enum<Region, Region1, Region2, Region3, Region4>>',
                                      tokenCertificate_0)
         }
         if (!(typeof(price_0) === 'bigint' && price_0 >= 0n && price_0 <= 18446744073709551615n)) {
@@ -1773,7 +1773,7 @@ export class Contract {
       }
       const newBalance_1 = ((t1) => {
                              if (t1 > 340282366920938463463374607431768211455n) {
-                               throw new __compactRuntime.CompactError('NonFungibleToken.compact line 151 char 26: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 340282366920938463463374607431768211455');
+                               throw new __compactRuntime.CompactError('NonFungibleToken.compact line 154 char 26: cast from Field or Uint value to smaller Uint value failed: ' + t1 + ' is greater than 340282366920938463463374607431768211455');
                              }
                              return t1;
                            })(_descriptor_0.fromValue(__compactRuntime.queryLedgerState(context,
@@ -3202,7 +3202,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(key_0) === 'bigint' && key_0 >= 0n && key_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('member',
                                      'argument 1',
-                                     'NonFungibleToken.compact line 72 char 3',
+                                     'NonFungibleToken.compact line 75 char 3',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      key_0)
         }
@@ -3234,7 +3234,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(key_0) === 'bigint' && key_0 >= 0n && key_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('lookup',
                                      'argument 1',
-                                     'NonFungibleToken.compact line 72 char 3',
+                                     'NonFungibleToken.compact line 75 char 3',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      key_0)
         }
@@ -3323,7 +3323,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(key_0) === 'object' && typeof(key_0.is_left) === 'boolean' && typeof(key_0.left) === 'object' && key_0.left.bytes.buffer instanceof ArrayBuffer && key_0.left.bytes.BYTES_PER_ELEMENT === 1 && key_0.left.bytes.length === 32 && typeof(key_0.right) === 'object' && key_0.right.bytes.buffer instanceof ArrayBuffer && key_0.right.bytes.BYTES_PER_ELEMENT === 1 && key_0.right.bytes.length === 32)) {
           __compactRuntime.typeError('member',
                                      'argument 1',
-                                     'NonFungibleToken.compact line 74 char 3',
+                                     'NonFungibleToken.compact line 77 char 3',
                                      'struct Either<is_left: Boolean, left: struct ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes: Bytes<32>>>',
                                      key_0)
         }
@@ -3355,7 +3355,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(key_0) === 'object' && typeof(key_0.is_left) === 'boolean' && typeof(key_0.left) === 'object' && key_0.left.bytes.buffer instanceof ArrayBuffer && key_0.left.bytes.BYTES_PER_ELEMENT === 1 && key_0.left.bytes.length === 32 && typeof(key_0.right) === 'object' && key_0.right.bytes.buffer instanceof ArrayBuffer && key_0.right.bytes.BYTES_PER_ELEMENT === 1 && key_0.right.bytes.length === 32)) {
           __compactRuntime.typeError('lookup',
                                      'argument 1',
-                                     'NonFungibleToken.compact line 74 char 3',
+                                     'NonFungibleToken.compact line 77 char 3',
                                      'struct Either<is_left: Boolean, left: struct ZswapCoinPublicKey<bytes: Bytes<32>>, right: struct ContractAddress<bytes: Bytes<32>>>',
                                      key_0)
         }
@@ -3444,7 +3444,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(key_0) === 'bigint' && key_0 >= 0n && key_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('member',
                                      'argument 1',
-                                     'NonFungibleToken.compact line 76 char 3',
+                                     'NonFungibleToken.compact line 79 char 3',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      key_0)
         }
@@ -3476,7 +3476,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(key_0) === 'bigint' && key_0 >= 0n && key_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('lookup',
                                      'argument 1',
-                                     'NonFungibleToken.compact line 76 char 3',
+                                     'NonFungibleToken.compact line 79 char 3',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      key_0)
         }
@@ -3565,7 +3565,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(key_0) === 'bigint' && key_0 >= 0n && key_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('member',
                                      'argument 1',
-                                     'NonFungibleToken.compact line 78 char 3',
+                                     'NonFungibleToken.compact line 81 char 3',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      key_0)
         }
@@ -3597,7 +3597,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(key_0) === 'bigint' && key_0 >= 0n && key_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('lookup',
                                      'argument 1',
-                                     'NonFungibleToken.compact line 78 char 3',
+                                     'NonFungibleToken.compact line 81 char 3',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      key_0)
         }

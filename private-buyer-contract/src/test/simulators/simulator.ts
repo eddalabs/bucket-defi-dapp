@@ -18,9 +18,9 @@ import {
   Either,
   ShieldedCoinInfo,
   type NonFungibleToken_Certificate,
-  NonFungibleToken_Source,
-  NonFungibleToken_Impact,
-  NonFungibleToken_Location
+  NonFungibleToken_Category,
+  NonFungibleToken_Tier,
+  NonFungibleToken_Region
 } from "../../managed/mini-private-buyer/contract/index.js";
 import {
   type PrivateState,
@@ -33,9 +33,9 @@ import { deployer } from "../mini-private-buyer.test.js";
 
 export {
   type NonFungibleToken_Certificate,
-  NonFungibleToken_Source,
-  NonFungibleToken_Impact,
-  NonFungibleToken_Location,
+  NonFungibleToken_Category,
+  NonFungibleToken_Tier,
+  NonFungibleToken_Region,
   type ShieldedCoinInfo
 };
 

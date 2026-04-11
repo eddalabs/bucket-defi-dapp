@@ -11,6 +11,9 @@ pragma language_version >= 0.20.0;
 *
 * @notice: This module does not include transfer or approval circuits. NFT ownership
 * post-purchase is tracked via hash commitments in the NFTPool module.
+*
+* @notice: Enums and struct are generic to support multiple use cases (e.g., energy
+* certificates, recycling credits). Each UI maps the generic values to domain labels.
 */
 
 module NonFungibleToken {
@@ -22,28 +25,28 @@ module NonFungibleToken {
   // ENUMS
   ///////////////////////////////////////////////////////////////////////////////
 
-  export enum Source {
-    Solar,
-    Wind,
-    Hydro,
-    Biomass,
-    Geothermal,
-    Nuclear
+  export enum Category {
+    Type1,
+    Type2,
+    Type3,
+    Type4,
+    Type5,
+    Type6
   }
 
-  export enum Impact {
-    Minimal,
-    Low,
-    Medium,
-    High,
-    Extreme
+  export enum Tier {
+    Level1,
+    Level2,
+    Level3,
+    Level4,
+    Level5
   }
 
-  export enum Location {
-    RJ,
-    SP,
-    MG,
-    RS
+  export enum Region {
+    Region1,
+    Region2,
+    Region3,
+    Region4
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -52,12 +55,12 @@ module NonFungibleToken {
 
   // Struct holding all attributes for a Certificate.
   export struct Certificate {
-    id: Opaque<"string">, // Certificate ID from web2 system
-    source: Source, // Type of the certificate
-    generation: Uint<64>, // kWh compensated
-    vintage: Uint<64>, // Expiration date
-    impact: Impact, // Impact of the certificate
-    location: Location // Location of the certificate
+    id: Opaque<"string">,     // External reference ID
+    category: Category,        // E.g., energy source type or material type
+    quantity: Uint<64>,        // E.g., kWh generated or tonnes collected
+    period: Uint<64>,          // E.g., vintage year or verification period
+    tier: Tier,                // E.g., impact level or material grade
+    region: Region             // Geographic region
   }
 
   ///////////////////////////////////////////////////////////////////////////////

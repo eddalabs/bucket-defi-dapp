@@ -12,28 +12,32 @@ export type ShieldedCoinInfo = { nonce: Uint8Array;
                                };
 
 export type NonFungibleToken_Certificate = { id: string;
-                                             source: NonFungibleToken_Source;
-                                             generation: bigint;
-                                             vintage: bigint;
-                                             impact: NonFungibleToken_Impact;
-                                             location: NonFungibleToken_Location
+                                             category: NonFungibleToken_Category;
+                                             quantity: bigint;
+                                             period: bigint;
+                                             tier: NonFungibleToken_Tier;
+                                             region: NonFungibleToken_Region
                                            };
 
-export enum NonFungibleToken_Location { RJ = 0, SP = 1, MG = 2, RS = 3 }
-
-export enum NonFungibleToken_Impact { Minimal = 0,
-                                      Low = 1,
-                                      Medium = 2,
-                                      High = 3,
-                                      Extreme = 4
+export enum NonFungibleToken_Category { Type1 = 0,
+                                        Type2 = 1,
+                                        Type3 = 2,
+                                        Type4 = 3,
+                                        Type5 = 4,
+                                        Type6 = 5
 }
 
-export enum NonFungibleToken_Source { Solar = 0,
-                                      Wind = 1,
-                                      Hydro = 2,
-                                      Biomass = 3,
-                                      Geothermal = 4,
-                                      Nuclear = 5
+export enum NonFungibleToken_Tier { Level1 = 0,
+                                    Level2 = 1,
+                                    Level3 = 2,
+                                    Level4 = 3,
+                                    Level5 = 4
+}
+
+export enum NonFungibleToken_Region { Region1 = 0,
+                                      Region2 = 1,
+                                      Region3 = 2,
+                                      Region4 = 3
 }
 
 export type Witnesses<PS> = {

@@ -1,8 +1,8 @@
 import {
   NonFungibleToken_Certificate,
-  NonFungibleToken_Source,
-  NonFungibleToken_Impact,
-  NonFungibleToken_Location,
+  NonFungibleToken_Category,
+  NonFungibleToken_Tier,
+  NonFungibleToken_Region,
   ShieldedCoinInfo,
   Simulator
 } from "./simulators/simulator";
@@ -42,34 +42,34 @@ const TOKEN_PRICE = 100n;
 
 // Helper to create a certificate for a given index
 function createCertificate(index: number): NonFungibleToken_Certificate {
-  const sources = [
-    NonFungibleToken_Source.Biomass,
-    NonFungibleToken_Source.Solar,
-    NonFungibleToken_Source.Wind,
-    NonFungibleToken_Source.Hydro,
-    NonFungibleToken_Source.Geothermal
+  const categories = [
+    NonFungibleToken_Category.Type1,
+    NonFungibleToken_Category.Type2,
+    NonFungibleToken_Category.Type3,
+    NonFungibleToken_Category.Type4,
+    NonFungibleToken_Category.Type5
   ];
-  const impacts = [
-    NonFungibleToken_Impact.High,
-    NonFungibleToken_Impact.Medium,
-    NonFungibleToken_Impact.Low,
-    NonFungibleToken_Impact.Minimal,
-    NonFungibleToken_Impact.Extreme
+  const tiers = [
+    NonFungibleToken_Tier.Level1,
+    NonFungibleToken_Tier.Level2,
+    NonFungibleToken_Tier.Level3,
+    NonFungibleToken_Tier.Level4,
+    NonFungibleToken_Tier.Level5
   ];
-  const locations = [
-    NonFungibleToken_Location.RJ,
-    NonFungibleToken_Location.SP,
-    NonFungibleToken_Location.MG,
-    NonFungibleToken_Location.RS
+  const regions = [
+    NonFungibleToken_Region.Region1,
+    NonFungibleToken_Region.Region2,
+    NonFungibleToken_Region.Region3,
+    NonFungibleToken_Region.Region4
   ];
 
   return {
     id: `Certificate_${index}`,
-    source: sources[index % sources.length],
-    generation: BigInt(1000000 * index),
-    vintage: BigInt(10 + index),
-    impact: impacts[index % impacts.length],
-    location: locations[index % locations.length]
+    category: categories[index % categories.length],
+    quantity: BigInt(1000000 * index),
+    period: BigInt(10 + index),
+    tier: tiers[index % tiers.length],
+    region: regions[index % regions.length]
   };
 }
 

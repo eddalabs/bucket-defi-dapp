@@ -126,16 +126,16 @@ function TransactionProgress({ stage, message, progress, errorMessage, isProcess
 
 // ─── Constants ────────────────────────────────────────────────────────────
 
-const SOURCE_LABELS = ['Solar', 'Wind', 'Hydro', 'Biomass', 'Geothermal', 'Nuclear'];
-const IMPACT_LABELS = ['Minimal', 'Low', 'Medium', 'High', 'Extreme'];
-const LOCATION_LABELS = ['RJ', 'SP', 'MG', 'RS'];
+const CATEGORY_LABELS = ['Type1', 'Type2', 'Type3', 'Type4', 'Type5', 'Type6'];
+const TIER_LABELS = ['Level1', 'Level2', 'Level3', 'Level4', 'Level5'];
+const REGION_LABELS = ['Region1', 'Region2', 'Region3', 'Region4'];
 
 interface MintedToken {
   tokenId: string;
   price: string;
-  source: number;
-  impact: number;
-  location: number;
+  category: number;
+  tier: number;
+  region: number;
 }
 
 // ─── Action Sections ──────────────────────────────────────────────────────
@@ -155,11 +155,11 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
 }) {
   const [tokenId, setTokenId] = useState('');
   const [price, setPrice] = useState('100');
-  const [source, setSource] = useState(0);
-  const [impact, setImpact] = useState(2);
-  const [location, setLocation] = useState(0);
-  const [generation, setGeneration] = useState('1000000');
-  const [vintage, setVintage] = useState('2024');
+  const [category, setCategory] = useState(0);
+  const [tier, setTier] = useState(2);
+  const [region, setRegion] = useState(0);
+  const [quantity, setQuantity] = useState('1000000');
+  const [period, setPeriod] = useState('2024');
   const [lastMintedId, setLastMintedId] = useState<string | null>(null);
   const txProgress = useTransactionProgress();
   useFlowMessageSync(txProgress);
@@ -176,15 +176,15 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
       };
       const certificate = {
         id: `Certificate_${tokenId}`,
-        source,
-        generation: BigInt(generation),
-        vintage: BigInt(vintage),
-        impact,
-        location,
+        category,
+        quantity: BigInt(quantity),
+        period: BigInt(period),
+        tier,
+        region,
       };
       await controller.mintAndList(to, BigInt(tokenId), certificate, BigInt(price));
       setLastMintedId(mintingId);
-      onMinted({ tokenId: mintingId, price, source, impact, location });
+      onMinted({ tokenId: mintingId, price, category, tier, region });
     });
   };
 
@@ -210,34 +210,34 @@ function MintSection({ controller, coinPublicKey, onMinted }: {
         </div>
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="text-xs text-muted-foreground">Source</label>
-            <select value={source} onChange={(e) => setSource(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
-              <option value={0}>Solar</option><option value={1}>Wind</option><option value={2}>Hydro</option>
-              <option value={3}>Biomass</option><option value={4}>Geothermal</option><option value={5}>Nuclear</option>
+            <label className="text-xs text-muted-foreground">Category</label>
+            <select value={category} onChange={(e) => setCategory(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
+              <option value={0}>Type1</option><option value={1}>Type2</option><option value={2}>Type3</option>
+              <option value={3}>Type4</option><option value={4}>Type5</option><option value={5}>Type6</option>
             </select>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Impact</label>
-            <select value={impact} onChange={(e) => setImpact(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
-              <option value={0}>Minimal</option><option value={1}>Low</option><option value={2}>Medium</option>
-              <option value={3}>High</option><option value={4}>Extreme</option>
+            <label className="text-xs text-muted-foreground">Tier</label>
+            <select value={tier} onChange={(e) => setTier(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
+              <option value={0}>Level1</option><option value={1}>Level2</option><option value={2}>Level3</option>
+              <option value={3}>Level4</option><option value={4}>Level5</option>
             </select>
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Location</label>
-            <select value={location} onChange={(e) => setLocation(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
-              <option value={0}>RJ</option><option value={1}>SP</option><option value={2}>MG</option><option value={3}>RS</option>
+            <label className="text-xs text-muted-foreground">Region</label>
+            <select value={region} onChange={(e) => setRegion(Number(e.target.value))} className="w-full border rounded px-3 py-2 text-sm bg-background">
+              <option value={0}>Region1</option><option value={1}>Region2</option><option value={2}>Region3</option><option value={3}>Region4</option>
             </select>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-muted-foreground">Generation (kWh)</label>
-            <input type="number" value={generation} onChange={(e) => setGeneration(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
+            <label className="text-xs text-muted-foreground">Quantity</label>
+            <input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground">Vintage (Year)</label>
-            <input type="number" value={vintage} onChange={(e) => setVintage(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
+            <label className="text-xs text-muted-foreground">Period</label>
+            <input type="number" value={period} onChange={(e) => setPeriod(e.target.value)} className="w-full border rounded px-3 py-2 text-sm bg-background" />
           </div>
         </div>
         <Button onClick={handleMintAndList} disabled={!tokenId || txProgress.isProcessing} className="w-full gap-2">
@@ -272,9 +272,9 @@ function MintedTokensList({ tokens }: { tokens: MintedToken[] }) {
           {tokens.map((t) => (
             <div key={t.tokenId} className="flex items-center justify-between border border-border/60 rounded-lg px-4 py-2.5 text-sm">
               <span className="font-mono font-semibold">#{t.tokenId}</span>
-              <span className="text-muted-foreground">{SOURCE_LABELS[t.source]}</span>
-              <span className="text-muted-foreground">{IMPACT_LABELS[t.impact]}</span>
-              <span className="text-muted-foreground">{LOCATION_LABELS[t.location]}</span>
+              <span className="text-muted-foreground">{CATEGORY_LABELS[t.category]}</span>
+              <span className="text-muted-foreground">{TIER_LABELS[t.tier]}</span>
+              <span className="text-muted-foreground">{REGION_LABELS[t.region]}</span>
               <span className="font-medium">Price: {t.price}</span>
             </div>
           ))}
@@ -381,9 +381,9 @@ function CertificatesTable({ tokens, secretNonce }: { tokens: TokenInfo[]; secre
             <thead>
               <tr className="border-b border-border/60 text-left">
                 <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">ID</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Source</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Impact</th>
-                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Location</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Category</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Tier</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Region</th>
                 <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Price</th>
                 <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Status</th>
                 <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Owner</th>
@@ -394,9 +394,9 @@ function CertificatesTable({ tokens, secretNonce }: { tokens: TokenInfo[]; secre
               {tokens.map((token) => (
                 <tr key={token.tokenId.toString()} className="border-b border-border/30 last:border-0">
                   <td className="py-2.5 pr-3 font-mono font-semibold">#{token.tokenId.toString()}</td>
-                  <td className="py-2.5 pr-3">{SOURCE_LABELS[token.certificate.source] ?? '?'}</td>
-                  <td className="py-2.5 pr-3">{IMPACT_LABELS[token.certificate.impact] ?? '?'}</td>
-                  <td className="py-2.5 pr-3">{LOCATION_LABELS[token.certificate.location] ?? '?'}</td>
+                  <td className="py-2.5 pr-3">{CATEGORY_LABELS[token.certificate.category] ?? '?'}</td>
+                  <td className="py-2.5 pr-3">{TIER_LABELS[token.certificate.tier] ?? '?'}</td>
+                  <td className="py-2.5 pr-3">{REGION_LABELS[token.certificate.region] ?? '?'}</td>
                   <td className="py-2.5 pr-3 font-medium">{token.price.toString()}</td>
                   <td className="py-2.5 pr-3">
                     {token.isSold ? (

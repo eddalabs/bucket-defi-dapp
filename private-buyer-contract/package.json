@@ -20,8 +20,8 @@
     "@midnight-ntwrk/ledger-v8": "8.0.3"
   },
   "scripts": {
-    "compact-full": "compact compile +0.30.0 src/mini-private-buyer.compact src/managed/mini-private-buyer",
-    "compact": "compact compile --skip-zk +0.30.0 src/mini-private-buyer.compact src/managed/mini-private-buyer",
+    "compact": "compact compile +0.30.0 src/mini-private-buyer.compact src/managed/mini-private-buyer",
+    "compact-fast": "compact compile --skip-zk +0.30.0 src/mini-private-buyer.compact src/managed/mini-private-buyer",
     "test": "vitest run",
     "test:compile": "pnpm compact && vitest run",
     "build": "rm -rf dist && tsc --project tsconfig.build.json && cp -Rf ./src/managed ./dist/managed && cp ./src/mini-private-buyer.compact ./dist",

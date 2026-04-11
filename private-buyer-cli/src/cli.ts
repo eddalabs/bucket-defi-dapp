@@ -241,19 +241,19 @@ const mainLoop = async (
           };
           const tokenId = await readBigInt(rli, 'Enter token ID: ');
           const idStr = await rli.question('Enter certificate ID: ');
-          const sourceStr = await rli.question('Enter source (Solar=0,Wind=1,Hydro=2,Biomass=3,Geothermal=4,Nuclear=5): ');
-          const generation = await readBigInt(rli, 'Enter generation: ');
-          const vintage = await readBigInt(rli, 'Enter vintage: ');
-          const impactStr = await rli.question('Enter impact (Minimal=0,Low=1,Medium=2,High=3,Extreme=4): ');
-          const locationStr = await rli.question('Enter location (RJ=0,SP=1,MG=2,RS=3): ');
+          const categoryStr = await rli.question('Enter category (Type1=0,Type2=1,Type3=2,Type4=3,Type5=4,Type6=5): ');
+          const quantity = await readBigInt(rli, 'Enter quantity: ');
+          const period = await readBigInt(rli, 'Enter period: ');
+          const tierStr = await rli.question('Enter tier (Level1=0,Level2=1,Level3=2,Level4=3,Level5=4): ');
+          const regionStr = await rli.question('Enter region (Region1=0,Region2=1,Region3=2,Region4=3): ');
           const price = await readBigInt(rli, 'Enter price: ');
           const cert: MiniPrivateBuyer.NonFungibleToken_Certificate = {
             id: idStr.trim(),
-            source: Number(sourceStr.trim()) as MiniPrivateBuyer.NonFungibleToken_Source,
-            generation,
-            vintage,
-            impact: Number(impactStr.trim()) as MiniPrivateBuyer.NonFungibleToken_Impact,
-            location: Number(locationStr.trim()) as MiniPrivateBuyer.NonFungibleToken_Location,
+            category: Number(categoryStr.trim()) as MiniPrivateBuyer.NonFungibleToken_Category,
+            quantity,
+            period,
+            tier: Number(tierStr.trim()) as MiniPrivateBuyer.NonFungibleToken_Tier,
+            region: Number(regionStr.trim()) as MiniPrivateBuyer.NonFungibleToken_Region,
           };
           await api.withStatus('Minting token', () => api.mint(contract, to, tokenId, cert, price));
           break;

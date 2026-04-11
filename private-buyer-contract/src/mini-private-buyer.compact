@@ -30,9 +30,9 @@ export { NonFungibleToken__name,
          NonFungibleToken__tokenToCertificate,
          NonFungibleToken__tokenToPrice,
          NonFungibleToken_Certificate,
-         NonFungibleToken_Location,
-         NonFungibleToken_Impact,
-         NonFungibleToken_Source };
+         NonFungibleToken_Category,
+         NonFungibleToken_Tier,
+         NonFungibleToken_Region };
 
 export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__nftOwnerCommitment }
 

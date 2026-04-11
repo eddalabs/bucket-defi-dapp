@@ -17,34 +17,34 @@ export const randomBytes = (length: number): Uint8Array => {
  * Create a certificate for a given index, rotating through available enum values.
  */
 export function createCertificate(index: number): MiniPrivateBuyer.NonFungibleToken_Certificate {
-  const sources = [
-    MiniPrivateBuyer.NonFungibleToken_Source.Biomass,
-    MiniPrivateBuyer.NonFungibleToken_Source.Solar,
-    MiniPrivateBuyer.NonFungibleToken_Source.Wind,
-    MiniPrivateBuyer.NonFungibleToken_Source.Hydro,
-    MiniPrivateBuyer.NonFungibleToken_Source.Geothermal,
+  const categories = [
+    MiniPrivateBuyer.NonFungibleToken_Category.Type1,
+    MiniPrivateBuyer.NonFungibleToken_Category.Type2,
+    MiniPrivateBuyer.NonFungibleToken_Category.Type3,
+    MiniPrivateBuyer.NonFungibleToken_Category.Type4,
+    MiniPrivateBuyer.NonFungibleToken_Category.Type5,
   ];
-  const impacts = [
-    MiniPrivateBuyer.NonFungibleToken_Impact.High,
-    MiniPrivateBuyer.NonFungibleToken_Impact.Medium,
-    MiniPrivateBuyer.NonFungibleToken_Impact.Low,
-    MiniPrivateBuyer.NonFungibleToken_Impact.Minimal,
-    MiniPrivateBuyer.NonFungibleToken_Impact.Extreme,
+  const tiers = [
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level1,
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level2,
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level3,
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level4,
+    MiniPrivateBuyer.NonFungibleToken_Tier.Level5,
   ];
-  const locations = [
-    MiniPrivateBuyer.NonFungibleToken_Location.RJ,
-    MiniPrivateBuyer.NonFungibleToken_Location.SP,
-    MiniPrivateBuyer.NonFungibleToken_Location.MG,
-    MiniPrivateBuyer.NonFungibleToken_Location.RS,
+  const regions = [
+    MiniPrivateBuyer.NonFungibleToken_Region.Region1,
+    MiniPrivateBuyer.NonFungibleToken_Region.Region2,
+    MiniPrivateBuyer.NonFungibleToken_Region.Region3,
+    MiniPrivateBuyer.NonFungibleToken_Region.Region4,
   ];
 
   return {
     id: `Certificate_${index}`,
-    source: sources[index % sources.length],
-    generation: BigInt(1000000 * index),
-    vintage: BigInt(10 + index),
-    impact: impacts[index % impacts.length],
-    location: locations[index % locations.length],
+    category: categories[index % categories.length],
+    quantity: BigInt(1000000 * index),
+    period: BigInt(10 + index),
+    tier: tiers[index % tiers.length],
+    region: regions[index % regions.length],
   };
 }
 

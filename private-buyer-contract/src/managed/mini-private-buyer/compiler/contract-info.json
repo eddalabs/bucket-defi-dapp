@@ -76,58 +76,58 @@
                 }
               },
               {
-                "name": "source",
+                "name": "category",
                 "type": {
                   "type-name": "Enum",
-                  "name": "Source",
+                  "name": "Category",
                   "elements": [
-                    "Solar",
-                    "Wind",
-                    "Hydro",
-                    "Biomass",
-                    "Geothermal",
-                    "Nuclear"
+                    "Type1",
+                    "Type2",
+                    "Type3",
+                    "Type4",
+                    "Type5",
+                    "Type6"
                   ]
                 }
               },
               {
-                "name": "generation",
+                "name": "quantity",
                 "type": {
                   "type-name": "Uint",
                   "maxval": 18446744073709551615
                 }
               },
               {
-                "name": "vintage",
+                "name": "period",
                 "type": {
                   "type-name": "Uint",
                   "maxval": 18446744073709551615
                 }
               },
               {
-                "name": "impact",
+                "name": "tier",
                 "type": {
                   "type-name": "Enum",
-                  "name": "Impact",
+                  "name": "Tier",
                   "elements": [
-                    "Minimal",
-                    "Low",
-                    "Medium",
-                    "High",
-                    "Extreme"
+                    "Level1",
+                    "Level2",
+                    "Level3",
+                    "Level4",
+                    "Level5"
                   ]
                 }
               },
               {
-                "name": "location",
+                "name": "region",
                 "type": {
                   "type-name": "Enum",
-                  "name": "Location",
+                  "name": "Region",
                   "elements": [
-                    "RJ",
-                    "SP",
-                    "MG",
-                    "RS"
+                    "Region1",
+                    "Region2",
+                    "Region3",
+                    "Region4"
                   ]
                 }
               }
@@ -221,58 +221,58 @@
                 }
               },
               {
-                "name": "source",
+                "name": "category",
                 "type": {
                   "type-name": "Enum",
-                  "name": "Source",
+                  "name": "Category",
                   "elements": [
-                    "Solar",
-                    "Wind",
-                    "Hydro",
-                    "Biomass",
-                    "Geothermal",
-                    "Nuclear"
+                    "Type1",
+                    "Type2",
+                    "Type3",
+                    "Type4",
+                    "Type5",
+                    "Type6"
                   ]
                 }
               },
               {
-                "name": "generation",
+                "name": "quantity",
                 "type": {
                   "type-name": "Uint",
                   "maxval": 18446744073709551615
                 }
               },
               {
-                "name": "vintage",
+                "name": "period",
                 "type": {
                   "type-name": "Uint",
                   "maxval": 18446744073709551615
                 }
               },
               {
-                "name": "impact",
+                "name": "tier",
                 "type": {
                   "type-name": "Enum",
-                  "name": "Impact",
+                  "name": "Tier",
                   "elements": [
-                    "Minimal",
-                    "Low",
-                    "Medium",
-                    "High",
-                    "Extreme"
+                    "Level1",
+                    "Level2",
+                    "Level3",
+                    "Level4",
+                    "Level5"
                   ]
                 }
               },
               {
-                "name": "location",
+                "name": "region",
                 "type": {
                   "type-name": "Enum",
-                  "name": "Location",
+                  "name": "Region",
                   "elements": [
-                    "RJ",
-                    "SP",
-                    "MG",
-                    "RS"
+                    "Region1",
+                    "Region2",
+                    "Region3",
+                    "Region4"
                   ]
                 }
               }
@@ -610,58 +610,58 @@
             }
           },
           {
-            "name": "source",
+            "name": "category",
             "type": {
               "type-name": "Enum",
-              "name": "Source",
+              "name": "Category",
               "elements": [
-                "Solar",
-                "Wind",
-                "Hydro",
-                "Biomass",
-                "Geothermal",
-                "Nuclear"
+                "Type1",
+                "Type2",
+                "Type3",
+                "Type4",
+                "Type5",
+                "Type6"
               ]
             }
           },
           {
-            "name": "generation",
+            "name": "quantity",
             "type": {
               "type-name": "Uint",
               "maxval": 18446744073709551615
             }
           },
           {
-            "name": "vintage",
+            "name": "period",
             "type": {
               "type-name": "Uint",
               "maxval": 18446744073709551615
             }
           },
           {
-            "name": "impact",
+            "name": "tier",
             "type": {
               "type-name": "Enum",
-              "name": "Impact",
+              "name": "Tier",
               "elements": [
-                "Minimal",
-                "Low",
-                "Medium",
-                "High",
-                "Extreme"
+                "Level1",
+                "Level2",
+                "Level3",
+                "Level4",
+                "Level5"
               ]
             }
           },
           {
-            "name": "location",
+            "name": "region",
             "type": {
               "type-name": "Enum",
-              "name": "Location",
+              "name": "Region",
               "elements": [
-                "RJ",
-                "SP",
-                "MG",
-                "RS"
+                "Region1",
+                "Region2",
+                "Region3",
+                "Region4"
               ]
             }
           }
