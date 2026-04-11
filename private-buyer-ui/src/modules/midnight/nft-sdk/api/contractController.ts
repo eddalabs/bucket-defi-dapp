@@ -8,6 +8,7 @@ import {
   emptyState,
   type DerivedState,
   type UserAction,
+  type TokenInfo,
 } from './common-types';
 import { MiniPrivateBuyer, type PrivateState, witnesses, createPrivateState } from '@eddalabs/mini-private-buyer-contract';
 import { deployContract, findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
@@ -41,7 +42,7 @@ export interface ContractControllerInterface {
 export class ContractController implements ContractControllerInterface {
   readonly deployedContractAddress: ContractAddress;
   readonly state$: Rx.Observable<DerivedState>;
-  readonly privateStates$: Rx.Subject<PrivateState>;
+  readonly privateStates$: Rx.BehaviorSubject<PrivateState>;
   readonly actions$: Rx.Subject<UserAction>;
 
   private constructor(
@@ -49,9 +50,10 @@ export class ContractController implements ContractControllerInterface {
     public readonly deployedContract: DeployedMiniPrivateBuyerContract,
     public readonly providers: MiniPrivateBuyerProviders,
     private readonly logger: Logger,
+    initialPrivateState: PrivateState,
   ) {
     this.deployedContractAddress = deployedContract.deployTxData.public.contractAddress;
-    this.privateStates$ = new Rx.Subject<PrivateState>();
+    this.privateStates$ = new Rx.BehaviorSubject<PrivateState>(initialPrivateState);
     this.actions$ = new Rx.Subject<UserAction>();
 
     const combine = (_acc: DerivedState, val: Partial<DerivedState>): DerivedState => ({
@@ -65,11 +67,49 @@ export class ContractController implements ContractControllerInterface {
       .pipe(
         Rx.map((contractState) => {
           const ledgerState = MiniPrivateBuyer.ledger(contractState.data);
+
+          // Extract first 10 tokens from ledger maps
+          const tokens: TokenInfo[] = [];
+          let count = 0;
+          for (const [tokenId, certificate] of ledgerState.NonFungibleToken__tokenToCertificate) {
+            if (count >= 10) break;
+
+            const price = ledgerState.NonFungibleToken__tokenToPrice.member(tokenId)
+              ? ledgerState.NonFungibleToken__tokenToPrice.lookup(tokenId)
+              : 0n;
+
+            const owner = ledgerState.NonFungibleToken__owners.member(tokenId)
+              ? ledgerState.NonFungibleToken__owners.lookup(tokenId)
+              : null;
+
+            const isListed = ledgerState.NFTPool__pool.member(tokenId);
+
+            const isSold = ledgerState.NFTPool__tokenSold.member(tokenId)
+              ? ledgerState.NFTPool__tokenSold.lookup(tokenId)
+              : false;
+
+            const buyerCommitment = ledgerState.NFTPool__nftOwnerCommitment.member(tokenId)
+              ? ledgerState.NFTPool__nftOwnerCommitment.lookup(tokenId)
+              : null;
+
+            tokens.push({
+              tokenId,
+              certificate,
+              price,
+              ownerBytes: owner?.left?.bytes ?? new Uint8Array(32),
+              isListed,
+              isSold,
+              buyerCommitment,
+            });
+            count++;
+          }
+
           return {
             name: ledgerState.NonFungibleToken__name,
             symbol: ledgerState.NonFungibleToken__symbol,
             certificatesCreatedCounter: ledgerState.NonFungibleToken__certificatesCreatedCounter,
             purchaseCounter: ledgerState.NFTPool__purchaseCounter,
+            tokens,
           };
         }),
         Rx.retry({ delay: 5000 }),
@@ -80,6 +120,7 @@ export class ContractController implements ContractControllerInterface {
             symbol: '',
             certificatesCreatedCounter: 0n,
             purchaseCounter: 0n,
+            tokens: [] as TokenInfo[],
           });
         }),
       );
@@ -101,14 +142,15 @@ export class ContractController implements ContractControllerInterface {
     symbol: string,
   ): Promise<ContractController> {
     logger.info('Deploying mini-private-buyer contract...');
+    const privateState = createPrivateState(crypto.getRandomValues(new Uint8Array(32)));
     const contract = await deployContract(providers, {
       compiledContract: miniPrivateBuyerCompiledContract,
       privateStateId: MiniPrivateBuyerPrivateStateId,
-      initialPrivateState: createPrivateState(crypto.getRandomValues(new Uint8Array(32))),
+      initialPrivateState: privateState,
       args: [name, symbol],
     });
     logger.info(`Deployed at: ${contract.deployTxData.public.contractAddress}`);
-    return new ContractController(MiniPrivateBuyerPrivateStateId, contract, providers, logger);
+    return new ContractController(MiniPrivateBuyerPrivateStateId, contract, providers, logger, privateState);
   }
 
   static async join(
@@ -117,14 +159,15 @@ export class ContractController implements ContractControllerInterface {
     contractAddress: string,
   ): Promise<ContractController> {
     logger.info(`Joining contract at: ${contractAddress}`);
+    const privateState = createPrivateState(crypto.getRandomValues(new Uint8Array(32)));
     const contract = await findDeployedContract(providers, {
       contractAddress,
       compiledContract: miniPrivateBuyerCompiledContract,
       privateStateId: MiniPrivateBuyerPrivateStateId,
-      initialPrivateState: createPrivateState(crypto.getRandomValues(new Uint8Array(32))),
+      initialPrivateState: privateState,
     });
     logger.info('Joined successfully');
-    return new ContractController(MiniPrivateBuyerPrivateStateId, contract, providers, logger);
+    return new ContractController(MiniPrivateBuyerPrivateStateId, contract, providers, logger, privateState);
   }
 
   async mint(

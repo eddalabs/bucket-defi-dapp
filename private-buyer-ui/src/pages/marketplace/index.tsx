@@ -11,6 +11,7 @@ import { useContractSubscription } from '@/modules/midnight/nft-sdk/hooks/use-co
 import { useTransactionProgress, type TxStage } from '@/modules/midnight/nft-sdk/hooks/use-transaction-progress';
 import { useProviders } from '@/modules/midnight/nft-sdk/hooks/use-providers';
 import type { ContractControllerInterface } from '@/modules/midnight/nft-sdk/api/contractController';
+import type { TokenInfo } from '@/modules/midnight/nft-sdk/api/common-types';
 
 // ─── Transaction Progress UI ──────────────────────────────────────────────
 
@@ -350,6 +351,108 @@ function BuySection({ controller }: { controller: ContractControllerInterface })
 
 // ─── Contract Stats ───────────────────────────────────────────────────────
 
+// ─── Certificates Table ───────────────────────────────────────────────────
+
+function toHexShort(bytes: Uint8Array): string {
+  const hex = Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+  if (hex.length <= 12) return hex;
+  return `${hex.slice(0, 6)}...${hex.slice(-6)}`;
+}
+
+function toHexFull(bytes: Uint8Array): string {
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function CertificatesTable({ tokens, secretNonce }: { tokens: TokenInfo[]; secretNonce: Uint8Array | undefined }) {
+  if (tokens.length === 0) return null;
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Activity className="h-5 w-5 text-primary" />
+          <CardTitle className="text-base">Certificates (Live)</CardTitle>
+        </div>
+        <CardDescription>Real-time state of NFT certificates from the indexer</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border/60 text-left">
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">ID</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Source</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Impact</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Location</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Price</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Status</th>
+                <th className="pb-2 pr-3 font-medium text-muted-foreground text-xs">Owner</th>
+                <th className="pb-2 font-medium text-muted-foreground text-xs">Buyer Commitment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tokens.map((token) => (
+                <tr key={token.tokenId.toString()} className="border-b border-border/30 last:border-0">
+                  <td className="py-2.5 pr-3 font-mono font-semibold">#{token.tokenId.toString()}</td>
+                  <td className="py-2.5 pr-3">{SOURCE_LABELS[token.certificate.source] ?? '?'}</td>
+                  <td className="py-2.5 pr-3">{IMPACT_LABELS[token.certificate.impact] ?? '?'}</td>
+                  <td className="py-2.5 pr-3">{LOCATION_LABELS[token.certificate.location] ?? '?'}</td>
+                  <td className="py-2.5 pr-3 font-medium">{token.price.toString()}</td>
+                  <td className="py-2.5 pr-3">
+                    {token.isSold ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                        Sold
+                      </span>
+                    ) : token.isListed ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        Listed
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                        Unlisted
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-2.5 pr-3 font-mono text-xs text-muted-foreground">
+                    {toHexShort(token.ownerBytes)}
+                  </td>
+                  <td className="py-2.5 font-mono text-xs">
+                    {token.buyerCommitment ? (
+                      <span className="text-purple-600 dark:text-purple-400" title={Array.from(token.buyerCommitment).map(b => b.toString(16).padStart(2, '0')).join('')}>
+                        {toHexShort(token.buyerCommitment)}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground/40">-</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Private state for connected wallet */}
+        {secretNonce && tokens.some((t) => t.isSold) && (
+          <div className="mt-4 p-3 bg-purple-500/5 border border-purple-500/20 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="h-4 w-4 text-purple-500" />
+              <p className="text-xs font-medium text-purple-600 dark:text-purple-400">My Private State (Secret Nonce)</p>
+            </div>
+            <p className="text-xs font-mono break-all text-purple-600/80 dark:text-purple-400/80 select-all">
+              {toHexFull(secretNonce)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              This nonce, combined with your public key, generates the commitment hash used to prove your NFT ownership via ZK proofs.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Contract Stats ───────────────────────────────────────────────────────
+
 function ContractStats({ name, symbol, certificatesCreatedCounter, purchaseCounter, contractAddress }: {
   name: string; symbol: string; certificatesCreatedCounter: bigint; purchaseCounter: bigint; contractAddress?: string;
 }) {
@@ -546,6 +649,8 @@ export function Marketplace() {
               purchaseCounter={derivedState.purchaseCounter}
               contractAddress={deployedContractAPI.deployedContractAddress}
             />
+
+            <CertificatesTable tokens={derivedState.tokens} secretNonce={derivedState.privateState.secretNonce} />
 
             <MintedTokensList tokens={mintedTokens} />
 
