@@ -455,15 +455,17 @@ function ContractStats({ name, symbol, certificatesCreatedCounter, purchaseCount
 
 export function Marketplace() {
   const { unshieldedAddress, shieldedAddresses } = useWallet();
-  const { deployedContractAPI, derivedState, contractDeployment, onDeploy, providers } = useContractSubscription();
+  const { deployedContractAPI, derivedState, providers } = useContractSubscription();
   const [mintedTokens, setMintedTokens] = useState<MintedToken[]>([]);
-  const txProgress = useTransactionProgress();
+  const deployTxProgress = useTransactionProgress();
   const [appLoading, setAppLoading] = useState(true);
+  const [deployedAddress, setDeployedAddress] = useState<string | undefined>(undefined);
+  const [deployedCopied, setDeployedCopied] = useState(false);
 
   const providersState = useProviders();
   const flowMessage = providersState?.flowMessage;
   useEffect(() => {
-    txProgress.updateFromFlowMessage(flowMessage);
+    deployTxProgress.updateFromFlowMessage(flowMessage);
   }, [flowMessage]);
 
   useEffect(() => {
@@ -471,6 +473,18 @@ export function Marketplace() {
       setAppLoading(false);
     }
   }, [derivedState?.name]);
+
+  const handleDeployNew = async () => {
+    if (!providersState?.providers) return;
+    setDeployedAddress(undefined);
+    await deployTxProgress.execute(async () => {
+      const { ContractController } = await import('@/modules/midnight/nft-sdk/api/contractController');
+      const { pino } = await import('pino');
+      const logger = pino({ level: 'trace', browser: { asObject: true } });
+      const controller = await ContractController.deploy(providersState.providers!, logger, 'EddaCerts', 'ECRT');
+      setDeployedAddress(controller.deployedContractAddress);
+    });
+  };
 
   if (!unshieldedAddress) {
     return (
@@ -491,9 +505,6 @@ export function Marketplace() {
     );
   }
 
-  const isDeploying = contractDeployment?.status === 'in-progress';
-  const deployError = contractDeployment?.status === 'failed' ? contractDeployment.error : null;
-
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {appLoading && !deployedContractAPI && <Loading text="Connecting to contract..." />}
@@ -504,34 +515,50 @@ export function Marketplace() {
           <p className="text-muted-foreground">Mint, list, price, and trade NFT certificates on Midnight Network</p>
         </div>
 
-        {/* Deploy section */}
-        {!deployedContractAPI && !appLoading && (
-          <Card className="mb-6 border-border/60">
-            <CardHeader>
-              <CardTitle className="text-base">Actions</CardTitle>
-              <CardDescription>Deploy a new contract to get started</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => txProgress.execute(() => onDeploy().then(() => {}))}
-                disabled={isDeploying || txProgress.isProcessing}
-                className="gap-2"
-              >
-                <PlusCircle className="h-4 w-4" />
-                Deploy New Contract
-              </Button>
+        {/* Deploy new contract */}
+        <Card className="mb-6 border-border/60">
+          <CardHeader>
+            <CardTitle className="text-base">Deploy</CardTitle>
+            <CardDescription>Deploy a new contract instance (copy the address to your .env)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={handleDeployNew}
+              disabled={deployTxProgress.isProcessing}
+              className="gap-2"
+            >
+              <PlusCircle className="h-4 w-4" />
+              Deploy New Contract
+            </Button>
 
-              {deployError && (
-                <div className="mt-4 flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                  <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-                  <p className="text-sm text-red-600 dark:text-red-400">{deployError}</p>
+            {deployedAddress && (
+              <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-border/60">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs font-medium text-muted-foreground">Deployed to</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs gap-1"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(deployedAddress);
+                      setDeployedCopied(true);
+                      setTimeout(() => setDeployedCopied(false), 2000);
+                    }}
+                  >
+                    {deployedCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {deployedCopied ? 'Copied!' : 'Copy'}
+                  </Button>
                 </div>
-              )}
+                <p className="text-xs font-mono break-all text-foreground select-all">{deployedAddress}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Set this as <code className="bg-muted px-1 rounded">VITE_CONTRACT_ADDRESS</code> in your <code className="bg-muted px-1 rounded">.env</code> file and restart the dev server.
+                </p>
+              </div>
+            )}
 
-              <TransactionProgress {...txProgress} />
-            </CardContent>
-          </Card>
-        )}
+            <TransactionProgress {...deployTxProgress} />
+          </CardContent>
+        </Card>
 
         {/* Connected to contract */}
         {deployedContractAPI && derivedState && (
