@@ -34,7 +34,7 @@ export { NonFungibleToken__name,
          NonFungibleToken_Tier,
          NonFungibleToken_Region };
 
-export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__nftOwnerCommitment }
+export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__nftOwnerCommitment, NFTPool__sellerAmount }
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC STATE TOP LEVEL
@@ -43,7 +43,7 @@ export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__n
 export { ZswapCoinPublicKey, ContractAddress, Either, ShieldedCoinInfo };
 
 ///////////////////////////////////////////////////////////////////////////////
-// CIRCUITS (15 total)
+// CIRCUITS (16 total)
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -90,6 +90,14 @@ export circuit burn(tokenId: Uint<128>): [] {
   }
 
   return NonFungibleToken_burn(tokenId);
+}
+
+/**
+* Circuit: Unlist and burn a listed NFT atomically
+*/
+export circuit unlistAndBurn(tokenId: Uint<128>): [] {
+  NFTPool_removeFromPool(tokenId);
+  NonFungibleToken_burn(tokenId);
 }
 
 /**

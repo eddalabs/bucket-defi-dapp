@@ -313,6 +313,25 @@
       }
     },
     {
+      "name": "unlistAndBurn",
+      "pure": false,
+      "proof": true,
+      "arguments": [
+        {
+          "name": "tokenId",
+          "type": {
+            "type-name": "Uint",
+            "maxval": 340282366920938463463374607431768211455
+          }
+        }
+      ],
+      "result-type": {
+        "type-name": "Tuple",
+        "types": [
+        ]
+      }
+    },
+    {
       "name": "addToPool",
       "pure": false,
       "proof": true,

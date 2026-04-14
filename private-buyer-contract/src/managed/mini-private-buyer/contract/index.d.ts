@@ -56,6 +56,7 @@ export type ImpureCircuits<PS> = {
               tokenCertificate_0: NonFungibleToken_Certificate,
               price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   burn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  unlistAndBurn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   purchaseNFT(context: __compactRuntime.CircuitContext<PS>,
@@ -93,6 +94,7 @@ export type ProvableCircuits<PS> = {
               tokenCertificate_0: NonFungibleToken_Certificate,
               price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   burn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  unlistAndBurn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   purchaseNFT(context: __compactRuntime.CircuitContext<PS>,
@@ -133,6 +135,7 @@ export type Circuits<PS> = {
               tokenCertificate_0: NonFungibleToken_Certificate,
               price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   burn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  unlistAndBurn(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   addToPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   removeFromPool(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, []>;
   purchaseNFT(context: __compactRuntime.CircuitContext<PS>,
@@ -210,6 +213,13 @@ export type Ledger = {
     member(key_0: bigint): boolean;
     lookup(key_0: bigint): boolean;
     [Symbol.iterator](): Iterator<[bigint, boolean]>
+  };
+  NFTPool__sellerAmount: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Either<ZswapCoinPublicKey, ContractAddress>): boolean;
+    lookup(key_0: Either<ZswapCoinPublicKey, ContractAddress>): bigint;
+    [Symbol.iterator](): Iterator<[Either<ZswapCoinPublicKey, ContractAddress>, bigint]>
   };
 }
 
