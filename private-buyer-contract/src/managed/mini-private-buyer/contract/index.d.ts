@@ -207,12 +207,37 @@ export type Ledger = {
     [Symbol.iterator](): Iterator<[bigint, Uint8Array]>
   };
   readonly NFTPool__purchaseCounter: bigint;
+  NFTPool__commitmentToCounter: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Uint8Array): boolean;
+    lookup(key_0: Uint8Array): bigint;
+    [Symbol.iterator](): Iterator<[Uint8Array, bigint]>
+  };
+  NFTPool__authVerifications: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Uint8Array): boolean;
+    lookup(key_0: Uint8Array): Uint8Array;
+    [Symbol.iterator](): Iterator<[Uint8Array, Uint8Array]>
+  };
   NFTPool__tokenSold: {
     isEmpty(): boolean;
     size(): bigint;
     member(key_0: bigint): boolean;
     lookup(key_0: bigint): boolean;
     [Symbol.iterator](): Iterator<[bigint, boolean]>
+  };
+  NFTPool__sellerBalance: {
+    isEmpty(): boolean;
+    size(): bigint;
+    member(key_0: Either<ZswapCoinPublicKey, ContractAddress>): boolean;
+    lookup(key_0: Either<ZswapCoinPublicKey, ContractAddress>): { nonce: Uint8Array,
+                                                                  color: Uint8Array,
+                                                                  value: bigint,
+                                                                  mt_index: bigint
+                                                                };
+    [Symbol.iterator](): Iterator<[Either<ZswapCoinPublicKey, ContractAddress>, { nonce: Uint8Array, color: Uint8Array, value: bigint, mt_index: bigint }]>
   };
   NFTPool__sellerAmount: {
     isEmpty(): boolean;

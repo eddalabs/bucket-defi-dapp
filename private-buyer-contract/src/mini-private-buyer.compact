@@ -34,7 +34,7 @@ export { NonFungibleToken__name,
          NonFungibleToken_Tier,
          NonFungibleToken_Region };
 
-export { NFTPool__purchaseCounter, NFTPool__pool, NFTPool__tokenSold, NFTPool__nftOwnerCommitment, NFTPool__sellerAmount }
+export { NFTPool__pool, NFTPool__nftOwnerCommitment, NFTPool__purchaseCounter, NFTPool__commitmentToCounter, NFTPool__authVerifications, NFTPool__tokenSold, NFTPool__sellerBalance, NFTPool__sellerAmount }
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC STATE TOP LEVEL
