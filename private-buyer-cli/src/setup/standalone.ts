@@ -18,7 +18,7 @@ async function setupStandalone() {
 
   try {
     const address = process.env.MY_UNDEPLOYED_UNSHIELDED_ADDRESS!;
-    const result = await sendArbitraryUnshieldedToken(wallet, address, 1000000000n);
+    const result = await sendArbitraryUnshieldedToken(wallet, address, 1000n);
     logger.info(`address keystore ${wallet.unshieldedKeystore.getAddress()}`);
     logger.info(result);
   } catch (error) {
