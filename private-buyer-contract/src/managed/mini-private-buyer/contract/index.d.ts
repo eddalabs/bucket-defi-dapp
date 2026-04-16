@@ -80,6 +80,9 @@ export type ImpureCircuits<PS> = {
   setTokenPrice(context: __compactRuntime.CircuitContext<PS>,
                 tokenId_0: bigint,
                 price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  isTokenSold(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+  isCommitmentOwner(context: __compactRuntime.CircuitContext<PS>,
+                    ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
 export type ProvableCircuits<PS> = {
@@ -118,9 +121,15 @@ export type ProvableCircuits<PS> = {
   setTokenPrice(context: __compactRuntime.CircuitContext<PS>,
                 tokenId_0: bigint,
                 price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  isTokenSold(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+  isCommitmentOwner(context: __compactRuntime.CircuitContext<PS>,
+                    ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
 export type PureCircuits = {
+  computeOwnerCommitment(id_0: Uint8Array, counter_0: bigint): Uint8Array;
+  computeOwnerId(pk_0: Either<ZswapCoinPublicKey, ContractAddress>,
+                 nonce_0: Uint8Array): Uint8Array;
 }
 
 export type Circuits<PS> = {
@@ -159,6 +168,15 @@ export type Circuits<PS> = {
   setTokenPrice(context: __compactRuntime.CircuitContext<PS>,
                 tokenId_0: bigint,
                 price_0: bigint): __compactRuntime.CircuitResults<PS, []>;
+  computeOwnerCommitment(context: __compactRuntime.CircuitContext<PS>,
+                         id_0: Uint8Array,
+                         counter_0: bigint): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  computeOwnerId(context: __compactRuntime.CircuitContext<PS>,
+                 pk_0: Either<ZswapCoinPublicKey, ContractAddress>,
+                 nonce_0: Uint8Array): __compactRuntime.CircuitResults<PS, Uint8Array>;
+  isTokenSold(context: __compactRuntime.CircuitContext<PS>, tokenId_0: bigint): __compactRuntime.CircuitResults<PS, boolean>;
+  isCommitmentOwner(context: __compactRuntime.CircuitContext<PS>,
+                    ownerCommitment_0: Uint8Array): __compactRuntime.CircuitResults<PS, boolean>;
 }
 
 export type Ledger = {
