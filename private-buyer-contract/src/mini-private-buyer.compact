@@ -224,16 +224,3 @@ export pure circuit computeOwnerId(
   return NFTPool__computeOwnerId(pk, nonce);
 }
 
-/**
-* Circuit: Check if a token has been sold
-*/
-export circuit isTokenSold(tokenId: Uint<128>): Boolean {
-  return NFTPool__isTokenSold(tokenId);
-}
-
-/**
-* Circuit: Check if caller is the commitment owner
-*/
-export circuit isCommitmentOwner(ownerCommitment: Bytes<32>): Boolean {
-  return NFTPool__isCommitmentOwner(ownerCommitment);
-}
