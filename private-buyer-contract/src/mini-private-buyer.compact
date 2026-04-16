@@ -208,3 +208,19 @@ export circuit tokenPrice(tokenId: Uint<128>): Uint<64> {
 export circuit setTokenPrice(tokenId: Uint<128>, price: Uint<64>): [] {
   NonFungibleToken__setTokenPrice(tokenId, price);
 }
+
+/**
+* Circuit: Compute owner commitment from id and counter
+*/
+export circuit computeOwnerCommitment(id: Bytes<32>, counter: Uint<64>): Bytes<32> {
+  return NFTPool__computeOwnerCommitment(id, counter);
+}
+
+/**
+* Circuit: Compute owner id from public key and nonce
+*/
+export pure circuit computeOwnerId(
+  pk: Either<ZswapCoinPublicKey, ContractAddress>, nonce: Bytes<32>): Bytes<32> {
+  return NFTPool__computeOwnerId(pk, nonce);
+}
+
